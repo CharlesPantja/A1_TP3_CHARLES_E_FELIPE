@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatórios — Bella Vista</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    table { width:100%; border-collapse:collapse; margin-top:1rem; background:var(--fundo2); border-radius:var(--radius); overflow:hidden; box-shadow:var(--sombra); }
+    th { background:var(--verde-escuro); color:#fff; padding:0.75rem 1rem; text-align:left; font-size:0.9rem; }
+    td { padding:0.7rem 1rem; border-bottom:1px solid var(--borda); font-size:0.9rem; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:#f0f7f4; }
+    .filtros { display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-end; margin-bottom:1.5rem; }
+    .filtros .form-group { margin:0; min-width:160px; }
+    .total-faturado { font-size:1.3rem; font-weight:700; color:var(--verde-escuro); margin:1rem 0; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🍽 Bella Vista</div>
+  <ul>
+    <li><a href="/">Início</a></li>
+    <li><a href="/#cardapio">Cardápio</a></li>
+  </ul>
+  <div id="nav-usuario">
+    <span id="nav-nome"></span>
+    <button onclick="window.location.href='/login.html'" id="btn-login-nav">Entrar</button>
+    <button onclick="fazerLogout()" id="btn-logout-nav" style="display:none">Sair</button>
+  </div>
+</nav>
+
+<section>
+  <h2 class="section-titulo">Relatórios</h2>
+  <p class="section-sub">Análise de faturamento e itens mais vendidos por período.</p>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <div class="form-group">
+      <label>Data Início</label>
+      <input type="date" id="data-inicio" />
+    </div>
+    <div class="form-group">
+      <label>Data Fim</label>
+      <input type="date" id="data-fim" />
+    </div>
+    <button class="btn btn-verde" onclick="gerarRelatorios()">Gerar Relatórios</button>
+  </div>
+
+  <!-- Faturamento por tipo -->
+  <h3 style="color:var(--verde-escuro);margin-bottom:0.5rem">💰 Faturamento por Tipo de Atendimento</h3>
+  <div id="tabela-faturamento"><p style="color:#888">Clique em "Gerar Relatórios" para carregar.</p></div>
+
+  <br>
+
+  <!-- Itens mais vendidos -->
+  <h3 style="color:var(--verde-escuro);margin-bottom:0.5rem">🏆 Itens Mais Vendidos</h3>
+  <div id="tabela-itens"><p style="color:#888">Clique em "Gerar Relatórios" para carregar.</p></div>
+</section>
+
+<div id="toast"></div>
+<script src="/js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const hoje = new Date();
+  const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  document.getElementById('data-inicio').value = primeiroDia.toISOString().split('T')[0];
+  document.getElementById('data-fim').value = hoje.toISOString().split('T')[0];
+  await verificarLogin();
+});
+
+async function verificarLogin() {
+  const r = await api.get('/auth/me');
+  const btnLogin = document.getElementById('btn-login-nav');
+  const btnLogout = document.getElementById('btn-logout-nav');
+  if (r && r.ok) {
+    document.getElementById('nav-nome').textContent = `Olá, ${r.data.nome}`;
+    btnLogin.style.display = 'none';
+    btnLogout.style.display = '';
+  }
+}
+
+async function fazerLogout() {
+  await api.post('/auth/logout');
+  window.location.href = '/';
+}
+
+async function gerarRelatorios() {
+  const inicio = document.getElementById('data-inicio').value;
+  const fim = document.getElementById('data-fim').value;
+  if (!inicio || !fim) { mostrarToast('Informe as datas.', 'erro'); return; }
+
+  mostrarToast('Gerando relatórios...');
+  await Promise.all([carregarFaturamento(inicio, fim), carregarItens(inicio, fim)]);
+}
+
+async function carregarFaturamento(inicio, fim) {
+  const r = await api.get(`/relatorio/faturamento?dataInicio=${inicio}&dataFim=${fim}`);
+  const el = document.getElementById('tabela-faturamento');
+  if (!r || !r.ok || !r.data.length) {
+    el.innerHTML = '<p style="color:#888">Nenhum dado encontrado.</p>';
+    return;
+  }
+  const total = r.data.reduce((a, row) => a + row.totalFaturado, 0);
+  const tiposLabel = { Presencial: '🪑 Presencial', DeliveryProprio: '🛵 Delivery Próprio', DeliveryAplicativo: '📱 Delivery App' };
+  el.innerHTML = `
+    <div class="total-faturado">Total Geral: ${formatarMoeda(total)}</div>
+    <table>
+      <thead><tr><th>Tipo de Atendimento</th><th>Pedidos</th><th>Faturamento</th><th>% do Total</th></tr></thead>
+      <tbody>
+        ${r.data.map(row => `
+          <tr>
+            <td>${tiposLabel[row.tipoAtendimento] || row.tipoAtendimento}</td>
+            <td>${row.totalPedidos}</td>
+            <td>${formatarMoeda(row.totalFaturado)}</td>
+            <td>${total > 0 ? ((row.totalFaturado / total) * 100).toFixed(1) : 0}%</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function carregarItens(inicio, fim) {
+  const r = await api.get(`/relatorio/itens-mais-vendidos?dataInicio=${inicio}&dataFim=${fim}`);
+  const el = document.getElementById('tabela-itens');
+  if (!r || !r.ok || !r.data.length) {
+    el.innerHTML = '<p style="color:#888">Nenhum dado encontrado.</p>';
+    return;
+  }
+  el.innerHTML = `
+    <table>
+      <thead><tr><th>#</th><th>Item</th><th>Período</th><th>Qtd Vendida</th><th>Como Sugestão</th><th>Receita Total</th></tr></thead>
+      <tbody>
+        ${r.data.map((row, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${row.nomeItem}</td>
+            <td>${row.periodo === 'Almoco' ? '🌞 Almoço' : '🌙 Jantar'}</td>
+            <td>${row.quantidadeVendida}</td>
+            <td>${row.vendasComoSugestao > 0 ? `⭐ ${row.vendasComoSugestao}` : '—'}</td>
+            <td>${formatarMoeda(row.receitaTotal)}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+</script>
+</body>
+</html>
