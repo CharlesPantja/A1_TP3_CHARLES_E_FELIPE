@@ -2,10 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\RestauranteApp",
-    "\\RestauranteApp\\bin",
-    "\\RestauranteApp\\Controllers",
-    "\\RestauranteApp\\Models"
+    "\\RestauranteApp\\RestauranteApp",
+    "\\RestauranteApp\\{RestauranteApp,RestauranteApp"
   ],
-  "SelectedNode": "\\RestauranteApp\\Models\\Cardapio.cs",
   "PreviewInSolutionExplorer": false
 }
