@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bella Vista — Bem-vindo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 60%, #40916c 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .logo { font-size: 3.5rem; margin-bottom: 0.5rem; }
+    .titulo { color: #fff; font-size: 2.2rem; font-weight: 700; text-align: center; }
+    .subtitulo { color: #b7e4c7; font-size: 1.05rem; text-align: center; margin-bottom: 3rem; }
+
+    .cards {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 820px;
+      width: 100%;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 2.5rem 2rem;
+      flex: 1;
+      min-width: 220px;
+      max-width: 260px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      color: inherit;
+      border: 3px solid transparent;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+      border-color: #40916c;
+    }
+
+    .card-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .card-titulo { font-size: 1.15rem; font-weight: 700; color: #1b4332; margin-bottom: 0.5rem; }
+    .card-desc { font-size: 0.85rem; color: #666; line-height: 1.5; }
+
+    .card-destaque { background: #1b4332; color: #fff; border-color: #52b788; }
+    .card-destaque .card-titulo { color: #d8f3dc; }
+    .card-destaque .card-desc { color: #b7e4c7; }
+    .card-destaque:hover { border-color: #74c69d; }
+
+    .card-menu {
+      margin-top: 1.5rem;
+      background: transparent;
+      border: 2px solid rgba(255,255,255,0.4);
+      color: #fff;
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .card-menu:hover { background: rgba(255,255,255,0.15); }
+
+    .nav-topo {
+      position: absolute;
+      top: 1.5rem;
+      right: 2rem;
+    }
+    .btn-login-topo {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.4);
+      padding: 0.5rem 1.25rem;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-login-topo:hover { background: rgba(255,255,255,0.35); }
+
+    #nav-logado { display: none; align-items: center; gap: 1rem; color: #d8f3dc; font-size: 0.9rem; }
+    #btn-sair { background: none; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 0.4rem 1rem; border-radius: 50px; cursor: pointer; font-size: 0.85rem; }
+    #btn-sair:hover { background: rgba(255,255,255,0.15); }
+
+    .rodape { margin-top: 3rem; color: rgba(255,255,255,0.5); font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+
+  <div class="nav-topo">
+    <a href="/login.html" class="btn-login-topo" id="btn-entrar">Entrar / Cadastrar</a>
+    <div id="nav-logado">
+      <span id="nav-nome-usuario"></span>
+      <button id="btn-sair" onclick="fazerLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="logo">🍽</div>
+  <h1 class="titulo">Restaurante Bella Vista</h1>
+  <p class="subtitulo">Sabor artesanal, atendimento especial. Como posso te ajudar hoje?</p>
+
+  <div class="cards">
+    <a class="card card-destaque" href="/index.html?modo=presencial">
+      <div class="card-icon">🪑</div>
+      <div class="card-titulo">Estou no Restaurante</div>
+      <div class="card-desc">Acesse o cardápio e faça seu pedido na mesa, sem precisar de conta.</div>
+    </a>
+
+    <a class="card" href="/index.html?modo=delivery" id="card-delivery">
+      <div class="card-icon">🛵</div>
+      <div class="card-titulo">Quero Delivery</div>
+      <div class="card-desc">Peça pelo nosso serviço ou por aplicativo. Cadastre-se para rastrear seus pedidos.</div>
+    </a>
+
+    <a class="card" href="/index.html?modo=reserva" id="card-reserva">
+      <div class="card-icon">📅</div>
+      <div class="card-titulo">Reservar Mesa</div>
+      <div class="card-desc">Reserve sua mesa para o jantar (19h–22h). Necessário ter conta.</div>
+    </a>
+  </div>
+
+  <a href="/index.html" class="card-menu">Ver cardápio completo →</a>
+
+  <p class="rodape">© 2025 Restaurante Bella Vista</p>
+
+  <script>
+    async function verificarLogin() {
+      try {
+        const r = await fetch('/api/auth/me', { credentials: 'include' });
+        if (r.ok) {
+          const data = await r.json();
+          document.getElementById('btn-entrar').style.display = 'none';
+          const navLogado = document.getElementById('nav-logado');
+          navLogado.style.display = 'flex';
+          document.getElementById('nav-nome-usuario').textContent = `Olá, ${data.nome}`;
+        }
+      } catch(e) {}
+    }
+
+    async function fazerLogout() {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      window.location.reload();
+    }
+
+    verificarLogin();
+  </script>
+</body>
+</html>

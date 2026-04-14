@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entrar — Bella Vista</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%); }
+    .auth-card { background: #fff; border-radius: 14px; padding: 2.5rem; width: 100%; max-width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
+    .auth-logo { text-align:center; font-size:2rem; margin-bottom:0.25rem; color: #1b4332; font-weight:700; }
+    .auth-sub { text-align:center; color:#888; font-size:0.9rem; margin-bottom:1.5rem; }
+    .form-panel { display:none; }
+    .form-panel.ativo { display:block; }
+  </style>
+</head>
+<body>
+<div class="auth-card">
+  <div class="auth-logo">🍽 Bella Vista</div>
+  <div class="auth-sub">Acesse sua conta ou cadastre-se</div>
+
+  <div class="auth-tabs">
+    <button class="auth-tab ativo" onclick="trocarTab('login', this)">Entrar</button>
+    <button class="auth-tab" onclick="trocarTab('cadastro', this)">Cadastrar</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="panel-login" class="form-panel ativo">
+    <div class="form-group">
+      <label>E-mail</label>
+      <input type="email" id="login-email" placeholder="seu@email.com" />
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="login-senha" placeholder="••••••" />
+    </div>
+    <div id="login-erro" class="form-erro"></div>
+    <button class="btn btn-verde" style="width:100%;margin-top:0.5rem" onclick="fazerLogin()">Entrar</button>
+    <p style="text-align:center;margin-top:1rem;font-size:0.85rem;color:#888">
+      <a href="/">Voltar para o site</a>
+    </p>
+  </div>
+
+  <!-- CADASTRO -->
+  <div id="panel-cadastro" class="form-panel">
+    <div class="form-group">
+      <label>Nome Completo</label>
+      <input type="text" id="cad-nome" placeholder="Seu nome" />
+    </div>
+    <div class="form-group">
+      <label>E-mail</label>
+      <input type="email" id="cad-email" placeholder="seu@email.com" />
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres" />
+    </div>
+    <div id="cad-erro" class="form-erro"></div>
+    <button class="btn btn-verde" style="width:100%;margin-top:0.5rem" onclick="fazerCadastro()">Criar Conta</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="/js/api.js"></script>
+<script>
+function trocarTab(tab, btn) {
+  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('ativo'));
+  document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('ativo'));
+  btn.classList.add('ativo');
+  document.getElementById(`panel-${tab}`).classList.add('ativo');
+}
+
+async function fazerLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const erroEl = document.getElementById('login-erro');
+  erroEl.textContent = '';
+
+  if (!email || !senha) { erroEl.textContent = 'Preencha todos os campos.'; return; }
+
+  const r = await api.post('/auth/login', { email, senha, lembrarMe: false });
+  if (!r || !r.ok) {
+    erroEl.textContent = 'Email ou senha inválidos.';
+    return;
+  }
+  mostrarToast(`Bem-vindo(a), ${r.data.nome}!`);
+  setTimeout(() => window.location.href = '/', 800);
+}
+
+async function fazerCadastro() {
+  const nomeCompleto = document.getElementById('cad-nome').value.trim();
+  const email = document.getElementById('cad-email').value.trim();
+  const senha = document.getElementById('cad-senha').value;
+  const erroEl = document.getElementById('cad-erro');
+  erroEl.textContent = '';
+
+  if (!nomeCompleto || !email || !senha) { erroEl.textContent = 'Preencha todos os campos.'; return; }
+  if (senha.length < 6) { erroEl.textContent = 'Senha deve ter ao menos 6 caracteres.'; return; }
+
+  const r = await api.post('/auth/cadastro', { nomeCompleto, email, senha });
+  if (!r || !r.ok) {
+    const erros = Array.isArray(r?.data) ? r.data.join(', ') : 'Erro no cadastro.';
+    erroEl.textContent = erros;
+    return;
+  }
+  mostrarToast('Conta criada com sucesso!');
+  setTimeout(() => window.location.href = '/', 800);
+}
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const loginAtivo = document.getElementById('panel-login').classList.contains('ativo');
+  if (loginAtivo) fazerLogin(); else fazerCadastro();
+});
+</script>
+</body>
+</html>
