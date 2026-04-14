@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "xgMBDelf3/Y=",
+  "dgSpecHash": "2CxSwjvvPY0=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Charles\\Desktop\\A1 TP3 V2\\RestauranteApp\\RestauranteApp\\RestauranteApp.csproj",
+  "projectFilePath": "C:\\Users\\Charles\\A1_TP3_CHARLES_E_FELIPE\\RestauranteApp\\RestauranteApp\\RestauranteApp.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Charles\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\Charles\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",

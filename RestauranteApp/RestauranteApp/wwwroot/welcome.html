@@ -5,159 +5,116 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bella Vista — Bem-vindo</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --verde:#2d6a4f; --verde-escuro:#1b4332; --verde-claro:#52b788; --cinza:#6c757d; }
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      font-family: 'Segoe UI', sans-serif;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 60%, #40916c 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
+      font-family:'Segoe UI',sans-serif;
+      min-height:100vh;
+      background:linear-gradient(160deg, #1b4332 0%, #2d6a4f 50%, #40916c 100%);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:1.5rem; color:#fff;
     }
+    .logo { font-size:3.5rem; margin-bottom:0.5rem; }
+    h1 { font-size:2.2rem; font-weight:700; margin-bottom:0.35rem; text-shadow:0 2px 8px rgba(0,0,0,0.3); }
+    .subtitulo { color:#b7e4c7; font-size:1rem; margin-bottom:2.5rem; }
 
-    .logo { font-size: 3.5rem; margin-bottom: 0.5rem; }
-    .titulo { color: #fff; font-size: 2.2rem; font-weight: 700; text-align: center; }
-    .subtitulo { color: #b7e4c7; font-size: 1.05rem; text-align: center; margin-bottom: 3rem; }
-
-    .cards {
-      display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      max-width: 820px;
-      width: 100%;
+    .opcoes { display:flex; gap:1.25rem; flex-wrap:wrap; justify-content:center; width:100%; max-width:760px; }
+    .opcao-card {
+      background:rgba(255,255,255,0.12);
+      backdrop-filter:blur(10px);
+      border:1.5px solid rgba(255,255,255,0.2);
+      border-radius:20px;
+      padding:2rem 1.5rem;
+      width:220px;
+      text-align:center;
+      cursor:pointer;
+      text-decoration:none;
+      color:#fff;
+      transition:all 0.25s;
     }
+    .opcao-card:hover { background:rgba(255,255,255,0.22); transform:translateY(-4px); border-color:rgba(255,255,255,0.5); }
+    .opcao-card .icone { font-size:2.8rem; margin-bottom:0.75rem; }
+    .opcao-card h2 { font-size:1.1rem; font-weight:700; margin-bottom:0.4rem; }
+    .opcao-card p { font-size:0.82rem; color:#b7e4c7; line-height:1.4; }
 
-    .card {
-      background: #fff;
-      border-radius: 18px;
-      padding: 2.5rem 2rem;
-      flex: 1;
-      min-width: 220px;
-      max-width: 260px;
-      text-align: center;
-      cursor: pointer;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-      transition: transform 0.2s, box-shadow 0.2s;
-      text-decoration: none;
-      color: inherit;
-      border: 3px solid transparent;
+    .usuario-info { margin-bottom:1.5rem; color:#b7e4c7; font-size:0.9rem; }
+    .nav-links { margin-top:2rem; display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center; }
+    .nav-links a { color:#b7e4c7; text-decoration:none; font-size:0.85rem; }
+    .nav-links a:hover { color:#fff; text-decoration:underline; }
+
+    .admin-badge {
+      position:fixed; top:1rem; right:1rem;
+      background:rgba(255,255,255,0.15);
+      border:1px solid rgba(255,255,255,0.3);
+      border-radius:50px;
+      padding:0.4rem 1rem;
+      font-size:0.82rem;
+      display:flex; gap:0.75rem; align-items:center;
     }
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 16px 40px rgba(0,0,0,0.3);
-      border-color: #40916c;
-    }
-
-    .card-icon { font-size: 3rem; margin-bottom: 1rem; }
-    .card-titulo { font-size: 1.15rem; font-weight: 700; color: #1b4332; margin-bottom: 0.5rem; }
-    .card-desc { font-size: 0.85rem; color: #666; line-height: 1.5; }
-
-    .card-destaque { background: #1b4332; color: #fff; border-color: #52b788; }
-    .card-destaque .card-titulo { color: #d8f3dc; }
-    .card-destaque .card-desc { color: #b7e4c7; }
-    .card-destaque:hover { border-color: #74c69d; }
-
-    .card-menu {
-      margin-top: 1.5rem;
-      background: transparent;
-      border: 2px solid rgba(255,255,255,0.4);
-      color: #fff;
-      padding: 1rem 2.5rem;
-      border-radius: 50px;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: background 0.2s;
-      text-decoration: none;
-      display: inline-block;
-    }
-    .card-menu:hover { background: rgba(255,255,255,0.15); }
-
-    .nav-topo {
-      position: absolute;
-      top: 1.5rem;
-      right: 2rem;
-    }
-    .btn-login-topo {
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.4);
-      padding: 0.5rem 1.25rem;
-      border-radius: 50px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      text-decoration: none;
-      transition: background 0.2s;
-    }
-    .btn-login-topo:hover { background: rgba(255,255,255,0.35); }
-
-    #nav-logado { display: none; align-items: center; gap: 1rem; color: #d8f3dc; font-size: 0.9rem; }
-    #btn-sair { background: none; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 0.4rem 1rem; border-radius: 50px; cursor: pointer; font-size: 0.85rem; }
-    #btn-sair:hover { background: rgba(255,255,255,0.15); }
-
-    .rodape { margin-top: 3rem; color: rgba(255,255,255,0.5); font-size: 0.8rem; }
+    .admin-badge a { color:#b7e4c7; text-decoration:none; }
+    .admin-badge a:hover { color:#fff; }
   </style>
 </head>
 <body>
 
-  <div class="nav-topo">
-    <a href="/login.html" class="btn-login-topo" id="btn-entrar">Entrar / Cadastrar</a>
-    <div id="nav-logado">
-      <span id="nav-nome-usuario"></span>
-      <button id="btn-sair" onclick="fazerLogout()">Sair</button>
-    </div>
-  </div>
+<div id="admin-badge" class="admin-badge" style="display:none">
+  👑 Admin:
+  <a href="/admin.html">🧑‍🍳 Pedidos</a>
+  <a href="/relatorio.html">📊 Relatórios</a>
+</div>
 
-  <div class="logo">🍽</div>
-  <h1 class="titulo">Restaurante Bella Vista</h1>
-  <p class="subtitulo">Sabor artesanal, atendimento especial. Como posso te ajudar hoje?</p>
+<div class="logo">🍽</div>
+<h1>Bella Vista</h1>
+<p class="subtitulo">Sabor artesanal, atendimento de excelência</p>
 
-  <div class="cards">
-    <a class="card card-destaque" href="/index.html?modo=presencial">
-      <div class="card-icon">🪑</div>
-      <div class="card-titulo">Estou no Restaurante</div>
-      <div class="card-desc">Acesse o cardápio e faça seu pedido na mesa, sem precisar de conta.</div>
-    </a>
+<div id="usuario-info" class="usuario-info" style="display:none"></div>
 
-    <a class="card" href="/index.html?modo=delivery" id="card-delivery">
-      <div class="card-icon">🛵</div>
-      <div class="card-titulo">Quero Delivery</div>
-      <div class="card-desc">Peça pelo nosso serviço ou por aplicativo. Cadastre-se para rastrear seus pedidos.</div>
-    </a>
+<div class="opcoes">
+  <a class="opcao-card" href="/index.html?modo=presencial">
+    <div class="icone">🪑</div>
+    <h2>Estou no Restaurante</h2>
+    <p>Faça seu pedido na mesa sem precisar de login</p>
+  </a>
+  <a class="opcao-card" href="/index.html?modo=delivery">
+    <div class="icone">🛵</div>
+    <h2>Quero Delivery</h2>
+    <p>Peça para entrega em casa (login necessário)</p>
+  </a>
+  <a class="opcao-card" href="/index.html?modo=reserva">
+    <div class="icone">📅</div>
+    <h2>Reservar Mesa</h2>
+    <p>Agende sua mesa para jantar com antecedência</p>
+  </a>
+</div>
 
-    <a class="card" href="/index.html?modo=reserva" id="card-reserva">
-      <div class="card-icon">📅</div>
-      <div class="card-titulo">Reservar Mesa</div>
-      <div class="card-desc">Reserve sua mesa para o jantar (19h–22h). Necessário ter conta.</div>
-    </a>
-  </div>
+<div class="nav-links">
+  <a href="/index.html">📋 Ver Cardápio</a>
+  <a href="/login.html" id="link-login">🔐 Entrar / Cadastrar</a>
+  <a href="#" id="link-logout" style="display:none" onclick="fazerLogout()">Sair</a>
+</div>
 
-  <a href="/index.html" class="card-menu">Ver cardápio completo →</a>
+<script>
+async function fazerLogout() {
+  await fetch('/api/auth/logout', { method:'POST', credentials:'include' });
+  location.reload();
+}
 
-  <p class="rodape">© 2025 Restaurante Bella Vista</p>
-
-  <script>
-    async function verificarLogin() {
-      try {
-        const r = await fetch('/api/auth/me', { credentials: 'include' });
-        if (r.ok) {
-          const data = await r.json();
-          document.getElementById('btn-entrar').style.display = 'none';
-          const navLogado = document.getElementById('nav-logado');
-          navLogado.style.display = 'flex';
-          document.getElementById('nav-nome-usuario').textContent = `Olá, ${data.nome}`;
-        }
-      } catch(e) {}
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const r = await fetch('/api/auth/me', { credentials:'include', headers:{'Accept':'application/json'} });
+    if (r.ok) {
+      const d = await r.json();
+      const infoEl = document.getElementById('usuario-info');
+      infoEl.textContent = '👋 Olá, ' + d.nome + '!';
+      infoEl.style.display = '';
+      document.getElementById('link-login').style.display = 'none';
+      document.getElementById('link-logout').style.display = '';
+      if (d.roles?.includes('Admin')) {
+        document.getElementById('admin-badge').style.display = '';
+      }
     }
-
-    async function fazerLogout() {
-      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-      window.location.reload();
-    }
-
-    verificarLogin();
-  </script>
+  } catch(_) {}
+});
+</script>
 </body>
 </html>

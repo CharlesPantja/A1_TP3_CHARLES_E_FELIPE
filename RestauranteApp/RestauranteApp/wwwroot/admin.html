@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Admin — Bella Vista</title>
+  <style>
+    :root { --verde:#2d6a4f; --verde-escuro:#1b4332; --verde-claro:#52b788; --cinza:#6c757d; --radius:12px; --sombra:0 2px 12px rgba(0,0,0,0.08); }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',sans-serif; background:#f8fdf9; color:#1a1a1a; }
+
+    nav { background:var(--verde-escuro); padding:0.9rem 2rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
+    .logo { color:#fff; font-size:1.3rem; font-weight:700; text-decoration:none; }
+    .nav-links a { color:#b7e4c7; text-decoration:none; font-size:0.9rem; margin-left:1.2rem; }
+    .nav-links a:hover { color:#fff; }
+    #nav-nome { color:#d8f3dc; font-size:0.85rem; margin-right:0.5rem; }
+    .btn-nav-outline { background:transparent; border:1px solid rgba(255,255,255,0.4); color:#fff; padding:0.4rem 1rem; border-radius:50px; cursor:pointer; font-size:0.85rem; }
+
+    section { max-width:1100px; margin:0 auto; padding:2.5rem 1.5rem; }
+    .section-titulo { font-size:1.6rem; color:var(--verde-escuro); margin-bottom:0.4rem; }
+    .section-sub { color:var(--cinza); margin-bottom:1.75rem; font-size:0.9rem; }
+
+    /* Acesso negado */
+    #acesso-negado { display:none; text-align:center; padding:4rem 2rem; }
+    #acesso-negado .icone { font-size:4rem; margin-bottom:1rem; }
+    #acesso-negado h2 { color:#c62828; font-size:1.6rem; margin-bottom:0.5rem; }
+    #conteudo-admin { display:none; }
+
+    .filtros { display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-end; background:#fff; padding:1.25rem; border-radius:var(--radius); box-shadow:var(--sombra); margin-bottom:2rem; }
+    .form-group { margin:0; min-width:120px; }
+    .form-group label { display:block; font-size:0.82rem; color:var(--cinza); margin-bottom:0.35rem; font-weight:600; }
+    .form-group select { width:100%; padding:0.6rem 0.9rem; border:1.5px solid #dee2e6; border-radius:8px; font-size:0.9rem; font-family:inherit; }
+    .btn { padding:0.6rem 1.4rem; border-radius:50px; border:none; cursor:pointer; font-size:0.88rem; font-family:inherit; transition:all 0.2s; font-weight:600; }
+    .btn-verde { background:var(--verde); color:#fff; }
+    .btn-verde:hover { background:var(--verde-escuro); }
+
+    .stats { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:1rem; margin-bottom:2rem; }
+    .stat-card { background:#fff; border-radius:var(--radius); padding:1.1rem 1.3rem; box-shadow:var(--sombra); text-align:center; }
+    .stat-num { font-size:2rem; font-weight:700; color:var(--verde-escuro); }
+    .stat-label { font-size:0.78rem; color:var(--cinza); margin-top:0.2rem; text-transform:uppercase; letter-spacing:.5px; }
+    .stat-card.pendente .stat-num { color:#d97706; }
+    .stat-card.preparando .stat-num { color:#2563eb; }
+    .stat-card.finalizado .stat-num { color:var(--verde); }
+    .stat-card.cancelado .stat-num { color:#dc2626; }
+
+    .pedidos-lista { display:flex; flex-direction:column; gap:0.75rem; }
+    .card-pedido-admin { background:#fff; border-radius:var(--radius); padding:1.1rem 1.3rem; box-shadow:var(--sombra); border-left:4px solid var(--verde-claro); }
+    .card-pedido-admin.status-0 { border-left-color:#d97706; }
+    .card-pedido-admin.status-1 { border-left-color:#2563eb; }
+    .card-pedido-admin.status-4 { border-left-color:var(--verde); }
+    .card-pedido-admin.status-5 { border-left-color:#dc2626; opacity:0.7; }
+    .pedido-top { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem; }
+    .pedido-id { font-weight:700; color:var(--verde-escuro); }
+    .pedido-info { font-size:0.83rem; color:var(--cinza); margin-bottom:0.5rem; }
+    .pedido-itens-lista { font-size:0.82rem; color:#444; margin-bottom:0.65rem; }
+    .pedido-acoes { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; }
+    .badge-status { font-size:0.75rem; font-weight:700; padding:0.25rem 0.7rem; border-radius:50px; }
+    .badge-0 { background:#fef3c7; color:#92400e; }
+    .badge-1 { background:#dbeafe; color:#1d4ed8; }
+    .badge-2 { background:#e0e7ff; color:#4338ca; }
+    .badge-3 { background:#d1fae5; color:#065f46; }
+    .badge-4 { background:#d1fae5; color:#065f46; }
+    .badge-5 { background:#fee2e2; color:#b91c1c; }
+
+    select.status-select { padding:0.35rem 0.6rem; border:1.5px solid #dee2e6; border-radius:8px; font-size:0.82rem; font-family:inherit; cursor:pointer; }
+    .btn-salvar { padding:0.35rem 0.85rem; background:var(--verde); color:#fff; border:none; border-radius:50px; font-size:0.8rem; cursor:pointer; font-family:inherit; }
+    .btn-salvar:hover { background:var(--verde-escuro); }
+
+    .toast { position:fixed; bottom:2rem; right:2rem; padding:0.85rem 1.5rem; border-radius:10px; color:#fff; font-size:0.9rem; font-weight:600; z-index:500; opacity:0; transform:translateY(10px); transition:opacity 0.3s,transform 0.3s; pointer-events:none; }
+    .toast.visivel { opacity:1; transform:translateY(0); }
+    .toast-sucesso { background:var(--verde); }
+    .toast-erro { background:#e63946; }
+
+    .sem-pedidos { text-align:center; padding:2.5rem; color:var(--cinza); background:#fff; border-radius:var(--radius); box-shadow:var(--sombra); }
+    .carregando { text-align:center; padding:2rem; color:var(--cinza); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">🍽 Bella Vista</a>
+  <div class="nav-links">
+    <a href="/">Início</a>
+    <a href="/relatorio.html">📊 Relatórios</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:.5rem">
+    <span id="nav-nome"></span>
+    <button onclick="fazerLogout()" class="btn-nav-outline">Sair</button>
+  </div>
+</nav>
+
+<section>
+  <!-- Acesso negado -->
+  <div id="acesso-negado">
+    <div class="icone">🔒</div>
+    <h2>Acesso Restrito</h2>
+    <p style="color:var(--cinza);margin-bottom:1.5rem">Esta área é exclusiva para administradores.</p>
+    <a href="/login.html" style="color:var(--verde);font-weight:600">→ Ir para o Login</a>
+  </div>
+
+  <!-- Painel admin -->
+  <div id="conteudo-admin">
+    <h2 class="section-titulo">🧑‍🍳 Painel de Pedidos</h2>
+    <p class="section-sub">Gerencie e atualize o status de todos os pedidos em tempo real.</p>
+
+    <!-- Cards de resumo -->
+    <div class="stats">
+      <div class="stat-card pendente">
+        <div class="stat-num" id="cnt-0">—</div>
+        <div class="stat-label">⏳ Pendentes</div>
+      </div>
+      <div class="stat-card preparando">
+        <div class="stat-num" id="cnt-1">—</div>
+        <div class="stat-label">👨‍🍳 Em Preparo</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="cnt-2">—</div>
+        <div class="stat-label">🛵 Saiu p/ Entrega</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="cnt-3">—</div>
+        <div class="stat-label">✅ Pronto p/ Retirada</div>
+      </div>
+      <div class="stat-card finalizado">
+        <div class="stat-num" id="cnt-4">—</div>
+        <div class="stat-label">✔️ Finalizados</div>
+      </div>
+      <div class="stat-card cancelado">
+        <div class="stat-num" id="cnt-5">—</div>
+        <div class="stat-label">❌ Cancelados</div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros">
+      <div class="form-group">
+        <label>Filtrar por Status</label>
+        <select id="filtro-status" onchange="aplicarFiltro()">
+          <option value="">Todos</option>
+          <option value="0">⏳ Pendente</option>
+          <option value="1">👨‍🍳 Em Preparo</option>
+          <option value="2">🛵 Saiu para Entrega</option>
+          <option value="3">✅ Pronto para Retirada</option>
+          <option value="4">✔️ Finalizado</option>
+          <option value="5">❌ Cancelado</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tipo de Atendimento</label>
+        <select id="filtro-tipo" onchange="aplicarFiltro()">
+          <option value="">Todos</option>
+          <option value="Presencial">🪑 Presencial</option>
+          <option value="DeliveryProprio">🛵 Delivery Próprio</option>
+          <option value="DeliveryAplicativo">📱 Delivery Aplicativo</option>
+        </select>
+      </div>
+      <button class="btn btn-verde" onclick="carregarPedidos()">🔄 Atualizar</button>
+    </div>
+
+    <div id="lista-pedidos-admin" class="pedidos-lista">
+      <div class="carregando">Carregando pedidos...</div>
+    </div>
+  </div>
+</section>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const statusLabels = ['⏳ Pendente','👨‍🍳 Em Preparo','🛵 Saiu p/ Entrega','✅ Pronto p/ Retirada','✔️ Finalizado','❌ Cancelado'];
+const tipoLabels  = { Presencial:'🪑 Presencial', DeliveryProprio:'🛵 Delivery Próprio', DeliveryAplicativo:'📱 Aplicativo' };
+let todosPedidos  = [];
+
+const api = {
+  async get(url) {
+    try {
+      const r = await fetch('/api' + url, { credentials:'include', headers:{'Accept':'application/json'} });
+      let data = null; try { data = await r.json(); } catch(_) {}
+      return { ok:r.ok, status:r.status, data };
+    } catch(e) { return null; }
+  },
+  async patch(url, body) {
+    try {
+      const r = await fetch('/api' + url, { method:'PATCH', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+      let data = null; try { data = await r.json(); } catch(_) {}
+      return { ok:r.ok, status:r.status, data };
+    } catch(e) { return null; }
+  },
+  async post(url, body) {
+    try {
+      const r = await fetch('/api' + url, { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body||{}) });
+      return { ok:r.ok };
+    } catch(e) { return null; }
+  }
+};
+
+function mostrarToast(msg, tipo='sucesso') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (tipo==='erro' ? 'toast-erro' : 'toast-sucesso');
+  void t.offsetWidth; t.classList.add('visivel');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('visivel'), 3500);
+}
+
+function fmtMoeda(v) {
+  return new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' }).format(v);
+}
+
+async function fazerLogout() {
+  await api.post('/auth/logout', {});
+  window.location.href = '/';
+}
+
+async function verificarAdmin() {
+  const r = await api.get('/auth/me');
+  if (!r || !r.ok) { mostrarBloqueio(); return false; }
+  if (!r.data.roles?.includes('Admin')) { mostrarBloqueio(); return false; }
+  document.getElementById('nav-nome').textContent = 'Admin: ' + r.data.nome;
+  document.getElementById('conteudo-admin').style.display = '';
+  return true;
+}
+
+function mostrarBloqueio() {
+  document.getElementById('acesso-negado').style.display = '';
+  document.getElementById('conteudo-admin').style.display = 'none';
+}
+
+async function carregarPedidos() {
+  const el = document.getElementById('lista-pedidos-admin');
+  el.innerHTML = '<div class="carregando">Carregando...</div>';
+  const r = await api.get('/pedido/todos?pagina=1&tamanho=50');
+  if (!r || !r.ok) { el.innerHTML = '<div class="sem-pedidos">Erro ao carregar pedidos.</div>'; return; }
+  todosPedidos = r.data;
+  atualizarContadores();
+  aplicarFiltro();
+}
+
+function atualizarContadores() {
+  for (let i = 0; i <= 5; i++) {
+    const cnt = todosPedidos.filter(p => p.status === i).length;
+    const el = document.getElementById('cnt-' + i);
+    if (el) el.textContent = cnt;
+  }
+}
+
+function aplicarFiltro() {
+  const filtroStatus = document.getElementById('filtro-status').value;
+  const filtroTipo   = document.getElementById('filtro-tipo').value;
+  let pedidos = todosPedidos;
+  if (filtroStatus !== '') pedidos = pedidos.filter(p => p.status === parseInt(filtroStatus));
+  if (filtroTipo !== '')   pedidos = pedidos.filter(p => p.tipoAtendimento === filtroTipo);
+  renderizarPedidos(pedidos);
+}
+
+function renderizarPedidos(pedidos) {
+  const el = document.getElementById('lista-pedidos-admin');
+  if (!pedidos.length) {
+    el.innerHTML = '<div class="sem-pedidos">Nenhum pedido encontrado para este filtro.</div>';
+    return;
+  }
+
+  el.innerHTML = pedidos.map(p => `
+    <div class="card-pedido-admin status-${p.status}" id="card-${p.pedidoId}">
+      <div class="pedido-top">
+        <div>
+          <span class="pedido-id">Pedido #${p.pedidoId}</span>
+          <span class="badge-status badge-${p.status}" style="margin-left:.5rem">${statusLabels[p.status]}</span>
+        </div>
+        <strong style="color:var(--verde-escuro)">${fmtMoeda(p.total)}</strong>
+      </div>
+      <div class="pedido-info">
+        ${tipoLabels[p.tipoAtendimento] || p.tipoAtendimento}
+        ${p.numeroMesa ? ' · Mesa ' + p.numeroMesa : ''}
+        · ${p.cliente}
+        · ${p.fmtDH}
+      </div>
+      <div class="pedido-itens-lista">
+        ${p.itens.map(i => `${i.nome} ×${i.quantidade}`).join(' · ')}
+      </div>
+      <div class="pedido-acoes">
+        <label style="font-size:.82rem;color:var(--cinza)">Alterar para:</label>
+        <select class="status-select" id="sel-${p.pedidoId}">
+          <option value="0" ${p.status===0?'selected':''}>⏳ Pendente</option>
+          <option value="1" ${p.status===1?'selected':''}>👨‍🍳 Em Preparo</option>
+          <option value="2" ${p.status===2?'selected':''}>🛵 Saiu para Entrega</option>
+          <option value="3" ${p.status===3?'selected':''}>✅ Pronto para Retirada</option>
+          <option value="4" ${p.status===4?'selected':''}>✔️ Finalizado</option>
+          <option value="5" ${p.status===5?'selected':''}>❌ Cancelado</option>
+        </select>
+        <button class="btn-salvar" onclick="salvarStatus(${p.pedidoId})">Salvar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function salvarStatus(pedidoId) {
+  const novoStatus = parseInt(document.getElementById('sel-' + pedidoId).value);
+  const r = await api.patch('/pedido/' + pedidoId + '/status', { novoStatus });
+  if (!r || !r.ok) { mostrarToast('Erro ao atualizar status.', 'erro'); return; }
+  mostrarToast(`Pedido #${pedidoId}: ${r.data.statusDesc}`);
+  // Atualiza localmente sem recarregar tudo
+  const pedido = todosPedidos.find(p => p.pedidoId === pedidoId);
+  if (pedido) pedido.status = novoStatus;
+  atualizarContadores();
+  aplicarFiltro();
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const isAdmin = await verificarAdmin();
+  if (isAdmin) await carregarPedidos();
+});
+</script>
+</body>
+</html>

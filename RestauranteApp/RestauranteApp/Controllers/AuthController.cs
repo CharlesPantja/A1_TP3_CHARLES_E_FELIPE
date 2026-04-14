@@ -65,7 +65,8 @@ namespace RestauranteApp.Controllers
         {
             var usuario = await _userManager.GetUserAsync(User);
             if (usuario == null) return Unauthorized();
-            return Ok(new { nome = usuario.NomeCompleto, email = usuario.Email });
+            var roles = await _userManager.GetRolesAsync(usuario);
+            return Ok(new { nome = usuario.NomeCompleto, email = usuario.Email, roles });
         }
 
         public class CadastroRequest

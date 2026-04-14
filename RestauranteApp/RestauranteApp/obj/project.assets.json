@@ -3985,11 +3985,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Charles\\Desktop\\A1 TP3 V2\\RestauranteApp\\RestauranteApp\\RestauranteApp.csproj",
+      "projectUniqueName": "C:\\Users\\Charles\\A1_TP3_CHARLES_E_FELIPE\\RestauranteApp\\RestauranteApp\\RestauranteApp.csproj",
       "projectName": "RestauranteApp",
-      "projectPath": "C:\\Users\\Charles\\Desktop\\A1 TP3 V2\\RestauranteApp\\RestauranteApp\\RestauranteApp.csproj",
+      "projectPath": "C:\\Users\\Charles\\A1_TP3_CHARLES_E_FELIPE\\RestauranteApp\\RestauranteApp\\RestauranteApp.csproj",
       "packagesPath": "C:\\Users\\Charles\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Charles\\Desktop\\A1 TP3 V2\\RestauranteApp\\RestauranteApp\\obj\\",
+      "outputPath": "C:\\Users\\Charles\\A1_TP3_CHARLES_E_FELIPE\\RestauranteApp\\RestauranteApp\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -252,6 +252,7 @@ function fmtDH(s){if(!s)return'';const d=new Date(s);return d.toLocaleDateString
 
 let usuarioLogado=null,abaPeriodo=1,sugestaoIdAtual=null,itensAtual=[],carrinho=[];
 
+function salvarCarrinho(){ sessionStorage.setItem('bv_carrinho', JSON.stringify(carrinho)); }
 function adicionarAoCarrinho(item,ehSugestao){
   const pf=ehSugestao?item.precoBase*.8:item.precoBase;
   const ex=carrinho.find(c=>c.id===item.id);
@@ -259,7 +260,7 @@ function adicionarAoCarrinho(item,ehSugestao){
   atualizarBadge();mostrarToast(item.nome+' adicionado!');atualizarCarrinhoInline();
 }
 function removerDoCarrinho(id){const i=carrinho.findIndex(c=>c.id===id);if(i===-1)return;if(carrinho[i].quantidade>1)carrinho[i].quantidade--;else carrinho.splice(i,1);atualizarBadge();renderizarCarrinho();atualizarCarrinhoInline();}
-function limparCarrinho(){carrinho=[];atualizarBadge();}
+function limparCarrinho(){carrinho=[];sessionStorage.removeItem('bv_carrinho');atualizarBadge();}
 function totalCarrinho(){return carrinho.reduce((s,c)=>s+c.precoFinal*c.quantidade,0);}
 function atualizarBadge(){const n=carrinho.reduce((s,c)=>s+c.quantidade,0);document.getElementById('carrinho-badge').textContent=n;document.getElementById('carrinho-total-nav').textContent=n>0?fmt(totalCarrinho()):'R$ 0,00';}
 function atualizarCarrinhoInline(){
@@ -290,10 +291,10 @@ async function verificarLogin(){
     document.getElementById('nav-nome').textContent='Olá, '+r.data.nome;
     document.getElementById('btn-login-nav').style.display='none';
     document.getElementById('btn-logout-nav').style.display='';
-    // Verifica admin (testa se tem acesso aos relatórios)
-    const ra=await api.get('/relatorio/faturamento?dataInicio=2000-01-01&dataFim=2000-01-01');
-    if(ra&&ra.status!==403)document.getElementById('link-relatorio').style.display='';
-    // Exibe seções restritas
+    // Verifica admin via roles retornadas pelo /auth/me
+    if(r.data.roles&&r.data.roles.includes('Admin'))
+      document.getElementById('link-relatorio').style.display='';
+    // Exibe seções restritas (reserva e meus pedidos)
     document.getElementById('form-reserva-container').style.display='';
     document.getElementById('reserva-login-aviso').style.display='none';
     await carregarReservas();
@@ -326,6 +327,13 @@ async function finalizarPedido(){
   if(!carrinho.length){mostrarToast('Carrinho vazio!','erro');return;}
   const tipo=document.getElementById('tipo-atendimento').value;
   if(tipo!=='Presencial'&&!usuarioLogado){mostrarToast('Faça login para delivery!','erro');return;}
+  if(tipo==='Presencial'){
+    const mesa=parseInt(document.getElementById('numero-mesa').value);
+    if(!mesa||mesa<1||mesa>30){mostrarToast('Informe um número de mesa válido (1–30).','erro');return;}
+  }
+  if(tipo!=='Presencial'&&!document.getElementById('endereco-entrega').value.trim()){
+    mostrarToast('Informe o endereço de entrega.','erro');return;
+  }
   const body={periodo:abaPeriodo,tipoAtendimento:tipo,itens:carrinho.map(c=>({itemId:c.id,quantidade:c.quantidade}))};
   if(tipo==='Presencial')body.numeroMesa=parseInt(document.getElementById('numero-mesa').value)||null;
   if(tipo!=='Presencial')body.enderecoEntrega=document.getElementById('endereco-entrega').value;
@@ -362,11 +370,35 @@ async function fazerReserva(){
   document.getElementById('mesa-select').innerHTML='<option value="">— Consulte primeiro —</option>';
   await carregarReservas();
 }
+async function cancelarPedido(id){
+  if(!confirm('Cancelar o pedido #'+id+'?')) return;
+  const r=await api.del('/pedido/'+id);
+  if(!r||!r.ok){mostrarToast(r?.data?.toString()||'Erro ao cancelar.','erro');return;}
+  mostrarToast('Pedido #'+id+' cancelado.');
+  await carregarMeusPedidos();
+}
 async function carregarReservas(){
   const r=await api.get('/reserva/minhas-reservas');
   const l=document.getElementById('lista-reservas');
   if(!r||!r.ok||!r.data.length){l.innerHTML='<p style="color:#888;font-size:.87rem">Nenhuma reserva encontrada.</p>';return;}
-  l.innerHTML=r.data.map(res=>`<div class="card-reserva"><h4>Mesa ${res.mesa?.numero??'?'} — ${fmtData(res.dataReserva)}</h4><p>${res.horarioInicio?.substring(0,5)} · ${res.numeroPessoas} pessoa(s)</p><div class="codigo-confirmacao">Código: ${res.codigoConfirmacao}</div></div>`).join('');
+  l.innerHTML=r.data.map(res=>{
+    const podeCancelar=res.status===0; // StatusReserva.Confirmada=0
+    return `<div class="card-reserva" style="${res.status===1?'opacity:.6':''}">
+      <h4>Mesa ${res.mesa?.numero??'?'} — ${fmtData(res.dataReserva)}</h4>
+      <p>${res.horarioInicio?.substring(0,5)} · ${res.numeroPessoas} pessoa(s) · <strong>${res.statusDesc}</strong></p>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.35rem">
+        <div class="codigo-confirmacao">Código: ${res.codigoConfirmacao}</div>
+        ${podeCancelar?`<button class="btn btn-sm" style="background:#fee2e2;color:#b91c1c;border:none;padding:.25rem .7rem;border-radius:50px;cursor:pointer;font-size:.78rem" onclick="cancelarReserva(${res.id})">✕ Cancelar</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+async function cancelarReserva(id){
+  if(!confirm('Cancelar esta reserva?')) return;
+  const r=await api.del('/reserva/'+id);
+  if(!r||!r.ok){mostrarToast(r?.data?.toString()||'Erro ao cancelar.','erro');return;}
+  mostrarToast('Reserva cancelada.');
+  await carregarReservas();
 }
 async function carregarMeusPedidos(){
   if(!usuarioLogado)return;
@@ -375,18 +407,63 @@ async function carregarMeusPedidos(){
   if(!r||!r.ok||!r.data.length){l.innerHTML='<p style="color:#888;font-size:.87rem">Nenhum pedido encontrado.</p>';return;}
   const tl={Presencial:'🪑 Presencial',DeliveryProprio:'🛵 Delivery Próprio',DeliveryAplicativo:'📱 Aplicativo'};
   const sc={EmPreparo:'preparando',Cancelado:'cancelado'};
-  l.innerHTML=r.data.map(p=>`<div class="card-pedido"><div class="pedido-header"><span class="pedido-id">Pedido #${p.id} — ${tl[p.tipoAtendimento]||p.tipoAtendimento}</span><span class="pedido-status ${sc[p.status]||''}">${p.statusDesc}</span></div><div class="pedido-itens">${p.itens.map(i=>`${i.nome} ×${i.quantidade}${i.foiSugestao?' ⭐':''}`).join(' · ')}</div><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:.77rem;color:var(--cinza)">${fmtDH(p.dataHora)}</span><strong style="color:var(--verde-escuro)">${fmt(p.total)}</strong></div></div>`).join('');
+  l.innerHTML=r.data.map(p=>{
+    const podeCancelar = p.status===0; // StatusPedido.Pendente = 0
+    return `<div class="card-pedido">
+      <div class="pedido-header">
+        <span class="pedido-id">Pedido #${p.pedidoId} — ${tl[p.tipoAtendimento]||p.tipoAtendimento}</span>
+        <span class="pedido-status ${sc[p.status]||''}">${p.statusDesc}</span>
+      </div>
+      <div class="pedido-itens">${p.itens.map(i=>`${i.nome} ×${i.quantidade}${i.sugestao?' ⭐':''}`).join(' · ')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.35rem">
+        <span style="font-size:.77rem;color:var(--cinza)">${p.fmtDH}</span>
+        <strong style="color:var(--verde-escuro)">${fmt(p.total)}</strong>
+        ${podeCancelar?`<button class="btn btn-sm" style="background:#fee2e2;color:#b91c1c;border:none;padding:.3rem .75rem;border-radius:50px;cursor:pointer;font-size:.78rem" onclick="cancelarPedido(${p.pedidoId})">✕ Cancelar</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
 }
 function aplicarModo(){
   const p=new URLSearchParams(window.location.search),modo=p.get('modo');
   const badge=document.getElementById('modo-badge');
-  if(modo==='presencial'){badge.textContent='🪑 Modo: Estou no Restaurante';document.getElementById('tipo-atendimento').value='Presencial';atualizarCamposAtendimento();setTimeout(()=>document.getElementById('cardapio').scrollIntoView({behavior:'smooth'}),300);}
-  else if(modo==='delivery'){badge.textContent='🛵 Modo: Delivery';document.getElementById('tipo-atendimento').value='DeliveryProprio';atualizarCamposAtendimento();}
-  else if(modo==='reserva'){badge.textContent='📅 Modo: Reservar Mesa';setTimeout(()=>document.getElementById('reserva').scrollIntoView({behavior:'smooth'}),400);}
+  const secReserva=document.getElementById('reserva');
+  const navReserva=document.querySelector('a[href="#reserva"]');
+  const heroBtnReserva=document.querySelector('a[href="#reserva"].btn');
+
+  if(modo==='presencial'){
+    badge.textContent='🪑 Modo: Estou no Restaurante';
+    document.getElementById('tipo-atendimento').value='Presencial';
+    atualizarCamposAtendimento();
+    // Quem está no restaurante não precisa reservar mesa
+    if(secReserva) secReserva.style.display='none';
+    if(navReserva) navReserva.style.display='none';
+    if(heroBtnReserva) heroBtnReserva.style.display='none';
+    setTimeout(()=>document.getElementById('cardapio').scrollIntoView({behavior:'smooth'}),300);
+  } else if(modo==='delivery'){
+    badge.textContent='🛵 Modo: Delivery';
+    document.getElementById('tipo-atendimento').value='DeliveryProprio';
+    atualizarCamposAtendimento();
+    // Delivery também não precisa de reserva
+    if(secReserva) secReserva.style.display='none';
+    if(navReserva) navReserva.style.display='none';
+    if(heroBtnReserva) heroBtnReserva.style.display='none';
+    setTimeout(()=>document.getElementById('pedido').scrollIntoView({behavior:'smooth'}),300);
+  } else if(modo==='reserva'){
+    badge.textContent='📅 Modo: Reservar Mesa';
+    setTimeout(()=>document.getElementById('reserva').scrollIntoView({behavior:'smooth'}),400);
+  }
 }
 document.addEventListener('DOMContentLoaded',async()=>{
   await verificarLogin();
-  await carregarCardapio('almoco');
+  // RF22: seleciona aba automaticamente pelo horário atual
+  const hora = new Date().getHours();
+  const periodoAuto = (hora >= 18) ? 'jantar' : 'almoco';
+  const btnAuto = periodoAuto === 'jantar'
+    ? document.querySelectorAll('.tab-btn')[1]
+    : document.querySelectorAll('.tab-btn')[0];
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('ativo'));
+  btnAuto.classList.add('ativo');
+  await carregarCardapio(periodoAuto);
   atualizarBadge();aplicarModo();
   const di=document.getElementById('data-reserva');
   const am=new Date();am.setDate(am.getDate()+1);

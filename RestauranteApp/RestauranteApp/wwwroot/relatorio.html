@@ -21,14 +21,11 @@
     .section-titulo { font-size:1.6rem; color:var(--verde-escuro); margin-bottom:0.4rem; }
     .section-sub { color:var(--cinza); margin-bottom:1.75rem; font-size:0.9rem; }
 
-    /* Acesso negado */
     #acesso-negado { display:none; text-align:center; padding:4rem 2rem; }
     #acesso-negado .icone-bloqueio { font-size:4rem; margin-bottom:1rem; }
     #acesso-negado h2 { color:#c62828; font-size:1.6rem; margin-bottom:0.5rem; }
     #acesso-negado p { color:var(--cinza); margin-bottom:1.5rem; }
     #acesso-negado a { color:var(--verde); font-weight:600; text-decoration:none; }
-    #acesso-negado a:hover { text-decoration:underline; }
-
     #conteudo-relatorio { display:none; }
 
     .filtros { display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-end; background:#fff; padding:1.25rem; border-radius:var(--radius); box-shadow:var(--sombra); margin-bottom:2rem; }
@@ -68,10 +65,6 @@
     .toast.visivel { opacity:1; transform:translateY(0); }
     .toast-sucesso { background:var(--verde); }
     .toast-erro { background:#e63946; }
-
-    .carregando { text-align:center; padding:1.5rem; color:var(--cinza); }
-    .carregando::after { content:''; display:inline-block; width:20px; height:20px; border:3px solid #ccc; border-top-color:var(--verde); border-radius:50%; animation:spin 0.8s linear infinite; margin-left:8px; vertical-align:middle; }
-    @keyframes spin { to { transform:rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -80,6 +73,7 @@
   <a class="logo" href="/">🍽 Bella Vista</a>
   <div class="nav-links">
     <a href="/">Início</a>
+    <a href="/admin.html">🧑‍🍳 Pedidos</a>
     <a href="/#cardapio">Cardápio</a>
   </div>
   <div style="display:flex;align-items:center">
@@ -90,18 +84,15 @@
 </nav>
 
 <section>
-
-  <!-- Acesso negado (exibido se não for admin) -->
   <div id="acesso-negado">
     <div class="icone-bloqueio">🔒</div>
     <h2>Acesso Restrito</h2>
-    <p>Esta área é exclusiva para administradores do sistema.<br>Faça login com uma conta de administrador para continuar.</p>
+    <p>Esta área é exclusiva para administradores do sistema.</p>
     <a href="/login.html">→ Ir para o Login</a>
     &nbsp;&nbsp;
     <a href="/">← Voltar ao início</a>
   </div>
 
-  <!-- Conteúdo dos relatórios (exibido só para admins) -->
   <div id="conteudo-relatorio">
     <h2 class="section-titulo">📊 Relatórios Administrativos</h2>
     <p class="section-sub">Análise completa de faturamento, vendas, clientes e horários de pico.</p>
@@ -126,31 +117,23 @@
       <button class="btn btn-verde" onclick="gerarRelatorios()">🔍 Gerar Relatórios</button>
     </div>
 
-    <!-- Faturamento -->
     <div class="relatorio-bloco">
       <h3>💰 Faturamento por Tipo de Atendimento</h3>
       <div id="tabela-faturamento"><p style="color:#888">Configure o período e clique em "Gerar Relatórios".</p></div>
     </div>
-
-    <!-- Itens mais vendidos -->
     <div class="relatorio-bloco">
       <h3>🏆 Itens Mais Vendidos</h3>
       <div id="tabela-itens"><p style="color:#888">Configure o período e clique em "Gerar Relatórios".</p></div>
     </div>
-
-    <!-- Top Clientes -->
     <div class="relatorio-bloco">
       <h3>👑 Top Clientes</h3>
       <div id="tabela-clientes"><p style="color:#888">Configure o período e clique em "Gerar Relatórios".</p></div>
     </div>
-
-    <!-- Horário de Pico -->
     <div class="relatorio-bloco">
       <h3>⏰ Horário de Pico</h3>
       <div id="grafico-pico"><p style="color:#888">Configure o período e clique em "Gerar Relatórios".</p></div>
     </div>
   </div>
-
 </section>
 
 <div id="toast" class="toast"></div>
@@ -179,47 +162,27 @@ function mostrarToast(msg, tipo='sucesso') {
   void t.offsetWidth; t.classList.add('visivel');
   clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('visivel'), 3500);
 }
+function fmtMoeda(v) { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v); }
 
-function fmtMoeda(v) {
-  return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);
-}
-
-async function fazerLogout() {
-  await api.post('/auth/logout', {});
-  window.location.href = '/';
-}
-
-// Verifica autenticação e se é admin — retorna true se admin, false caso contrário
 async function verificarAdmin() {
   const r = await api.get('/auth/me');
-  if (!r || !r.ok) {
-    // Não está logado
-    mostrarBloqueio('login');
-    return false;
-  }
-  if (!r.data.roles || !r.data.roles.includes('Admin')) {
-    // Logado mas não é admin
-    mostrarBloqueio('forbidden');
-    return false;
-  }
-  // É admin — mostra nome e conteúdo
+  if (!r || !r.ok) { mostrarBloqueio('login'); return false; }
+  if (!r.data.roles?.includes('Admin')) { mostrarBloqueio('forbidden'); return false; }
   document.getElementById('nav-nome').textContent = 'Olá, ' + r.data.nome + ' ';
   document.getElementById('btn-login-nav').style.display = 'none';
   document.getElementById('btn-logout-nav').style.display = '';
   document.getElementById('conteudo-relatorio').style.display = '';
   return true;
 }
-
 function mostrarBloqueio(motivo) {
   const el = document.getElementById('acesso-negado');
-  if (motivo === 'login') {
-    el.querySelector('p').textContent = 'Você precisa estar logado como administrador para acessar esta página.';
-  } else {
-    el.querySelector('p').textContent = 'Sua conta não possui permissões de administrador.';
-  }
+  el.querySelector('p').textContent = motivo === 'login'
+    ? 'Você precisa estar logado como administrador.'
+    : 'Sua conta não possui permissões de administrador.';
   el.style.display = '';
   document.getElementById('conteudo-relatorio').style.display = 'none';
 }
+async function fazerLogout() { await api.post('/auth/logout', {}); window.location.href = '/'; }
 
 async function gerarRelatorios() {
   const inicio = document.getElementById('data-inicio').value;
@@ -227,182 +190,82 @@ async function gerarRelatorios() {
   const topN   = document.getElementById('top-n').value;
   if (!inicio || !fim) { mostrarToast('Informe as datas.', 'erro'); return; }
   if (inicio > fim)    { mostrarToast('Data início deve ser anterior à data fim.', 'erro'); return; }
-
   ['tabela-faturamento','tabela-itens','tabela-clientes','grafico-pico'].forEach(id => {
-    document.getElementById(id).innerHTML = '<p class="carregando">Carregando</p>';
+    document.getElementById(id).innerHTML = '<p style="color:#888">Carregando...</p>';
   });
-
   await Promise.all([
     carregarFaturamento(inicio, fim),
     carregarItens(inicio, fim),
     carregarTopClientes(inicio, fim, topN),
     carregarHorarioPico(inicio, fim)
   ]);
-  mostrarToast('Relatórios gerados com sucesso!');
+  mostrarToast('Relatórios gerados!');
 }
 
-// ── Faturamento ─────────────────────────────────────────────────────────────
 async function carregarFaturamento(inicio, fim) {
   const r = await api.get(`/relatorio/faturamento?dataInicio=${inicio}&dataFim=${fim}`);
   const el = document.getElementById('tabela-faturamento');
-  if (!r || !r.ok || !r.data?.length) {
-    el.innerHTML = '<p style="color:#888">Nenhum pedido no período.</p>'; return;
-  }
-
+  if (!r || !r.ok || !r.data?.length) { el.innerHTML = '<p style="color:#888">Nenhum pedido no período.</p>'; return; }
   const total = r.data.reduce((a, row) => a + row.totalFaturado, 0);
   const labels = { Presencial:'🪑 Presencial', DeliveryProprio:'🛵 Delivery Próprio', DeliveryAplicativo:'📱 Delivery Aplicativo' };
-
-  el.innerHTML = `
-    <div class="total-destaque">Total Geral: ${fmtMoeda(total)}</div>
-    <table>
-      <thead>
-        <tr>
-          <th>Tipo de Atendimento</th>
-          <th>Nº de Pedidos</th>
-          <th>Faturamento</th>
-          <th>Ticket Médio</th>
-          <th>% do Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${r.data.map(row => `
-          <tr>
-            <td><strong>${labels[row.tipoAtendimento] || row.tipoAtendimento}</strong></td>
-            <td>${row.totalPedidos}</td>
-            <td>${fmtMoeda(row.totalFaturado)}</td>
-            <td>${fmtMoeda(row.ticketMedio)}</td>
-            <td>${total > 0 ? ((row.totalFaturado/total)*100).toFixed(1) : 0}%</td>
-          </tr>`).join('')}
-      </tbody>
-    </table>`;
+  el.innerHTML = `<div class="total-destaque">Total Geral: ${fmtMoeda(total)}</div>
+    <table><thead><tr><th>Tipo</th><th>Pedidos</th><th>Faturamento</th><th>Ticket Médio</th><th>%</th></tr></thead>
+    <tbody>${r.data.map(row => `<tr><td><strong>${labels[row.tipoAtendimento]||row.tipoAtendimento}</strong></td>
+      <td>${row.totalPedidos}</td><td>${fmtMoeda(row.totalFaturado)}</td><td>${fmtMoeda(row.ticketMedio)}</td>
+      <td>${total>0?((row.totalFaturado/total)*100).toFixed(1):0}%</td></tr>`).join('')}</tbody></table>`;
 }
 
-// ── Itens mais vendidos ──────────────────────────────────────────────────────
 async function carregarItens(inicio, fim) {
   const r = await api.get(`/relatorio/itens-mais-vendidos?dataInicio=${inicio}&dataFim=${fim}`);
   const el = document.getElementById('tabela-itens');
-  if (!r || !r.ok || !r.data?.length) {
-    el.innerHTML = '<p style="color:#888">Nenhum item vendido no período.</p>'; return;
-  }
-
-  el.innerHTML = `
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Item</th>
-          <th>Período</th>
-          <th>Qtd Vendida</th>
-          <th>Sugestões do Chefe</th>
-          <th>Receita Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${r.data.map((row, i) => `
-          <tr>
-            <td><strong>${i+1}</strong></td>
-            <td>${row.nomeItem}</td>
-            <td>${row.periodo === 'Almoco' ? '🌞 Almoço' : '🌙 Jantar'}</td>
-            <td>${row.quantidadeVendida}</td>
-            <td>${row.vendasComoSugestao > 0 ? '⭐ ' + row.vendasComoSugestao : '—'}</td>
-            <td>${fmtMoeda(row.receitaTotal)}</td>
-          </tr>`).join('')}
-      </tbody>
-    </table>`;
+  if (!r || !r.ok || !r.data?.length) { el.innerHTML = '<p style="color:#888">Nenhum item vendido.</p>'; return; }
+  el.innerHTML = `<table><thead><tr><th>#</th><th>Item</th><th>Período</th><th>Qtd</th><th>Sugestões</th><th>Receita</th></tr></thead>
+    <tbody>${r.data.map((row,i) => `<tr><td><strong>${i+1}</strong></td><td>${row.nomeItem}</td>
+      <td>${row.periodo==='Almoco'?'🌞 Almoço':'🌙 Jantar'}</td><td>${row.quantidadeVendida}</td>
+      <td>${row.vendasComoSugestao>0?'⭐ '+row.vendasComoSugestao:'—'}</td>
+      <td>${fmtMoeda(row.receitaTotal)}</td></tr>`).join('')}</tbody></table>`;
 }
 
-// ── Top Clientes ─────────────────────────────────────────────────────────────
 async function carregarTopClientes(inicio, fim, top) {
   const r = await api.get(`/relatorio/top-clientes?dataInicio=${inicio}&dataFim=${fim}&top=${top}`);
   const el = document.getElementById('tabela-clientes');
-  if (!r || !r.ok || !r.data?.length) {
-    el.innerHTML = '<p style="color:#888">Nenhum cliente com pedidos no período.</p>'; return;
-  }
-
-  const totalGeral = r.data.reduce((a, c) => a + c.totalGasto, 0);
-
-  el.innerHTML = `
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Cliente</th>
-          <th>E-mail</th>
-          <th>Nº de Pedidos</th>
-          <th>Total Gasto</th>
-          <th>Ticket Médio</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${r.data.map((c, i) => `
-          <tr>
-            <td><strong>${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1}</strong></td>
-            <td>${c.nome}</td>
-            <td style="color:var(--cinza)">${c.email}</td>
-            <td>${c.totalPedidos}</td>
-            <td>${fmtMoeda(c.totalGasto)}</td>
-            <td>${fmtMoeda(c.ticketMedio)}</td>
-          </tr>`).join('')}
-      </tbody>
-    </table>`;
+  if (!r || !r.ok || !r.data?.length) { el.innerHTML = '<p style="color:#888">Nenhum cliente no período.</p>'; return; }
+  el.innerHTML = `<table><thead><tr><th>#</th><th>Cliente</th><th>E-mail</th><th>Pedidos</th><th>Total Gasto</th><th>Ticket Médio</th></tr></thead>
+    <tbody>${r.data.map((c,i) => `<tr><td><strong>${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</strong></td>
+      <td>${c.nome}</td><td style="color:var(--cinza)">${c.email}</td><td>${c.totalPedidos}</td>
+      <td>${fmtMoeda(c.totalGasto)}</td><td>${fmtMoeda(c.ticketMedio)}</td></tr>`).join('')}</tbody></table>`;
 }
 
-// ── Horário de Pico ──────────────────────────────────────────────────────────
 async function carregarHorarioPico(inicio, fim) {
   const r = await api.get(`/relatorio/horario-pico?dataInicio=${inicio}&dataFim=${fim}`);
   const el = document.getElementById('grafico-pico');
-  if (!r || !r.ok || !r.data?.length) {
-    el.innerHTML = '<p style="color:#888">Nenhum pedido no período.</p>'; return;
-  }
-
-  // Ordena por hora para exibição
-  const dados = [...r.data].sort((a, b) => a.hora - b.hora);
-  const maxPedidos = Math.max(...dados.map(d => d.totalPedidos));
-  const totalPedidos = dados.reduce((s, d) => s + d.totalPedidos, 0);
-  const horaPico = r.data[0]; // já vem ordenado por totalPedidos desc
-
-  el.innerHTML = `
-    <div class="grid-resumo">
-      <div class="resumo-card">
-        <div class="label">Hora de Pico</div>
-        <div class="valor">${horaPico.faixaHorario}</div>
-      </div>
-      <div class="resumo-card">
-        <div class="label">Pedidos na Hora Pico</div>
-        <div class="valor">${horaPico.totalPedidos}</div>
-      </div>
-      <div class="resumo-card">
-        <div class="label">Total do Período</div>
-        <div class="valor">${totalPedidos} pedidos</div>
-      </div>
-      <div class="resumo-card">
-        <div class="label">Faturamento na Hora Pico</div>
-        <div class="valor">${fmtMoeda(horaPico.totalFaturado)}</div>
-      </div>
-    </div>
-    <div style="margin-top:1rem">
-      ${dados.map(d => `
-        <div class="pico-bar">
-          <span class="hora-label">${d.faixaHorario}</span>
-          <div class="barra-wrap">
-            <div class="barra" style="width:${maxPedidos > 0 ? (d.totalPedidos/maxPedidos*100).toFixed(0) : 0}%">
-              <span>${d.totalPedidos} ped.</span>
-            </div>
-          </div>
-          <span class="total-label">${fmtMoeda(d.totalFaturado)}</span>
-        </div>`).join('')}
-    </div>`;
+  if (!r || !r.ok || !r.data?.length) { el.innerHTML = '<p style="color:#888">Nenhum pedido no período.</p>'; return; }
+  const dados = [...r.data].sort((a,b) => a.hora-b.hora);
+  const maxP  = Math.max(...dados.map(d => d.totalPedidos));
+  const pico  = r.data[0];
+  const total = dados.reduce((s,d) => s+d.totalPedidos, 0);
+  el.innerHTML = `<div class="grid-resumo">
+    <div class="resumo-card"><div class="label">Hora de Pico</div><div class="valor">${pico.faixaHorario}</div></div>
+    <div class="resumo-card"><div class="label">Pedidos na Hora Pico</div><div class="valor">${pico.totalPedidos}</div></div>
+    <div class="resumo-card"><div class="label">Total do Período</div><div class="valor">${total} pedidos</div></div>
+    <div class="resumo-card"><div class="label">Fat. na Hora Pico</div><div class="valor">${fmtMoeda(pico.totalFaturado)}</div></div>
+  </div>
+  <div style="margin-top:1rem">${dados.map(d=>`
+    <div class="pico-bar">
+      <span class="hora-label">${d.faixaHorario}</span>
+      <div class="barra-wrap"><div class="barra" style="width:${maxP>0?(d.totalPedidos/maxP*100).toFixed(0):0}%">
+        <span>${d.totalPedidos} ped.</span></div></div>
+      <span class="total-label">${fmtMoeda(d.totalFaturado)}</span>
+    </div>`).join('')}</div>`;
 }
 
-// ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   const isAdmin = await verificarAdmin();
   if (!isAdmin) return;
-
   const hoje = new Date();
   const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   document.getElementById('data-inicio').value = primeiroDia.toISOString().split('T')[0];
-  document.getElementById('data-fim').value = hoje.toISOString().split('T')[0];
+  document.getElementById('data-fim').value    = hoje.toISOString().split('T')[0];
 });
 </script>
 </body>
