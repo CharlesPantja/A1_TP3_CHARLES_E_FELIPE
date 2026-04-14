@@ -122,14 +122,3 @@ RestauranteApp/
 - ✅ Usuário pode ter múltiplos endereços
 - ✅ Código de confirmação gerado automaticamente para reservas
 
----
-
-## 🔗 Git
-
-```bash
-git init
-git add .
-git commit -m "feat: sistema completo de gestão de restaurante"
-git remote add origin SEU_LINK_AQUI
-git push -u origin main
-```
