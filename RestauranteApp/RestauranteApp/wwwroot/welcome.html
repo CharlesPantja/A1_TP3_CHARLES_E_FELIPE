@@ -4,116 +4,172 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bella Vista — Bem-vindo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bv: {
+              bg:      '#010906',
+              card:    '#020e0a',
+              hover:   '#031e15',
+              border:  '#042f20',
+              border2: '#064028',
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    :root { --verde:#2d6a4f; --verde-escuro:#1b4332; --verde-claro:#52b788; --cinza:#6c757d; }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family:'Segoe UI',sans-serif;
-      min-height:100vh;
-      background:linear-gradient(160deg, #1b4332 0%, #2d6a4f 50%, #40916c 100%);
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      padding:1.5rem; color:#fff;
+    body { background-color: #010906; }
+    .glass {
+      background: rgba(2,14,10,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
-    .logo { font-size:3.5rem; margin-bottom:0.5rem; }
-    h1 { font-size:2.2rem; font-weight:700; margin-bottom:0.35rem; text-shadow:0 2px 8px rgba(0,0,0,0.3); }
-    .subtitulo { color:#b7e4c7; font-size:1rem; margin-bottom:2.5rem; }
-
-    .opcoes { display:flex; gap:1.25rem; flex-wrap:wrap; justify-content:center; width:100%; max-width:760px; }
-    .opcao-card {
-      background:rgba(255,255,255,0.12);
-      backdrop-filter:blur(10px);
-      border:1.5px solid rgba(255,255,255,0.2);
-      border-radius:20px;
-      padding:2rem 1.5rem;
-      width:220px;
-      text-align:center;
-      cursor:pointer;
-      text-decoration:none;
-      color:#fff;
-      transition:all 0.25s;
+    .card-option {
+      transition: all 0.25s ease;
+      border: 1.5px solid #042f20;
+      background: #020e0a;
     }
-    .opcao-card:hover { background:rgba(255,255,255,0.22); transform:translateY(-4px); border-color:rgba(255,255,255,0.5); }
-    .opcao-card .icone { font-size:2.8rem; margin-bottom:0.75rem; }
-    .opcao-card h2 { font-size:1.1rem; font-weight:700; margin-bottom:0.4rem; }
-    .opcao-card p { font-size:0.82rem; color:#b7e4c7; line-height:1.4; }
-
-    .usuario-info { margin-bottom:1.5rem; color:#b7e4c7; font-size:0.9rem; }
-    .nav-links { margin-top:2rem; display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center; }
-    .nav-links a { color:#b7e4c7; text-decoration:none; font-size:0.85rem; }
-    .nav-links a:hover { color:#fff; text-decoration:underline; }
-
-    .admin-badge {
-      position:fixed; top:1rem; right:1rem;
-      background:rgba(255,255,255,0.15);
-      border:1px solid rgba(255,255,255,0.3);
-      border-radius:50px;
-      padding:0.4rem 1rem;
-      font-size:0.82rem;
-      display:flex; gap:0.75rem; align-items:center;
+    .card-option:hover {
+      background: #031e15;
+      border-color: #10b981;
+      transform: translateY(-4px);
+      box-shadow: 0 0 24px rgba(16,185,129,0.15);
     }
-    .admin-badge a { color:#b7e4c7; text-decoration:none; }
-    .admin-badge a:hover { color:#fff; }
+    .btn-primary {
+      background: linear-gradient(135deg, #059669, #10b981);
+      transition: all 0.2s;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #047857, #059669);
+      box-shadow: 0 0 20px rgba(16,185,129,0.3);
+    }
+    .hero-glow {
+      background: radial-gradient(ellipse at 50% 0%, rgba(16,185,129,0.12) 0%, transparent 70%);
+    }
+    @keyframes fadeIn {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .fade-in { animation: fadeIn 0.5s ease forwards; }
   </style>
 </head>
-<body>
+<body class="min-h-screen text-white font-sans">
 
-<div id="admin-badge" class="admin-badge" style="display:none">
-  👑 Admin:
-  <a href="/admin.html">🧑‍🍳 Pedidos</a>
-  <a href="/relatorio.html">📊 Relatórios</a>
-</div>
+  <!-- HEADER -->
+  <header class="glass sticky top-0 z-50 border-b border-bv-border">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/welcome.html" class="flex items-center gap-3">
+        <img src="/bellavistalogo.png" alt="Bella Vista" class="h-10 w-10 rounded-full object-cover" onerror="this.style.display='none'">
+        <span class="text-xl font-extrabold text-emerald-400">Bella Vista</span>
+      </a>
+      <nav class="flex items-center gap-4 text-sm">
+        <a href="/index.html" class="text-emerald-300 hover:text-white transition-colors">📋 Cardápio</a>
+        <span id="nav-logged-in" class="hidden items-center gap-4">
+          <span id="nav-user-name" class="text-gray-400"></span>
+          <a id="nav-admin-link" href="/admin.html" class="hidden text-amber-400 hover:text-amber-300 font-bold transition-colors">👑 Admin</a>
+          <button onclick="fazerLogout()" class="text-red-400 hover:text-red-300 transition-colors">Sair</button>
+        </span>
+        <a id="nav-login-link" href="/login.html" class="btn-primary text-white font-bold px-4 py-2 rounded-full text-sm">Entrar</a>
+      </nav>
+    </div>
+  </header>
 
-<div class="logo">🍽</div>
-<h1>Bella Vista</h1>
-<p class="subtitulo">Sabor artesanal, atendimento de excelência</p>
+  <!-- HERO -->
+  <section class="hero-glow relative overflow-hidden">
+    <div class="max-w-6xl mx-auto px-4 py-20 text-center fade-in">
+      <div class="inline-flex items-center gap-2 bg-emerald-900/30 border border-emerald-700/40 rounded-full px-4 py-1.5 mb-6 text-emerald-400 text-sm font-medium">
+        <span>✨</span> Bem-vindo ao Bella Vista
+      </div>
+      <h1 class="text-5xl md:text-6xl font-extrabold mb-4 leading-tight">
+        Sabor artesanal,<br>
+        <span class="text-emerald-400">atendimento de excelência</span>
+      </h1>
+      <p class="text-gray-400 text-lg max-w-xl mx-auto mb-10">
+        Escolha como deseja aproveitar nossa experiência gastronômica única.
+      </p>
 
-<div id="usuario-info" class="usuario-info" style="display:none"></div>
+      <!-- CARDS DE OPÇÃO -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-4xl mx-auto mt-8">
 
-<div class="opcoes">
-  <a class="opcao-card" href="/index.html?modo=presencial">
-    <div class="icone">🪑</div>
-    <h2>Estou no Restaurante</h2>
-    <p>Faça seu pedido na mesa sem precisar de login</p>
-  </a>
-  <a class="opcao-card" href="/index.html?modo=delivery">
-    <div class="icone">🛵</div>
-    <h2>Quero Delivery</h2>
-    <p>Peça para entrega em casa (login necessário)</p>
-  </a>
-  <a class="opcao-card" href="/index.html?modo=reserva">
-    <div class="icone">📅</div>
-    <h2>Reservar Mesa</h2>
-    <p>Agende sua mesa para jantar com antecedência</p>
-  </a>
-</div>
+        <a href="/index.html?modo=presencial" class="card-option rounded-3xl p-8 flex flex-col items-center text-center no-underline group cursor-pointer">
+          <div class="text-5xl mb-4">🪑</div>
+          <h2 class="text-xl font-extrabold text-white mb-2">Estou no Restaurante</h2>
+          <p class="text-gray-400 text-sm leading-relaxed">Faça seu pedido na mesa sem precisar de login</p>
+          <span class="mt-4 text-emerald-400 text-sm font-bold group-hover:text-emerald-300">Ver cardápio →</span>
+        </a>
 
-<div class="nav-links">
-  <a href="/index.html">📋 Ver Cardápio</a>
-  <a href="/login.html" id="link-login">🔐 Entrar / Cadastrar</a>
-  <a href="#" id="link-logout" style="display:none" onclick="fazerLogout()">Sair</a>
-</div>
+        <a href="/index.html?modo=delivery" class="card-option rounded-3xl p-8 flex flex-col items-center text-center no-underline group cursor-pointer">
+          <div class="text-5xl mb-4">🛵</div>
+          <h2 class="text-xl font-extrabold text-white mb-2">Quero Delivery</h2>
+          <p class="text-gray-400 text-sm leading-relaxed">Peça para entrega em casa (login necessário)</p>
+          <span class="mt-4 text-emerald-400 text-sm font-bold group-hover:text-emerald-300">Pedir agora →</span>
+        </a>
+
+        <a href="/index.html?modo=reserva" class="card-option rounded-3xl p-8 flex flex-col items-center text-center no-underline group cursor-pointer">
+          <div class="text-5xl mb-4">📅</div>
+          <h2 class="text-xl font-extrabold text-white mb-2">Reservar Mesa</h2>
+          <p class="text-gray-400 text-sm leading-relaxed">Agende sua mesa para jantar com antecedência</p>
+          <span class="mt-4 text-emerald-400 text-sm font-bold group-hover:text-emerald-300">Reservar →</span>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="max-w-6xl mx-auto px-4 py-16">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="rounded-2xl p-6 border border-bv-border bg-bv-card">
+        <div class="text-3xl mb-3">🍽️</div>
+        <h3 class="font-extrabold text-white mb-1">Cardápio Completo</h3>
+        <p class="text-gray-500 text-sm">Pratos cuidadosamente elaborados para almoço e jantar com ingredientes frescos.</p>
+      </div>
+      <div class="rounded-2xl p-6 border border-bv-border bg-bv-card">
+        <div class="text-3xl mb-3">👨‍🍳</div>
+        <h3 class="font-extrabold text-white mb-1">Sugestão do Chef</h3>
+        <p class="text-gray-500 text-sm">Descubra a recomendação especial do dia com desconto exclusivo.</p>
+      </div>
+      <div class="rounded-2xl p-6 border border-bv-border bg-bv-card">
+        <div class="text-3xl mb-3">📦</div>
+        <h3 class="font-extrabold text-white mb-1">Delivery Rápido</h3>
+        <p class="text-gray-500 text-sm">Receba nossos pratos no conforto da sua casa com entrega própria ou por aplicativo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-bv-border mt-4 py-8">
+    <div class="max-w-6xl mx-auto px-4 text-center text-gray-600 text-sm">
+      <p>© 2025 Bella Vista — Todos os direitos reservados</p>
+    </div>
+  </footer>
 
 <script>
 async function fazerLogout() {
-  await fetch('/api/auth/logout', { method:'POST', credentials:'include' });
+  await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
   location.reload();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const r = await fetch('/api/auth/me', { credentials:'include', headers:{'Accept':'application/json'} });
+    const r = await fetch('/api/auth/me', { credentials: 'include', headers: { 'Accept': 'application/json' } });
     if (r.ok) {
       const d = await r.json();
-      const infoEl = document.getElementById('usuario-info');
-      infoEl.textContent = '👋 Olá, ' + d.nome + '!';
-      infoEl.style.display = '';
-      document.getElementById('link-login').style.display = 'none';
-      document.getElementById('link-logout').style.display = '';
+      document.getElementById('nav-login-link').classList.add('hidden');
+      const loggedIn = document.getElementById('nav-logged-in');
+      loggedIn.classList.remove('hidden');
+      loggedIn.classList.add('flex');
+      document.getElementById('nav-user-name').textContent = '👋 ' + d.nome;
       if (d.roles?.includes('Admin')) {
-        document.getElementById('admin-badge').style.display = '';
+        document.getElementById('nav-admin-link').classList.remove('hidden');
       }
     }
-  } catch(_) {}
+  } catch (_) {}
 });
 </script>
 </body>

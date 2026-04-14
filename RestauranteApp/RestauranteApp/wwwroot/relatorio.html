@@ -3,269 +3,389 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Relatórios — Bella Vista</title>
+  <title>Bella Vista — Relatórios</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bv: { bg:'#010906', card:'#020e0a', hover:'#031e15', border:'#042f20', border2:'#064028' }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    :root { --verde:#2d6a4f; --verde-escuro:#1b4332; --verde-claro:#52b788; --cinza:#6c757d; --radius:12px; --sombra:0 2px 12px rgba(0,0,0,0.08); }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Segoe UI',sans-serif; background:#f8fdf9; color:#1a1a1a; }
-
-    nav { background:var(--verde-escuro); padding:0.9rem 2rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
-    .logo { color:#fff; font-size:1.3rem; font-weight:700; text-decoration:none; }
-    .nav-links a { color:#b7e4c7; text-decoration:none; font-size:0.9rem; margin-left:1.2rem; }
-    .nav-links a:hover { color:#fff; }
-    #nav-nome { color:#d8f3dc; font-size:0.85rem; margin-right:0.5rem; }
-    .btn-nav { background:var(--verde-claro); color:#fff; border:none; padding:0.45rem 1.1rem; border-radius:50px; cursor:pointer; font-size:0.85rem; }
-    .btn-nav-outline { background:transparent; border:1px solid rgba(255,255,255,0.4); color:#fff; padding:0.4rem 1rem; border-radius:50px; cursor:pointer; font-size:0.85rem; }
-
-    section { max-width:1000px; margin:0 auto; padding:2.5rem 1.5rem; }
-    .section-titulo { font-size:1.6rem; color:var(--verde-escuro); margin-bottom:0.4rem; }
-    .section-sub { color:var(--cinza); margin-bottom:1.75rem; font-size:0.9rem; }
-
-    #acesso-negado { display:none; text-align:center; padding:4rem 2rem; }
-    #acesso-negado .icone-bloqueio { font-size:4rem; margin-bottom:1rem; }
-    #acesso-negado h2 { color:#c62828; font-size:1.6rem; margin-bottom:0.5rem; }
-    #acesso-negado p { color:var(--cinza); margin-bottom:1.5rem; }
-    #acesso-negado a { color:var(--verde); font-weight:600; text-decoration:none; }
-    #conteudo-relatorio { display:none; }
-
-    .filtros { display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-end; background:#fff; padding:1.25rem; border-radius:var(--radius); box-shadow:var(--sombra); margin-bottom:2rem; }
-    .form-group { margin:0; min-width:150px; }
-    .form-group label { display:block; font-size:0.82rem; color:var(--cinza); margin-bottom:0.35rem; font-weight:600; }
-    .form-group input, .form-group select { width:100%; padding:0.6rem 0.9rem; border:1.5px solid #dee2e6; border-radius:8px; font-size:0.9rem; font-family:inherit; }
-    .form-group input:focus, .form-group select:focus { outline:none; border-color:var(--verde-claro); }
-
-    .btn { padding:0.65rem 1.5rem; border-radius:50px; border:none; cursor:pointer; font-size:0.92rem; font-family:inherit; transition:all 0.2s; }
-    .btn-verde { background:var(--verde); color:#fff; }
-    .btn-verde:hover { background:var(--verde-escuro); }
-
-    .relatorio-bloco { background:#fff; border-radius:var(--radius); padding:1.5rem; box-shadow:var(--sombra); margin-bottom:2rem; }
-    .relatorio-bloco h3 { font-size:1.1rem; color:var(--verde-escuro); margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:2px solid #d8f3dc; }
-
-    table { width:100%; border-collapse:collapse; }
-    th { background:var(--verde-escuro); color:#fff; padding:0.7rem 1rem; text-align:left; font-size:0.85rem; }
-    td { padding:0.65rem 1rem; border-bottom:1px solid #f0f0f0; font-size:0.88rem; }
-    tr:last-child td { border-bottom:none; }
-    tr:hover td { background:#f0f7f4; }
-
-    .total-destaque { font-size:1.4rem; font-weight:700; color:var(--verde-escuro); margin-bottom:1rem; padding:0.75rem 1rem; background:#d8f3dc; border-radius:8px; display:inline-block; }
-
-    .grid-resumo { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:1rem; margin-bottom:1.5rem; }
-    .resumo-card { background:#f0f7f4; border-radius:10px; padding:1rem 1.2rem; }
-    .resumo-card .label { font-size:0.78rem; color:var(--cinza); margin-bottom:0.25rem; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
-    .resumo-card .valor { font-size:1.25rem; font-weight:700; color:var(--verde-escuro); }
-
-    .pico-bar { display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem; }
-    .pico-bar .hora-label { width:80px; font-size:0.82rem; color:var(--cinza); flex-shrink:0; }
-    .pico-bar .barra-wrap { flex:1; background:#e9ecef; border-radius:20px; height:22px; overflow:hidden; }
-    .pico-bar .barra { height:100%; background:var(--verde); border-radius:20px; transition:width 0.6s ease; display:flex; align-items:center; padding-left:8px; }
-    .pico-bar .barra span { font-size:0.75rem; color:#fff; font-weight:700; }
-    .pico-bar .total-label { width:70px; text-align:right; font-size:0.82rem; color:var(--cinza); flex-shrink:0; }
-
-    .toast { position:fixed; bottom:2rem; right:2rem; padding:0.85rem 1.5rem; border-radius:10px; color:#fff; font-size:0.9rem; font-weight:600; z-index:500; opacity:0; transform:translateY(10px); transition:opacity 0.3s,transform 0.3s; pointer-events:none; }
-    .toast.visivel { opacity:1; transform:translateY(0); }
-    .toast-sucesso { background:var(--verde); }
-    .toast-erro { background:#e63946; }
+    body { background-color: #010906; }
+    .glass { background: rgba(2,14,10,0.88); backdrop-filter: blur(16px); }
+    .btn-primary { background: linear-gradient(135deg,#059669,#10b981); transition:all .2s; }
+    .btn-primary:hover { background: linear-gradient(135deg,#047857,#059669); box-shadow:0 0 20px rgba(16,185,129,.3); }
+    .stat-card { background:#020e0a; border:1.5px solid #042f20; border-radius:1.5rem; padding:1.5rem; }
+    .input-field { background:#010906; border:1.5px solid #042f20; color:#fff; border-radius:.75rem; padding:.65rem 1rem; font-size:.875rem; transition:border-color .2s; }
+    .input-field:focus { outline:none; border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.1); }
+    .select-field { background:#010906; border:1.5px solid #042f20; color:#fff; border-radius:.75rem; padding:.65rem 1rem; font-size:.875rem; }
+    .select-field:focus { outline:none; border-color:#10b981; }
+    table { border-collapse: collapse; width: 100%; }
+    th { text-align:left; padding:.65rem 1rem; font-size:.75rem; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid #042f20; }
+    td { padding:.65rem 1rem; font-size:.875rem; color:#d1d5db; border-bottom:1px solid #0a1f15; }
+    tr:hover td { background:#031e15; }
+    .badge { padding:.2rem .65rem; border-radius:999px; font-size:.7rem; font-weight:700; }
+    .tab-btn { padding:.5rem 1.25rem; border-radius:999px; font-weight:700; font-size:.875rem; transition:all .2s; cursor:pointer; }
+    .tab-btn.active { background:#10b981; color:#000; }
+    .tab-btn:not(.active) { background:#020e0a; border:1px solid #042f20; color:#9ca3af; }
+    .tab-btn:not(.active):hover { border-color:#10b981; color:#fff; }
+    #toast {
+      position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999;
+      padding:.85rem 1.5rem; border-radius:16px; font-weight:600; font-size:.9rem;
+      opacity:0; transform:translateY(8px); transition:all .3s; pointer-events:none;
+    }
+    #toast.show { opacity:1; transform:translateY(0); }
+    #toast.success { background:#064028; border:1px solid #10b981; color:#6ee7b7; }
+    #toast.error   { background:#3b0a0a; border:1px solid #ef4444; color:#fca5a5; }
+    .bar-fill { height:.5rem; border-radius:999px; transition:width .6s ease; }
   </style>
 </head>
-<body>
+<body class="min-h-screen text-white font-sans">
 
-<nav>
-  <a class="logo" href="/">🍽 Bella Vista</a>
-  <div class="nav-links">
-    <a href="/">Início</a>
-    <a href="/admin.html">🧑‍🍳 Pedidos</a>
-    <a href="/#cardapio">Cardápio</a>
+<!-- HEADER -->
+<header class="glass sticky top-0 z-50 border-b border-bv-border">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="/welcome.html" class="flex items-center gap-3">
+      <img src="/bellavistalogo.png" alt="Bella Vista" class="h-10 w-10 rounded-full object-cover" onerror="this.style.display='none'">
+      <span class="text-xl font-extrabold text-emerald-400">Bella Vista</span>
+      <span class="bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-bold px-2 py-0.5 rounded-full">Admin</span>
+    </a>
+    <nav class="flex items-center gap-4 text-sm">
+      <a href="/admin.html" class="text-gray-400 hover:text-white transition-colors">👑 Pedidos</a>
+      <a href="/index.html" class="text-gray-400 hover:text-white transition-colors">📋 Cardápio</a>
+      <button onclick="fazerLogout()" class="text-red-400 hover:text-red-300 transition-colors">Sair</button>
+    </nav>
   </div>
-  <div style="display:flex;align-items:center">
-    <span id="nav-nome"></span>
-    <button onclick="window.location.href='/login.html'" id="btn-login-nav" class="btn-nav">Entrar</button>
-    <button onclick="fazerLogout()" id="btn-logout-nav" class="btn-nav-outline" style="display:none">Sair</button>
-  </div>
-</nav>
+</header>
 
-<section>
-  <div id="acesso-negado">
-    <div class="icone-bloqueio">🔒</div>
-    <h2>Acesso Restrito</h2>
-    <p>Esta área é exclusiva para administradores do sistema.</p>
-    <a href="/login.html">→ Ir para o Login</a>
-    &nbsp;&nbsp;
-    <a href="/">← Voltar ao início</a>
+<main class="max-w-7xl mx-auto px-4 py-8">
+
+  <!-- ACESSO NEGADO -->
+  <div id="acesso-negado" class="hidden text-center py-24">
+    <div class="text-6xl mb-4">🔒</div>
+    <h2 class="text-2xl font-extrabold text-white mb-2">Acesso Restrito</h2>
+    <p class="text-gray-400 mb-6">Esta página é exclusiva para administradores.</p>
+    <a href="/login.html" class="btn-primary text-white font-bold px-8 py-3 rounded-full inline-block">Entrar</a>
   </div>
 
-  <div id="conteudo-relatorio">
-    <h2 class="section-titulo">📊 Relatórios Administrativos</h2>
-    <p class="section-sub">Análise completa de faturamento, vendas, clientes e horários de pico.</p>
+  <!-- PAINEL -->
+  <div id="painel-relatorios" class="hidden">
 
-    <div class="filtros">
-      <div class="form-group">
-        <label>Data Início</label>
-        <input type="date" id="data-inicio" />
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-extrabold text-white">Relatórios</h1>
+        <p class="text-gray-500 text-sm mt-1">Faturamento por tipo de atendimento e itens mais vendidos</p>
       </div>
-      <div class="form-group">
-        <label>Data Fim</label>
-        <input type="date" id="data-fim" />
-      </div>
-      <div class="form-group">
-        <label>Top Clientes</label>
-        <select id="top-n">
-          <option value="5">Top 5</option>
-          <option value="10" selected>Top 10</option>
-          <option value="20">Top 20</option>
-        </select>
-      </div>
-      <button class="btn btn-verde" onclick="gerarRelatorios()">🔍 Gerar Relatórios</button>
+      <button onclick="gerarRelatorio()" class="btn-primary text-white font-bold px-5 py-2.5 rounded-full text-sm">📊 Gerar</button>
     </div>
 
-    <div class="relatorio-bloco">
-      <h3>💰 Faturamento por Tipo de Atendimento</h3>
-      <div id="tabela-faturamento"><p style="color:#888">Configure o período e clique em "Gerar Relatórios".</p></div>
+    <!-- FILTROS DE DATA -->
+    <div class="bg-bv-card border border-bv-border rounded-2xl p-5 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Data Início</label>
+          <input type="date" id="filtro-inicio" class="input-field w-full" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Data Fim</label>
+          <input type="date" id="filtro-fim" class="input-field w-full" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Exibir top clientes</label>
+          <select id="filtro-top" class="select-field w-full">
+            <option value="5">Top 5</option>
+            <option value="10" selected>Top 10</option>
+            <option value="20">Top 20</option>
+          </select>
+        </div>
+        <button onclick="gerarRelatorio()" class="btn-primary text-white font-bold py-2.5 rounded-full text-sm">Filtrar</button>
+      </div>
     </div>
-    <div class="relatorio-bloco">
-      <h3>🏆 Itens Mais Vendidos</h3>
-      <div id="tabela-itens"><p style="color:#888">Configure o período e clique em "Gerar Relatórios".</p></div>
+
+    <!-- CARDS RESUMO -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="stat-card">
+        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Faturamento Total</p>
+        <p id="res-fat-total" class="text-3xl font-extrabold text-emerald-400">—</p>
+      </div>
+      <div class="stat-card">
+        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Pedidos</p>
+        <p id="res-total-pedidos" class="text-3xl font-extrabold text-white">—</p>
+      </div>
+      <div class="stat-card">
+        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Ticket Médio</p>
+        <p id="res-ticket-medio" class="text-3xl font-extrabold text-blue-400">—</p>
+      </div>
+      <div class="stat-card">
+        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Itens Vendidos</p>
+        <p id="res-itens-total" class="text-3xl font-extrabold text-amber-400">—</p>
+      </div>
     </div>
-    <div class="relatorio-bloco">
-      <h3>👑 Top Clientes</h3>
-      <div id="tabela-clientes"><p style="color:#888">Configure o período e clique em "Gerar Relatórios".</p></div>
+
+    <!-- TABS -->
+    <div class="flex gap-2 mb-6 flex-wrap">
+      <button onclick="showTab('faturamento')" id="tab-faturamento" class="tab-btn active">💰 Faturamento por Tipo</button>
+      <button onclick="showTab('itens')" id="tab-itens" class="tab-btn">🍽️ Itens Mais Vendidos</button>
+      <button onclick="showTab('clientes')" id="tab-clientes" class="tab-btn">👥 Top Clientes</button>
+      <button onclick="showTab('horario')" id="tab-horario" class="tab-btn">⏰ Horário de Pico</button>
     </div>
-    <div class="relatorio-bloco">
-      <h3>⏰ Horário de Pico</h3>
-      <div id="grafico-pico"><p style="color:#888">Configure o período e clique em "Gerar Relatórios".</p></div>
+
+    <!-- TAB: FATURAMENTO POR TIPO DE ATENDIMENTO -->
+    <div id="tab-content-faturamento">
+      <div class="bg-bv-card border border-bv-border rounded-2xl overflow-hidden">
+        <div class="p-5 border-b border-bv-border">
+          <h3 class="font-extrabold text-white">Faturamento por Tipo de Atendimento</h3>
+          <p class="text-gray-500 text-xs mt-0.5">Excluindo pedidos cancelados</p>
+        </div>
+        <div id="rel-faturamento-content" class="p-5">
+          <p class="text-gray-500 text-sm text-center py-6">Clique em "Gerar" para carregar os dados</p>
+        </div>
+      </div>
     </div>
+
+    <!-- TAB: ITENS MAIS VENDIDOS -->
+    <div id="tab-content-itens" class="hidden">
+      <div class="bg-bv-card border border-bv-border rounded-2xl overflow-hidden">
+        <div class="p-5 border-b border-bv-border">
+          <h3 class="font-extrabold text-white">Itens Mais Vendidos</h3>
+          <p class="text-gray-500 text-xs mt-0.5">Com e sem Sugestão do Chef</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Item</th>
+                <th>Período</th>
+                <th>Qtd Vendida</th>
+                <th>Receita</th>
+                <th>Vendas como Chef ⭐</th>
+              </tr>
+            </thead>
+            <tbody id="rel-itens-tbody">
+              <tr><td colspan="6" class="text-center text-gray-500 py-8">Aguardando dados...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: TOP CLIENTES -->
+    <div id="tab-content-clientes" class="hidden">
+      <div class="bg-bv-card border border-bv-border rounded-2xl overflow-hidden">
+        <div class="p-5 border-b border-bv-border">
+          <h3 class="font-extrabold text-white">Top Clientes</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Cliente</th>
+                <th>E-mail</th>
+                <th>Pedidos</th>
+                <th>Total Gasto</th>
+                <th>Ticket Médio</th>
+              </tr>
+            </thead>
+            <tbody id="rel-clientes-tbody">
+              <tr><td colspan="6" class="text-center text-gray-500 py-8">Aguardando dados...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: HORÁRIO DE PICO -->
+    <div id="tab-content-horario" class="hidden">
+      <div class="bg-bv-card border border-bv-border rounded-2xl p-5">
+        <h3 class="font-extrabold text-white mb-4">Horário de Pico</h3>
+        <div id="rel-horario-content">
+          <p class="text-gray-500 text-sm text-center py-6">Aguardando dados...</p>
+        </div>
+      </div>
+    </div>
+
   </div>
-</section>
+</main>
 
-<div id="toast" class="toast"></div>
+<div id="toast"></div>
 
 <script>
 const api = {
   async get(url) {
-    try {
-      const r = await fetch('/api' + url, { credentials:'include', headers:{'Accept':'application/json'} });
-      let data = null; try { data = await r.json(); } catch(_) {}
-      return { ok:r.ok, status:r.status, data };
-    } catch(e) { return null; }
-  },
-  async post(url, body) {
-    try {
-      const r = await fetch('/api' + url, { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body||{}) });
-      return { ok:r.ok };
-    } catch(e) { return null; }
+    const r = await fetch('/api' + url, { credentials:'include', headers:{'Accept':'application/json'} });
+    const data = r.status === 204 ? null : await r.json().catch(() => null);
+    return { ok: r.ok, data };
   }
 };
 
-function mostrarToast(msg, tipo='sucesso') {
+let dadosCarregados = false;
+
+function showToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = 'toast ' + (tipo==='erro' ? 'toast-erro' : 'toast-sucesso');
-  void t.offsetWidth; t.classList.add('visivel');
-  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('visivel'), 3500);
+  t.className = 'show ' + (type || 'success');
+  setTimeout(() => { t.className = ''; }, 3000);
 }
-function fmtMoeda(v) { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v); }
+
+function showTab(name) {
+  ['faturamento','itens','clientes','horario'].forEach(t => {
+    document.getElementById('tab-content-' + t).classList.add('hidden');
+    document.getElementById('tab-' + t).classList.remove('active');
+  });
+  document.getElementById('tab-content-' + name).classList.remove('hidden');
+  document.getElementById('tab-' + name).classList.add('active');
+}
 
 async function verificarAdmin() {
   const r = await api.get('/auth/me');
-  if (!r || !r.ok) { mostrarBloqueio('login'); return false; }
-  if (!r.data.roles?.includes('Admin')) { mostrarBloqueio('forbidden'); return false; }
-  document.getElementById('nav-nome').textContent = 'Olá, ' + r.data.nome + ' ';
-  document.getElementById('btn-login-nav').style.display = 'none';
-  document.getElementById('btn-logout-nav').style.display = '';
-  document.getElementById('conteudo-relatorio').style.display = '';
+  if (!r.ok || !r.data?.roles?.includes('Admin')) {
+    document.getElementById('acesso-negado').classList.remove('hidden');
+    return false;
+  }
+  document.getElementById('painel-relatorios').classList.remove('hidden');
   return true;
 }
-function mostrarBloqueio(motivo) {
-  const el = document.getElementById('acesso-negado');
-  el.querySelector('p').textContent = motivo === 'login'
-    ? 'Você precisa estar logado como administrador.'
-    : 'Sua conta não possui permissões de administrador.';
-  el.style.display = '';
-  document.getElementById('conteudo-relatorio').style.display = 'none';
-}
-async function fazerLogout() { await api.post('/auth/logout', {}); window.location.href = '/'; }
 
-async function gerarRelatorios() {
-  const inicio = document.getElementById('data-inicio').value;
-  const fim    = document.getElementById('data-fim').value;
-  const topN   = document.getElementById('top-n').value;
-  if (!inicio || !fim) { mostrarToast('Informe as datas.', 'erro'); return; }
-  if (inicio > fim)    { mostrarToast('Data início deve ser anterior à data fim.', 'erro'); return; }
-  ['tabela-faturamento','tabela-itens','tabela-clientes','grafico-pico'].forEach(id => {
-    document.getElementById(id).innerHTML = '<p style="color:#888">Carregando...</p>';
-  });
-  await Promise.all([
-    carregarFaturamento(inicio, fim),
-    carregarItens(inicio, fim),
-    carregarTopClientes(inicio, fim, topN),
-    carregarHorarioPico(inicio, fim)
-  ]);
-  mostrarToast('Relatórios gerados!');
+function fmt(val) {
+  return 'R$ ' + (val || 0).toFixed(2).replace('.', ',');
 }
 
-async function carregarFaturamento(inicio, fim) {
-  const r = await api.get(`/relatorio/faturamento?dataInicio=${inicio}&dataFim=${fim}`);
-  const el = document.getElementById('tabela-faturamento');
-  if (!r || !r.ok || !r.data?.length) { el.innerHTML = '<p style="color:#888">Nenhum pedido no período.</p>'; return; }
-  const total = r.data.reduce((a, row) => a + row.totalFaturado, 0);
-  const labels = { Presencial:'🪑 Presencial', DeliveryProprio:'🛵 Delivery Próprio', DeliveryAplicativo:'📱 Delivery Aplicativo' };
-  el.innerHTML = `<div class="total-destaque">Total Geral: ${fmtMoeda(total)}</div>
-    <table><thead><tr><th>Tipo</th><th>Pedidos</th><th>Faturamento</th><th>Ticket Médio</th><th>%</th></tr></thead>
-    <tbody>${r.data.map(row => `<tr><td><strong>${labels[row.tipoAtendimento]||row.tipoAtendimento}</strong></td>
-      <td>${row.totalPedidos}</td><td>${fmtMoeda(row.totalFaturado)}</td><td>${fmtMoeda(row.ticketMedio)}</td>
-      <td>${total>0?((row.totalFaturado/total)*100).toFixed(1):0}%</td></tr>`).join('')}</tbody></table>`;
+async function gerarRelatorio() {
+  const inicio = document.getElementById('filtro-inicio').value;
+  const fim    = document.getElementById('filtro-fim').value;
+  const top    = document.getElementById('filtro-top').value;
+
+  if (!inicio || !fim) { showToast('❌ Selecione as datas', 'error'); return; }
+
+  const params = `dataInicio=${inicio}&dataFim=${fim}`;
+  const btn    = document.querySelector('button[onclick="gerarRelatorio()"]');
+  btn.textContent = 'Carregando...'; btn.disabled = true;
+
+  try {
+    const [rFat, rItens, rClientes, rHorario] = await Promise.all([
+      api.get('/relatorio/faturamento?' + params),
+      api.get('/relatorio/itens-mais-vendidos?' + params),
+      api.get('/relatorio/top-clientes?' + params + '&top=' + top),
+      api.get('/relatorio/horario-pico?' + params)
+    ]);
+
+    // ── Resumo geral ──────────────────────────────────────────────────────
+    const fatTotal     = rFat.ok ? rFat.data.reduce((s, f) => s + f.totalFaturado, 0) : 0;
+    const totalPedidos = rFat.ok ? rFat.data.reduce((s, f) => s + f.totalPedidos, 0) : 0;
+    const ticketMedio  = totalPedidos > 0 ? fatTotal / totalPedidos : 0;
+    const itensTotal   = rItens.ok ? rItens.data.reduce((s, i) => s + i.quantidadeVendida, 0) : 0;
+
+    document.getElementById('res-fat-total').textContent    = fmt(fatTotal);
+    document.getElementById('res-total-pedidos').textContent = totalPedidos;
+    document.getElementById('res-ticket-medio').textContent  = fmt(ticketMedio);
+    document.getElementById('res-itens-total').textContent   = itensTotal;
+
+    // ── Faturamento por tipo ──────────────────────────────────────────────
+    const tipoIcons = { 'Presencial':'🪑', 'DeliveryProprio':'🛵', 'DeliveryAplicativo':'📱' };
+    const cores     = ['#10b981','#3b82f6','#8b5cf6','#f59e0b'];
+
+    if (rFat.ok && rFat.data?.length) {
+      const maxFat = Math.max(...rFat.data.map(f => f.totalFaturado));
+      document.getElementById('rel-faturamento-content').innerHTML = rFat.data.map((f, i) => `
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">${tipoIcons[f.tipoAtendimento] || '📦'}</span>
+              <span class="text-white font-bold">${f.tipoAtendimento}</span>
+            </div>
+            <div class="text-right">
+              <p class="text-emerald-400 font-extrabold">${fmt(f.totalFaturado)}</p>
+              <p class="text-gray-500 text-xs">${f.totalPedidos} pedidos · Ticket: ${fmt(f.ticketMedio)}</p>
+            </div>
+          </div>
+          <div class="bg-bv-border rounded-full h-2">
+            <div class="bar-fill rounded-full" style="width:${Math.round(f.totalFaturado/maxFat*100)}%;background:${cores[i%cores.length]}"></div>
+          </div>
+        </div>`).join('');
+    } else {
+      document.getElementById('rel-faturamento-content').innerHTML = '<p class="text-gray-500 text-sm text-center py-6">Nenhum dado no período.</p>';
+    }
+
+    // ── Itens mais vendidos ───────────────────────────────────────────────
+    if (rItens.ok && rItens.data?.length) {
+      document.getElementById('rel-itens-tbody').innerHTML = rItens.data.map((item, idx) => `
+        <tr>
+          <td class="text-gray-500 font-bold">${idx + 1}</td>
+          <td class="text-white font-bold">${item.nomeItem}</td>
+          <td><span class="badge" style="background:#064028;color:#6ee7b7">${item.periodo}</span></td>
+          <td><span class="badge" style="background:#1c3a5e;color:#93c5fd">${item.quantidadeVendida}</span></td>
+          <td class="text-emerald-400 font-bold">${fmt(item.receitaTotal)}</td>
+          <td>${item.vendasComoSugestao > 0
+            ? `<span class="badge" style="background:#3b2500;color:#fbbf24">⭐ ${item.vendasComoSugestao}x</span>`
+            : '<span class="text-gray-600">—</span>'}</td>
+        </tr>`).join('');
+    } else {
+      document.getElementById('rel-itens-tbody').innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-8">Nenhum item vendido no período.</td></tr>';
+    }
+
+    // ── Top clientes ──────────────────────────────────────────────────────
+    if (rClientes.ok && rClientes.data?.length) {
+      document.getElementById('rel-clientes-tbody').innerHTML = rClientes.data.map((c, idx) => `
+        <tr>
+          <td class="text-gray-500 font-bold">${idx + 1}</td>
+          <td class="text-white font-bold">${c.nome}</td>
+          <td class="text-gray-400">${c.email}</td>
+          <td><span class="badge" style="background:#1c3a5e;color:#93c5fd">${c.totalPedidos}</span></td>
+          <td class="text-emerald-400 font-bold">${fmt(c.totalGasto)}</td>
+          <td class="text-blue-400 font-bold">${fmt(c.ticketMedio)}</td>
+        </tr>`).join('');
+    } else {
+      document.getElementById('rel-clientes-tbody').innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-8">Nenhum cliente no período.</td></tr>';
+    }
+
+    // ── Horário de pico ───────────────────────────────────────────────────
+    if (rHorario.ok && rHorario.data?.length) {
+      const maxPedidos = Math.max(...rHorario.data.map(h => h.totalPedidos));
+      document.getElementById('rel-horario-content').innerHTML = rHorario.data.map(h => `
+        <div class="flex items-center gap-4 mb-3">
+          <span class="text-gray-400 text-sm font-bold w-16 flex-shrink-0">${h.faixaHorario}</span>
+          <div class="flex-1 bg-bv-border rounded-full h-2">
+            <div class="bar-fill rounded-full bg-emerald-500" style="width:${Math.round(h.totalPedidos/maxPedidos*100)}%"></div>
+          </div>
+          <span class="text-white font-bold text-sm w-8 text-right">${h.totalPedidos}</span>
+          <span class="text-emerald-400 text-xs w-24 text-right">${fmt(h.totalFaturado)}</span>
+        </div>`).join('');
+    } else {
+      document.getElementById('rel-horario-content').innerHTML = '<p class="text-gray-500 text-sm text-center py-6">Nenhum dado no período.</p>';
+    }
+
+    showToast('✅ Relatórios gerados!', 'success');
+    dadosCarregados = true;
+
+  } catch(e) {
+    showToast('❌ Erro ao carregar relatórios', 'error');
+  } finally {
+    btn.textContent = '📊 Gerar'; btn.disabled = false;
+  }
 }
 
-async function carregarItens(inicio, fim) {
-  const r = await api.get(`/relatorio/itens-mais-vendidos?dataInicio=${inicio}&dataFim=${fim}`);
-  const el = document.getElementById('tabela-itens');
-  if (!r || !r.ok || !r.data?.length) { el.innerHTML = '<p style="color:#888">Nenhum item vendido.</p>'; return; }
-  el.innerHTML = `<table><thead><tr><th>#</th><th>Item</th><th>Período</th><th>Qtd</th><th>Sugestões</th><th>Receita</th></tr></thead>
-    <tbody>${r.data.map((row,i) => `<tr><td><strong>${i+1}</strong></td><td>${row.nomeItem}</td>
-      <td>${row.periodo==='Almoco'?'🌞 Almoço':'🌙 Jantar'}</td><td>${row.quantidadeVendida}</td>
-      <td>${row.vendasComoSugestao>0?'⭐ '+row.vendasComoSugestao:'—'}</td>
-      <td>${fmtMoeda(row.receitaTotal)}</td></tr>`).join('')}</tbody></table>`;
-}
-
-async function carregarTopClientes(inicio, fim, top) {
-  const r = await api.get(`/relatorio/top-clientes?dataInicio=${inicio}&dataFim=${fim}&top=${top}`);
-  const el = document.getElementById('tabela-clientes');
-  if (!r || !r.ok || !r.data?.length) { el.innerHTML = '<p style="color:#888">Nenhum cliente no período.</p>'; return; }
-  el.innerHTML = `<table><thead><tr><th>#</th><th>Cliente</th><th>E-mail</th><th>Pedidos</th><th>Total Gasto</th><th>Ticket Médio</th></tr></thead>
-    <tbody>${r.data.map((c,i) => `<tr><td><strong>${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</strong></td>
-      <td>${c.nome}</td><td style="color:var(--cinza)">${c.email}</td><td>${c.totalPedidos}</td>
-      <td>${fmtMoeda(c.totalGasto)}</td><td>${fmtMoeda(c.ticketMedio)}</td></tr>`).join('')}</tbody></table>`;
-}
-
-async function carregarHorarioPico(inicio, fim) {
-  const r = await api.get(`/relatorio/horario-pico?dataInicio=${inicio}&dataFim=${fim}`);
-  const el = document.getElementById('grafico-pico');
-  if (!r || !r.ok || !r.data?.length) { el.innerHTML = '<p style="color:#888">Nenhum pedido no período.</p>'; return; }
-  const dados = [...r.data].sort((a,b) => a.hora-b.hora);
-  const maxP  = Math.max(...dados.map(d => d.totalPedidos));
-  const pico  = r.data[0];
-  const total = dados.reduce((s,d) => s+d.totalPedidos, 0);
-  el.innerHTML = `<div class="grid-resumo">
-    <div class="resumo-card"><div class="label">Hora de Pico</div><div class="valor">${pico.faixaHorario}</div></div>
-    <div class="resumo-card"><div class="label">Pedidos na Hora Pico</div><div class="valor">${pico.totalPedidos}</div></div>
-    <div class="resumo-card"><div class="label">Total do Período</div><div class="valor">${total} pedidos</div></div>
-    <div class="resumo-card"><div class="label">Fat. na Hora Pico</div><div class="valor">${fmtMoeda(pico.totalFaturado)}</div></div>
-  </div>
-  <div style="margin-top:1rem">${dados.map(d=>`
-    <div class="pico-bar">
-      <span class="hora-label">${d.faixaHorario}</span>
-      <div class="barra-wrap"><div class="barra" style="width:${maxP>0?(d.totalPedidos/maxP*100).toFixed(0):0}%">
-        <span>${d.totalPedidos} ped.</span></div></div>
-      <span class="total-label">${fmtMoeda(d.totalFaturado)}</span>
-    </div>`).join('')}</div>`;
+async function fazerLogout() {
+  await fetch('/api/auth/logout', { method:'POST', credentials:'include' });
+  location.href = '/welcome.html';
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const isAdmin = await verificarAdmin();
-  if (!isAdmin) return;
-  const hoje = new Date();
-  const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-  document.getElementById('data-inicio').value = primeiroDia.toISOString().split('T')[0];
-  document.getElementById('data-fim').value    = hoje.toISOString().split('T')[0];
+  // Datas padrão: último mês
+  const hoje      = new Date();
+  const mesPassado = new Date(hoje); mesPassado.setMonth(hoje.getMonth() - 1);
+  document.getElementById('filtro-fim').value    = hoje.toISOString().slice(0, 10);
+  document.getElementById('filtro-inicio').value = mesPassado.toISOString().slice(0, 10);
+
+  const ok = await verificarAdmin();
+  if (ok) gerarRelatorio();
 });
 </script>
 </body>

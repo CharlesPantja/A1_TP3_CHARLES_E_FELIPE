@@ -3,310 +3,362 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Painel Admin — Bella Vista</title>
+  <title>Bella Vista — Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bv: { bg:'#010906', card:'#020e0a', hover:'#031e15', border:'#042f20', border2:'#064028' }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    :root { --verde:#2d6a4f; --verde-escuro:#1b4332; --verde-claro:#52b788; --cinza:#6c757d; --radius:12px; --sombra:0 2px 12px rgba(0,0,0,0.08); }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Segoe UI',sans-serif; background:#f8fdf9; color:#1a1a1a; }
-
-    nav { background:var(--verde-escuro); padding:0.9rem 2rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
-    .logo { color:#fff; font-size:1.3rem; font-weight:700; text-decoration:none; }
-    .nav-links a { color:#b7e4c7; text-decoration:none; font-size:0.9rem; margin-left:1.2rem; }
-    .nav-links a:hover { color:#fff; }
-    #nav-nome { color:#d8f3dc; font-size:0.85rem; margin-right:0.5rem; }
-    .btn-nav-outline { background:transparent; border:1px solid rgba(255,255,255,0.4); color:#fff; padding:0.4rem 1rem; border-radius:50px; cursor:pointer; font-size:0.85rem; }
-
-    section { max-width:1100px; margin:0 auto; padding:2.5rem 1.5rem; }
-    .section-titulo { font-size:1.6rem; color:var(--verde-escuro); margin-bottom:0.4rem; }
-    .section-sub { color:var(--cinza); margin-bottom:1.75rem; font-size:0.9rem; }
-
-    /* Acesso negado */
-    #acesso-negado { display:none; text-align:center; padding:4rem 2rem; }
-    #acesso-negado .icone { font-size:4rem; margin-bottom:1rem; }
-    #acesso-negado h2 { color:#c62828; font-size:1.6rem; margin-bottom:0.5rem; }
-    #conteudo-admin { display:none; }
-
-    .filtros { display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-end; background:#fff; padding:1.25rem; border-radius:var(--radius); box-shadow:var(--sombra); margin-bottom:2rem; }
-    .form-group { margin:0; min-width:120px; }
-    .form-group label { display:block; font-size:0.82rem; color:var(--cinza); margin-bottom:0.35rem; font-weight:600; }
-    .form-group select { width:100%; padding:0.6rem 0.9rem; border:1.5px solid #dee2e6; border-radius:8px; font-size:0.9rem; font-family:inherit; }
-    .btn { padding:0.6rem 1.4rem; border-radius:50px; border:none; cursor:pointer; font-size:0.88rem; font-family:inherit; transition:all 0.2s; font-weight:600; }
-    .btn-verde { background:var(--verde); color:#fff; }
-    .btn-verde:hover { background:var(--verde-escuro); }
-
-    .stats { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:1rem; margin-bottom:2rem; }
-    .stat-card { background:#fff; border-radius:var(--radius); padding:1.1rem 1.3rem; box-shadow:var(--sombra); text-align:center; }
-    .stat-num { font-size:2rem; font-weight:700; color:var(--verde-escuro); }
-    .stat-label { font-size:0.78rem; color:var(--cinza); margin-top:0.2rem; text-transform:uppercase; letter-spacing:.5px; }
-    .stat-card.pendente .stat-num { color:#d97706; }
-    .stat-card.preparando .stat-num { color:#2563eb; }
-    .stat-card.finalizado .stat-num { color:var(--verde); }
-    .stat-card.cancelado .stat-num { color:#dc2626; }
-
-    .pedidos-lista { display:flex; flex-direction:column; gap:0.75rem; }
-    .card-pedido-admin { background:#fff; border-radius:var(--radius); padding:1.1rem 1.3rem; box-shadow:var(--sombra); border-left:4px solid var(--verde-claro); }
-    .card-pedido-admin.status-0 { border-left-color:#d97706; }
-    .card-pedido-admin.status-1 { border-left-color:#2563eb; }
-    .card-pedido-admin.status-4 { border-left-color:var(--verde); }
-    .card-pedido-admin.status-5 { border-left-color:#dc2626; opacity:0.7; }
-    .pedido-top { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem; }
-    .pedido-id { font-weight:700; color:var(--verde-escuro); }
-    .pedido-info { font-size:0.83rem; color:var(--cinza); margin-bottom:0.5rem; }
-    .pedido-itens-lista { font-size:0.82rem; color:#444; margin-bottom:0.65rem; }
-    .pedido-acoes { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; }
-    .badge-status { font-size:0.75rem; font-weight:700; padding:0.25rem 0.7rem; border-radius:50px; }
-    .badge-0 { background:#fef3c7; color:#92400e; }
-    .badge-1 { background:#dbeafe; color:#1d4ed8; }
-    .badge-2 { background:#e0e7ff; color:#4338ca; }
-    .badge-3 { background:#d1fae5; color:#065f46; }
-    .badge-4 { background:#d1fae5; color:#065f46; }
-    .badge-5 { background:#fee2e2; color:#b91c1c; }
-
-    select.status-select { padding:0.35rem 0.6rem; border:1.5px solid #dee2e6; border-radius:8px; font-size:0.82rem; font-family:inherit; cursor:pointer; }
-    .btn-salvar { padding:0.35rem 0.85rem; background:var(--verde); color:#fff; border:none; border-radius:50px; font-size:0.8rem; cursor:pointer; font-family:inherit; }
-    .btn-salvar:hover { background:var(--verde-escuro); }
-
-    .toast { position:fixed; bottom:2rem; right:2rem; padding:0.85rem 1.5rem; border-radius:10px; color:#fff; font-size:0.9rem; font-weight:600; z-index:500; opacity:0; transform:translateY(10px); transition:opacity 0.3s,transform 0.3s; pointer-events:none; }
-    .toast.visivel { opacity:1; transform:translateY(0); }
-    .toast-sucesso { background:var(--verde); }
-    .toast-erro { background:#e63946; }
-
-    .sem-pedidos { text-align:center; padding:2.5rem; color:var(--cinza); background:#fff; border-radius:var(--radius); box-shadow:var(--sombra); }
-    .carregando { text-align:center; padding:2rem; color:var(--cinza); }
+    body { background-color: #010906; }
+    .glass { background: rgba(2,14,10,0.88); backdrop-filter: blur(16px); }
+    .btn-primary { background: linear-gradient(135deg,#059669,#10b981); transition:all .2s; }
+    .btn-primary:hover { background: linear-gradient(135deg,#047857,#059669); box-shadow:0 0 20px rgba(16,185,129,.3); }
+    .input-field { background:#010906; border:1.5px solid #042f20; color:#fff; transition:border-color .2s; }
+    .input-field:focus { outline:none; border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.1); }
+    .select-field { background:#010906; border:1.5px solid #042f20; color:#fff; border-radius:.75rem; padding:.65rem 1rem; font-size:.875rem; width:100%; }
+    .select-field:focus { outline:none; border-color:#10b981; }
+    .stat-card { background:#020e0a; border:1.5px solid #042f20; border-radius:1.5rem; padding:1.25rem; }
+    .order-card { background:#020e0a; border:1.5px solid #042f20; border-radius:1.25rem; padding:1.25rem; transition:all .2s; }
+    .order-card:hover { border-color:#10b981; }
+    .status-badge { padding:.25rem .75rem; border-radius:999px; font-size:.7rem; font-weight:700; }
+    .status-0 { background:#064028; color:#6ee7b7; }
+    .status-1 { background:#1c3a5e; color:#93c5fd; }
+    .status-2 { background:#3b1f5e; color:#c4b5fd; }
+    .status-3 { background:#1a3a1a; color:#86efac; }
+    .status-4 { background:#1f2937; color:#9ca3af; }
+    .status-5 { background:#3b0a0a; color:#fca5a5; }
+    .border-status-0 { border-left: 3px solid #10b981; }
+    .border-status-1 { border-left: 3px solid #3b82f6; }
+    .border-status-2 { border-left: 3px solid #8b5cf6; }
+    .border-status-3 { border-left: 3px solid #22c55e; }
+    .border-status-4 { border-left: 3px solid #6b7280; }
+    .border-status-5 { border-left: 3px solid #ef4444; }
+    #toast {
+      position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999;
+      padding:.85rem 1.5rem; border-radius:16px; font-weight:600; font-size:.9rem;
+      opacity:0; transform:translateY(8px); transition:all .3s; pointer-events:none;
+    }
+    #toast.show { opacity:1; transform:translateY(0); }
+    #toast.success { background:#064028; border:1px solid #10b981; color:#6ee7b7; }
+    #toast.error   { background:#3b0a0a; border:1px solid #ef4444; color:#fca5a5; }
+    #toast.info    { background:#1c3a5e; border:1px solid #3b82f6; color:#93c5fd; }
   </style>
 </head>
-<body>
+<body class="min-h-screen text-white font-sans">
 
-<nav>
-  <a class="logo" href="/">🍽 Bella Vista</a>
-  <div class="nav-links">
-    <a href="/">Início</a>
-    <a href="/relatorio.html">📊 Relatórios</a>
+<!-- HEADER -->
+<header class="glass sticky top-0 z-50 border-b border-bv-border">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="/welcome.html" class="flex items-center gap-3">
+      <img src="/bellavistalogo.png" alt="Bella Vista" class="h-10 w-10 rounded-full object-cover" onerror="this.style.display='none'">
+      <span class="text-xl font-extrabold text-emerald-400">Bella Vista</span>
+      <span class="bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-bold px-2 py-0.5 rounded-full">Admin</span>
+    </a>
+    <nav class="flex items-center gap-4 text-sm">
+      <a href="/index.html" class="text-gray-400 hover:text-white transition-colors">📋 Cardápio</a>
+      <a href="/relatorio.html" class="text-gray-400 hover:text-white transition-colors">📊 Relatórios</a>
+      <button onclick="fazerLogout()" class="text-red-400 hover:text-red-300 transition-colors">Sair</button>
+    </nav>
   </div>
-  <div style="display:flex;align-items:center;gap:.5rem">
-    <span id="nav-nome"></span>
-    <button onclick="fazerLogout()" class="btn-nav-outline">Sair</button>
-  </div>
-</nav>
+</header>
 
-<section>
-  <!-- Acesso negado -->
-  <div id="acesso-negado">
-    <div class="icone">🔒</div>
-    <h2>Acesso Restrito</h2>
-    <p style="color:var(--cinza);margin-bottom:1.5rem">Esta área é exclusiva para administradores.</p>
-    <a href="/login.html" style="color:var(--verde);font-weight:600">→ Ir para o Login</a>
+<main class="max-w-7xl mx-auto px-4 py-8">
+
+  <!-- ACESSO NEGADO (oculto por padrão) -->
+  <div id="acesso-negado" class="hidden text-center py-24">
+    <div class="text-6xl mb-4">🔒</div>
+    <h2 class="text-2xl font-extrabold text-white mb-2">Acesso Restrito</h2>
+    <p class="text-gray-400 mb-6">Esta página é exclusiva para administradores.</p>
+    <a href="/welcome.html" class="btn-primary text-white font-bold px-8 py-3 rounded-full inline-block">Voltar</a>
   </div>
 
-  <!-- Painel admin -->
-  <div id="conteudo-admin">
-    <h2 class="section-titulo">🧑‍🍳 Painel de Pedidos</h2>
-    <p class="section-sub">Gerencie e atualize o status de todos os pedidos em tempo real.</p>
+  <!-- PAINEL ADMIN -->
+  <div id="painel-admin" class="hidden">
 
-    <!-- Cards de resumo -->
-    <div class="stats">
-      <div class="stat-card pendente">
-        <div class="stat-num" id="cnt-0">—</div>
-        <div class="stat-label">⏳ Pendentes</div>
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-extrabold text-white">Painel de Controle</h1>
+        <p class="text-gray-500 text-sm mt-1">Gerencie pedidos e sugestões do chef</p>
       </div>
-      <div class="stat-card preparando">
-        <div class="stat-num" id="cnt-1">—</div>
-        <div class="stat-label">👨‍🍳 Em Preparo</div>
+      <button onclick="carregarPedidos()" class="btn-primary text-white font-bold px-5 py-2.5 rounded-full text-sm">🔄 Atualizar</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+      <div class="stat-card text-center">
+        <div class="text-2xl font-extrabold text-emerald-400" id="cnt-0">—</div>
+        <div class="text-xs text-gray-500 mt-1">Pendentes</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-num" id="cnt-2">—</div>
-        <div class="stat-label">🛵 Saiu p/ Entrega</div>
+      <div class="stat-card text-center">
+        <div class="text-2xl font-extrabold text-blue-400" id="cnt-1">—</div>
+        <div class="text-xs text-gray-500 mt-1">Em Preparo</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-num" id="cnt-3">—</div>
-        <div class="stat-label">✅ Pronto p/ Retirada</div>
+      <div class="stat-card text-center">
+        <div class="text-2xl font-extrabold text-purple-400" id="cnt-2">—</div>
+        <div class="text-xs text-gray-500 mt-1">Saiu p/ Entrega</div>
       </div>
-      <div class="stat-card finalizado">
-        <div class="stat-num" id="cnt-4">—</div>
-        <div class="stat-label">✔️ Finalizados</div>
+      <div class="stat-card text-center">
+        <div class="text-2xl font-extrabold text-green-400" id="cnt-3">—</div>
+        <div class="text-xs text-gray-500 mt-1">Pronto p/ Retirada</div>
       </div>
-      <div class="stat-card cancelado">
-        <div class="stat-num" id="cnt-5">—</div>
-        <div class="stat-label">❌ Cancelados</div>
+      <div class="stat-card text-center">
+        <div class="text-2xl font-extrabold text-gray-400" id="cnt-4">—</div>
+        <div class="text-xs text-gray-500 mt-1">Finalizados</div>
+      </div>
+      <div class="stat-card text-center">
+        <div class="text-2xl font-extrabold text-red-400" id="cnt-5">—</div>
+        <div class="text-xs text-gray-500 mt-1">Cancelados</div>
       </div>
     </div>
 
-    <!-- Filtros -->
-    <div class="filtros">
-      <div class="form-group">
-        <label>Filtrar por Status</label>
-        <select id="filtro-status" onchange="aplicarFiltro()">
-          <option value="">Todos</option>
-          <option value="0">⏳ Pendente</option>
-          <option value="1">👨‍🍳 Em Preparo</option>
-          <option value="2">🛵 Saiu para Entrega</option>
-          <option value="3">✅ Pronto para Retirada</option>
-          <option value="4">✔️ Finalizado</option>
-          <option value="5">❌ Cancelado</option>
+    <!-- SUGESTÃO DO CHEF -->
+    <div class="bg-bv-card border border-bv-border rounded-2xl p-5 mb-8">
+      <h2 class="text-lg font-extrabold text-white mb-4">👨‍🍳 Sugestão do Chef</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Período</label>
+          <select id="sug-periodo" class="select-field" onchange="carregarItensSugestao()">
+            <option value="Almoco">Almoço</option>
+            <option value="Jantar">Jantar</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Item do Cardápio</label>
+          <select id="sug-item-id" class="select-field" onchange="document.getElementById('sug-item-id-num').value=this.value">
+            <option value="">Selecione um item...</option>
+          </select>
+          <input type="hidden" id="sug-item-id-num" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Desconto (%)</label>
+          <input type="number" id="sug-desconto" value="10" min="1" max="100"
+            class="input-field w-full rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <button onclick="salvarSugestao()" class="btn-primary text-white font-bold py-3 rounded-full text-sm">
+          ✅ Salvar Sugestão
+        </button>
+      </div>
+      <div id="sug-atual" class="mt-4 text-sm text-gray-500"></div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="flex flex-wrap gap-3 mb-6 items-center">
+      <span class="text-gray-400 text-sm font-bold">Filtrar:</span>
+      <button onclick="filtrar('')" id="f-todos" class="px-4 py-1.5 rounded-full text-sm font-bold bg-emerald-700 text-white">Todos</button>
+      <button onclick="filtrar('0')" id="f-0" class="px-4 py-1.5 rounded-full text-sm font-bold bg-bv-card border border-bv-border text-gray-400">Pendentes</button>
+      <button onclick="filtrar('1')" id="f-1" class="px-4 py-1.5 rounded-full text-sm font-bold bg-bv-card border border-bv-border text-gray-400">Em Preparo</button>
+      <button onclick="filtrar('2')" id="f-2" class="px-4 py-1.5 rounded-full text-sm font-bold bg-bv-card border border-bv-border text-gray-400">Saiu p/ Entrega</button>
+      <button onclick="filtrar('3')" id="f-3" class="px-4 py-1.5 rounded-full text-sm font-bold bg-bv-card border border-bv-border text-gray-400">Pronto p/ Retirada</button>
+      <button onclick="filtrar('4')" id="f-4" class="px-4 py-1.5 rounded-full text-sm font-bold bg-bv-card border border-bv-border text-gray-400">Finalizados</button>
+      <button onclick="filtrar('5')" id="f-5" class="px-4 py-1.5 rounded-full text-sm font-bold bg-bv-card border border-bv-border text-gray-400">Cancelados</button>
+      <div class="ml-auto flex items-center gap-2">
+        <select id="filtro-tipo" onchange="renderPedidos()" class="select-field" style="width:auto;padding:.4rem .75rem;">
+          <option value="">Todos os tipos</option>
+          <option value="Presencial">Presencial</option>
+          <option value="DeliveryProprio">Delivery Próprio</option>
+          <option value="DeliveryAplicativo">Delivery Aplicativo</option>
         </select>
       </div>
-      <div class="form-group">
-        <label>Tipo de Atendimento</label>
-        <select id="filtro-tipo" onchange="aplicarFiltro()">
-          <option value="">Todos</option>
-          <option value="Presencial">🪑 Presencial</option>
-          <option value="DeliveryProprio">🛵 Delivery Próprio</option>
-          <option value="DeliveryAplicativo">📱 Delivery Aplicativo</option>
-        </select>
-      </div>
-      <button class="btn btn-verde" onclick="carregarPedidos()">🔄 Atualizar</button>
     </div>
 
-    <div id="lista-pedidos-admin" class="pedidos-lista">
-      <div class="carregando">Carregando pedidos...</div>
+    <!-- LISTA DE PEDIDOS -->
+    <div id="pedidos-admin-list" class="space-y-3">
+      <div class="text-center py-12 text-gray-500">Carregando pedidos...</div>
+    </div>
+
+    <!-- PAGINAÇÃO -->
+    <div class="flex items-center justify-between mt-6">
+      <button onclick="mudarPagina(-1)" id="btn-prev" class="bg-bv-card border border-bv-border text-white font-bold px-5 py-2 rounded-full text-sm hover:bg-bv-hover disabled:opacity-30 transition-colors">← Anterior</button>
+      <span id="pagina-info" class="text-gray-500 text-sm">Página 1</span>
+      <button onclick="mudarPagina(1)" id="btn-next" class="bg-bv-card border border-bv-border text-white font-bold px-5 py-2 rounded-full text-sm hover:bg-bv-hover transition-colors">Próxima →</button>
     </div>
   </div>
-</section>
+</main>
 
-<div id="toast" class="toast"></div>
+<div id="toast"></div>
 
 <script>
-const statusLabels = ['⏳ Pendente','👨‍🍳 Em Preparo','🛵 Saiu p/ Entrega','✅ Pronto p/ Retirada','✔️ Finalizado','❌ Cancelado'];
-const tipoLabels  = { Presencial:'🪑 Presencial', DeliveryProprio:'🛵 Delivery Próprio', DeliveryAplicativo:'📱 Aplicativo' };
-let todosPedidos  = [];
-
 const api = {
   async get(url) {
-    try {
-      const r = await fetch('/api' + url, { credentials:'include', headers:{'Accept':'application/json'} });
-      let data = null; try { data = await r.json(); } catch(_) {}
-      return { ok:r.ok, status:r.status, data };
-    } catch(e) { return null; }
-  },
-  async patch(url, body) {
-    try {
-      const r = await fetch('/api' + url, { method:'PATCH', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
-      let data = null; try { data = await r.json(); } catch(_) {}
-      return { ok:r.ok, status:r.status, data };
-    } catch(e) { return null; }
+    const r = await fetch('/api' + url, { credentials:'include', headers:{'Accept':'application/json'} });
+    const data = r.status === 204 ? null : await r.json().catch(() => null);
+    return { ok: r.ok, data };
   },
   async post(url, body) {
-    try {
-      const r = await fetch('/api' + url, { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body||{}) });
-      return { ok:r.ok };
-    } catch(e) { return null; }
+    const r = await fetch('/api' + url, { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const data = await r.json().catch(() => null);
+    return { ok: r.ok, data };
+  },
+  async patch(url, body) {
+    const r = await fetch('/api' + url, { method:'PATCH', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const data = await r.json().catch(() => null);
+    return { ok: r.ok, data };
   }
 };
 
-function mostrarToast(msg, tipo='sucesso') {
+const statusDesc  = ['Pendente','Em Preparo','Saiu p/ Entrega','Pronto p/ Retirada','Finalizado','Cancelado'];
+const statusClass = ['status-0','status-1','status-2','status-3','status-4','status-5'];
+
+let todosPedidos = [];
+let filtroStatus = '';
+let pagina = 1;
+const TAMANHO = 20;
+
+function showToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = 'toast ' + (tipo==='erro' ? 'toast-erro' : 'toast-sucesso');
-  void t.offsetWidth; t.classList.add('visivel');
-  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('visivel'), 3500);
-}
-
-function fmtMoeda(v) {
-  return new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' }).format(v);
-}
-
-async function fazerLogout() {
-  await api.post('/auth/logout', {});
-  window.location.href = '/';
+  t.className = 'show ' + (type || 'success');
+  setTimeout(() => { t.className = ''; }, 3000);
 }
 
 async function verificarAdmin() {
   const r = await api.get('/auth/me');
-  if (!r || !r.ok) { mostrarBloqueio(); return false; }
-  if (!r.data.roles?.includes('Admin')) { mostrarBloqueio(); return false; }
-  document.getElementById('nav-nome').textContent = 'Admin: ' + r.data.nome;
-  document.getElementById('conteudo-admin').style.display = '';
+  if (!r.ok || !r.data?.roles?.includes('Admin')) {
+    document.getElementById('acesso-negado').classList.remove('hidden');
+    return false;
+  }
+  document.getElementById('painel-admin').classList.remove('hidden');
   return true;
 }
 
-function mostrarBloqueio() {
-  document.getElementById('acesso-negado').style.display = '';
-  document.getElementById('conteudo-admin').style.display = 'none';
-}
-
 async function carregarPedidos() {
-  const el = document.getElementById('lista-pedidos-admin');
-  el.innerHTML = '<div class="carregando">Carregando...</div>';
-  const r = await api.get('/pedido/todos?pagina=1&tamanho=50');
-  if (!r || !r.ok) { el.innerHTML = '<div class="sem-pedidos">Erro ao carregar pedidos.</div>'; return; }
-  todosPedidos = r.data;
+  const r = await api.get('/pedido/todos?pagina=' + pagina + '&tamanho=' + TAMANHO);
+  if (!r.ok) { showToast('❌ Erro ao carregar pedidos', 'error'); return; }
+  todosPedidos = r.data || [];
   atualizarContadores();
-  aplicarFiltro();
+  renderPedidos();
+  document.getElementById('pagina-info').textContent = 'Página ' + pagina;
+  document.getElementById('btn-prev').disabled = pagina <= 1;
 }
 
 function atualizarContadores() {
   for (let i = 0; i <= 5; i++) {
-    const cnt = todosPedidos.filter(p => p.status === i).length;
-    const el = document.getElementById('cnt-' + i);
-    if (el) el.textContent = cnt;
+    document.getElementById('cnt-' + i).textContent = todosPedidos.filter(p => p.status === i).length;
   }
 }
 
-function aplicarFiltro() {
-  const filtroStatus = document.getElementById('filtro-status').value;
-  const filtroTipo   = document.getElementById('filtro-tipo').value;
-  let pedidos = todosPedidos;
-  if (filtroStatus !== '') pedidos = pedidos.filter(p => p.status === parseInt(filtroStatus));
-  if (filtroTipo !== '')   pedidos = pedidos.filter(p => p.tipoAtendimento === filtroTipo);
-  renderizarPedidos(pedidos);
+function filtrar(status) {
+  filtroStatus = status;
+  // Update filter buttons
+  const ids = ['todos','0','1','2','3','4','5'];
+  ids.forEach(id => {
+    const btn = document.getElementById('f-' + id);
+    if (!btn) return;
+    const isActive = id === (status === '' ? 'todos' : status);
+    btn.className = 'px-4 py-1.5 rounded-full text-sm font-bold ' + (isActive ? 'bg-emerald-700 text-white' : 'bg-bv-card border border-bv-border text-gray-400');
+  });
+  renderPedidos();
 }
 
-function renderizarPedidos(pedidos) {
-  const el = document.getElementById('lista-pedidos-admin');
-  if (!pedidos.length) {
-    el.innerHTML = '<div class="sem-pedidos">Nenhum pedido encontrado para este filtro.</div>';
+function renderPedidos() {
+  const tipoFiltro = document.getElementById('filtro-tipo').value;
+  let lista = todosPedidos;
+  if (filtroStatus !== '') lista = lista.filter(p => p.status === parseInt(filtroStatus));
+  if (tipoFiltro) lista = lista.filter(p => p.tipoAtendimento === tipoFiltro);
+
+  const el = document.getElementById('pedidos-admin-list');
+  if (!lista.length) {
+    el.innerHTML = '<div class="text-center py-12 text-gray-500">Nenhum pedido encontrado.</div>';
     return;
   }
-
-  el.innerHTML = pedidos.map(p => `
-    <div class="card-pedido-admin status-${p.status}" id="card-${p.pedidoId}">
-      <div class="pedido-top">
+  el.innerHTML = lista.map(p => `
+    <div class="order-card border-status-${p.status}">
+      <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
         <div>
-          <span class="pedido-id">Pedido #${p.pedidoId}</span>
-          <span class="badge-status badge-${p.status}" style="margin-left:.5rem">${statusLabels[p.status]}</span>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-white font-extrabold">Pedido #${p.pedidoId}</span>
+            <span class="status-badge ${statusClass[p.status]}">${p.statusDesc || statusDesc[p.status]}</span>
+          </div>
+          <p class="text-gray-500 text-xs">${p.fmtDH} · ${p.tipoAtendimento}${p.numeroMesa ? ' · Mesa '+p.numeroMesa : ''}</p>
+          <p class="text-gray-400 text-sm mt-0.5">👤 ${p.cliente}</p>
         </div>
-        <strong style="color:var(--verde-escuro)">${fmtMoeda(p.total)}</strong>
+        <div class="text-right">
+          <p class="text-emerald-400 font-extrabold text-lg">R$ ${p.total.toFixed(2).replace('.',',')}</p>
+        </div>
       </div>
-      <div class="pedido-info">
-        ${tipoLabels[p.tipoAtendimento] || p.tipoAtendimento}
-        ${p.numeroMesa ? ' · Mesa ' + p.numeroMesa : ''}
-        · ${p.cliente}
-        · ${p.fmtDH}
+      <div class="text-xs text-gray-500 mb-3">
+        ${p.itens.map(i => i.quantidade + '× ' + i.nome).join(' · ')}
       </div>
-      <div class="pedido-itens-lista">
-        ${p.itens.map(i => `${i.nome} ×${i.quantidade}`).join(' · ')}
-      </div>
-      <div class="pedido-acoes">
-        <label style="font-size:.82rem;color:var(--cinza)">Alterar para:</label>
-        <select class="status-select" id="sel-${p.pedidoId}">
-          <option value="0" ${p.status===0?'selected':''}>⏳ Pendente</option>
-          <option value="1" ${p.status===1?'selected':''}>👨‍🍳 Em Preparo</option>
-          <option value="2" ${p.status===2?'selected':''}>🛵 Saiu para Entrega</option>
-          <option value="3" ${p.status===3?'selected':''}>✅ Pronto para Retirada</option>
-          <option value="4" ${p.status===4?'selected':''}>✔️ Finalizado</option>
-          <option value="5" ${p.status===5?'selected':''}>❌ Cancelado</option>
+      <div class="flex items-center gap-3 pt-3 border-t border-bv-border">
+        <select id="sel-${p.pedidoId}" class="select-field flex-1" style="padding:.4rem .75rem;">
+          ${[0,1,2,3,4,5].map(s => `<option value="${s}" ${p.status===s?'selected':''}>${statusDesc[s]}</option>`).join('')}
         </select>
-        <button class="btn-salvar" onclick="salvarStatus(${p.pedidoId})">Salvar</button>
+        <button onclick="salvarStatus(${p.pedidoId})" class="btn-primary text-white font-bold px-5 py-2 rounded-full text-sm whitespace-nowrap">
+          Salvar
+        </button>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 async function salvarStatus(pedidoId) {
   const novoStatus = parseInt(document.getElementById('sel-' + pedidoId).value);
   const r = await api.patch('/pedido/' + pedidoId + '/status', { novoStatus });
-  if (!r || !r.ok) { mostrarToast('Erro ao atualizar status.', 'erro'); return; }
-  mostrarToast(`Pedido #${pedidoId}: ${r.data.statusDesc}`);
-  // Atualiza localmente sem recarregar tudo
-  const pedido = todosPedidos.find(p => p.pedidoId === pedidoId);
-  if (pedido) pedido.status = novoStatus;
-  atualizarContadores();
-  aplicarFiltro();
+  if (r.ok) {
+    showToast('✅ Status atualizado: ' + r.data?.statusDesc, 'success');
+    // Atualizar localmente sem recarregar tudo
+    const idx = todosPedidos.findIndex(p => p.pedidoId === pedidoId);
+    if (idx >= 0) { todosPedidos[idx].status = novoStatus; todosPedidos[idx].statusDesc = statusDesc[novoStatus]; }
+    atualizarContadores();
+    renderPedidos();
+  } else {
+    showToast('❌ Erro ao atualizar status', 'error');
+  }
+}
+
+async function salvarSugestao() {
+  const periodo = document.getElementById('sug-periodo').value;
+  const itemId = parseInt(document.getElementById('sug-item-id').value || document.getElementById('sug-item-id-num').value);
+  const desconto = parseFloat(document.getElementById('sug-desconto').value);
+  if (!itemId || isNaN(itemId)) { showToast('❌ Informe um ID de item válido', 'error'); return; }
+  if (!desconto || desconto < 1 || desconto > 100) { showToast('❌ Desconto deve ser entre 1 e 100%', 'error'); return; }
+  // API espera: { ItemId, Periodo (string), PercentualDesconto }
+  const r = await api.post('/cardapio/sugestao', { itemId, periodo, percentualDesconto: desconto });
+  if (r.ok) {
+    showToast('✅ Sugestão salva!', 'success');
+    document.getElementById('sug-atual').textContent = '✅ Sugestão ativa: Item #' + itemId + ' com ' + desconto + '% de desconto no ' + periodo;
+  } else {
+    showToast('❌ ' + (r.data?.message || r.data || 'Erro ao salvar sugestão'), 'error');
+  }
+}
+
+function mudarPagina(delta) {
+  if (pagina + delta < 1) return;
+  pagina += delta;
+  carregarPedidos();
+}
+
+async function fazerLogout() {
+  await fetch('/api/auth/logout', { method:'POST', credentials:'include' });
+  location.href = '/welcome.html';
+}
+
+async function carregarItensSugestao() {
+  const periodo = document.getElementById('sug-periodo').value;
+  const endpoint = periodo === 'Jantar' ? '/cardapio/jantar' : '/cardapio/almoco';
+  const r = await api.get(endpoint);
+  const select = document.getElementById('sug-item-id');
+  if (r.ok && r.data?.itens?.length) {
+    select.innerHTML = '<option value="">Selecione um item...</option>' +
+      r.data.itens.map(i => `<option value="${i.id}">#${i.id} — ${i.nome} (R$ ${i.precoBase.toFixed(2).replace('.',',')})</option>`).join('');
+  } else {
+    select.innerHTML = '<option value="">Nenhum item disponível</option>';
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const isAdmin = await verificarAdmin();
-  if (isAdmin) await carregarPedidos();
+  const ok = await verificarAdmin();
+  if (ok) {
+    carregarPedidos();
+    carregarItensSugestao();
+  }
 });
 </script>
 </body>

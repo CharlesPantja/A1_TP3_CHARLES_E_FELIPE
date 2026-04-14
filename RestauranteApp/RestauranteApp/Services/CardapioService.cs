@@ -30,7 +30,7 @@ namespace RestauranteApp.Services
                 .FirstOrDefaultAsync(s => s.Data == hoje && s.Periodo == periodo);
         }
 
-        public async Task<bool> DefinirSugestaoChefe(int itemId, Periodo periodo)
+        public async Task<bool> DefinirSugestaoChefe(int itemId, Periodo periodo, decimal percentualDesconto = 20m)
         {
             var item = await _context.ItensCardapio.FindAsync(itemId);
             if (item == null || item.Periodo != periodo) return false;
@@ -44,9 +44,10 @@ namespace RestauranteApp.Services
 
             _context.SugestoesChefe.Add(new SugestaoChefe
             {
-                Data = hoje,
-                Periodo = periodo,
-                ItemCardapioId = itemId
+                Data               = hoje,
+                Periodo            = periodo,
+                ItemCardapioId     = itemId,
+                PercentualDesconto = percentualDesconto
             });
 
             await _context.SaveChangesAsync();

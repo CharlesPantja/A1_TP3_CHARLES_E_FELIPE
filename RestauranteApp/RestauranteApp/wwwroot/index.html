@@ -4,470 +4,785 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bella Vista — Cardápio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bv: { bg:'#010906', card:'#020e0a', hover:'#031e15', border:'#042f20', border2:'#064028' }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    :root{--verde:#2d6a4f;--verde-escuro:#1b4332;--verde-claro:#52b788;--fundo:#f8fdf9;--cinza:#6c757d;--radius:12px;--sombra:0 2px 12px rgba(0,0,0,.08);}
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Segoe UI',sans-serif;background:var(--fundo);color:#1a1a1a;}
-    nav{background:var(--verde-escuro);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3);}
-    .logo{color:#fff;font-size:1.3rem;font-weight:700;text-decoration:none;}
-    .nav-links{display:flex;gap:1.1rem;align-items:center;}
-    .nav-links a{color:#b7e4c7;text-decoration:none;font-size:.88rem;transition:color .2s;}
-    .nav-links a:hover{color:#fff;}
-    #nav-nome{color:#d8f3dc;font-size:.85rem;}
-    .btn-nav{background:var(--verde-claro);color:#fff;border:none;padding:.42rem 1rem;border-radius:50px;cursor:pointer;font-size:.85rem;font-family:inherit;}
-    .btn-nav:hover{background:#40916c;}
-    .btn-nav-outline{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;padding:.38rem .9rem;border-radius:50px;cursor:pointer;font-size:.85rem;font-family:inherit;}
-    .hero{background:linear-gradient(135deg,var(--verde-escuro),var(--verde));color:#fff;padding:3rem 2rem;text-align:center;}
-    .hero h1{font-size:2rem;margin-bottom:.4rem;}
-    .hero p{color:#b7e4c7;margin-bottom:1.1rem;}
-    #modo-badge{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:.3rem 1rem;border-radius:50px;font-size:.85rem;margin-bottom:.65rem;}
-    .hero-btns{display:flex;gap:.9rem;justify-content:center;flex-wrap:wrap;}
-    .btn{display:inline-block;padding:.58rem 1.3rem;border-radius:50px;font-size:.9rem;cursor:pointer;border:none;transition:all .2s;text-decoration:none;font-family:inherit;}
-    .btn-primary{background:#fff;color:var(--verde-escuro);font-weight:600;}
-    .btn-primary:hover{background:#d8f3dc;}
-    .btn-secondary{background:transparent;border:2px solid rgba(255,255,255,.6);color:#fff;}
-    .btn-secondary:hover{background:rgba(255,255,255,.15);}
-    .btn-verde{background:var(--verde);color:#fff;}
-    .btn-verde:hover{background:var(--verde-escuro);}
-    .btn-sm{padding:.35rem .85rem;font-size:.8rem;}
-    .btn-danger{background:#fee2e2;color:#b91c1c;border:none;}
-    section{max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem;}
-    .section-titulo{font-size:1.5rem;color:var(--verde-escuro);margin-bottom:.3rem;}
-    .section-sub{color:var(--cinza);margin-bottom:1.2rem;font-size:.87rem;}
-    .tabs{display:flex;gap:.55rem;margin-bottom:1.2rem;flex-wrap:wrap;}
-    .tab-btn{padding:.45rem 1.2rem;border-radius:50px;border:2px solid var(--verde);background:#fff;color:var(--verde);cursor:pointer;font-size:.87rem;font-weight:600;font-family:inherit;transition:all .2s;}
-    .tab-btn.ativo,.tab-btn:hover{background:var(--verde);color:#fff;}
-    .cardapio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:1rem;}
-    .card-item{background:#fff;border-radius:var(--radius);padding:1.1rem;box-shadow:var(--sombra);border:2px solid transparent;transition:border .2s,transform .2s;}
-    .card-item:hover{transform:translateY(-3px);border-color:#b7e4c7;}
-    .card-item.sugestao{border-color:#f4a261;background:#fffbf5;}
-    .badge-sugestao{font-size:.7rem;color:#e76f51;font-weight:700;margin-bottom:.3rem;display:block;}
-    .card-item h3{font-size:.93rem;color:var(--verde-escuro);margin-bottom:.18rem;}
-    .card-item p{font-size:.79rem;color:var(--cinza);margin-bottom:.6rem;}
-    .card-preco{display:flex;justify-content:space-between;align-items:center;}
-    .preco-original{text-decoration:line-through;color:#aaa;font-size:.79rem;margin-right:.2rem;}
-    .preco-final{font-weight:700;color:var(--verde-escuro);}
-    .form-container{background:#fff;border-radius:var(--radius);padding:1.3rem;box-shadow:var(--sombra);}
-    .form-group{margin-bottom:.85rem;}
-    .form-group label{display:block;font-size:.8rem;color:var(--cinza);margin-bottom:.28rem;font-weight:600;}
-    .form-group input,.form-group select{width:100%;padding:.55rem .82rem;border:1.5px solid #dee2e6;border-radius:8px;font-size:.88rem;font-family:inherit;transition:border .2s;}
-    .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--verde-claro);}
-    .aviso-warn{background:#fff3cd;border:1px solid #ffc107;color:#856404;border-radius:var(--radius);padding:.9rem 1rem;font-size:.85rem;}
-    .aviso-warn p{margin-bottom:.55rem;}
-    .card-reserva{background:#fff;border-radius:var(--radius);padding:.9rem 1.1rem;box-shadow:var(--sombra);margin-bottom:.6rem;border-left:4px solid var(--verde-claro);}
-    .card-reserva h4{color:var(--verde-escuro);font-size:.9rem;margin-bottom:.18rem;}
-    .codigo-confirmacao{font-size:.7rem;color:var(--cinza);font-family:monospace;margin-top:.35rem;background:#f0f0f0;padding:.18rem .45rem;border-radius:4px;display:inline-block;}
-    .card-pedido{background:#fff;border-radius:var(--radius);padding:1rem 1.2rem;box-shadow:var(--sombra);margin-bottom:.65rem;border-left:4px solid var(--verde);}
-    .pedido-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.42rem;flex-wrap:wrap;gap:.25rem;}
-    .pedido-id{font-weight:700;color:var(--verde-escuro);font-size:.9rem;}
-    .pedido-status{font-size:.76rem;font-weight:600;padding:.2rem .6rem;border-radius:50px;background:#d1fae5;color:#065f46;}
-    .pedido-status.preparando{background:#fef3c7;color:#92400e;}
-    .pedido-status.cancelado{background:#fee2e2;color:#b91c1c;}
-    .pedido-itens{font-size:.8rem;color:var(--cinza);margin-bottom:.35rem;}
-    .carrinho-fixo{position:fixed;bottom:2rem;right:2rem;background:var(--verde);color:#fff;border-radius:50px;padding:.7rem 1.25rem;display:flex;align-items:center;gap:.5rem;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);font-size:1rem;z-index:200;transition:background .2s,transform .2s;}
-    .carrinho-fixo:hover{background:var(--verde-escuro);transform:scale(1.05);}
-    .badge{background:#e63946;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;}
-    #carrinho-total-nav{font-size:.8rem;font-weight:600;}
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:1rem;}
-    .modal-overlay.aberto{display:flex;}
-    .modal{background:#fff;border-radius:16px;padding:1.6rem;max-width:490px;width:100%;max-height:88vh;overflow-y:auto;}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
-    .modal-fechar{background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--cinza);}
-    .carrinho-item{display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px solid #f0f0f0;}
-    .carrinho-nome{font-weight:600;font-size:.87rem;}
-    .carrinho-preco{font-size:.77rem;color:var(--cinza);}
-    .badge-mini{font-size:.67rem;color:#e76f51;font-weight:700;margin-left:.28rem;}
-    .btn-remover{background:#fee2e2;color:#e63946;border:none;border-radius:50%;width:23px;height:23px;cursor:pointer;font-size:.9rem;line-height:1;}
-    .carrinho-total-row{display:flex;justify-content:space-between;margin-top:.6rem;font-size:.93rem;}
-    .toast{position:fixed;bottom:5.5rem;right:2rem;padding:.75rem 1.3rem;border-radius:10px;color:#fff;font-size:.87rem;font-weight:600;z-index:500;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;max-width:300px;}
-    .toast.visivel{opacity:1;transform:translateY(0);}
-    .toast-sucesso{background:var(--verde);}
-    .toast-erro{background:#e63946;}
-    footer{background:var(--verde-escuro);color:#b7e4c7;text-align:center;padding:1.3rem;font-size:.82rem;margin-top:2rem;}
+    body { background-color: #010906; }
+    .glass { background: rgba(2,14,10,0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    .btn-primary { background: linear-gradient(135deg,#059669,#10b981); transition:all .2s; }
+    .btn-primary:hover { background: linear-gradient(135deg,#047857,#059669); box-shadow:0 0 20px rgba(16,185,129,.3); }
+    .btn-danger { background: linear-gradient(135deg,#dc2626,#ef4444); transition:all .2s; }
+    .btn-danger:hover { background: linear-gradient(135deg,#b91c1c,#dc2626); }
+    .card-item {
+      background:#020e0a; border:1.5px solid #042f20;
+      transition:all .25s; border-radius:1.5rem;
+    }
+    .card-item:hover { background:#031e15; border-color:#10b981; box-shadow:0 0 20px rgba(16,185,129,.12); transform:translateY(-2px); }
+    .sugestao-badge {
+      background:linear-gradient(135deg,#d97706,#f59e0b);
+      color:#000; font-size:.65rem; font-weight:900;
+      padding:.2rem .6rem; border-radius:999px;
+    }
+    .input-field {
+      background:#010906; border:1.5px solid #042f20; color:#fff;
+      transition:border-color .2s;
+    }
+    .input-field:focus { outline:none; border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.1); }
+    .input-field::placeholder { color:#4b5563; }
+    .nav-tab { transition:all .2s; border-bottom:2px solid transparent; }
+    .nav-tab.active { border-bottom-color:#10b981; color:#10b981; }
+    .period-btn { transition:all .2s; }
+    .period-btn.active { background:#10b981; color:#000; }
+    .period-btn:not(.active) { background:#020e0a; border:1.5px solid #042f20; color:#9ca3af; }
+    .cart-badge {
+      background:#10b981; color:#000; border-radius:999px;
+      font-size:.65rem; font-weight:900; min-width:1.2rem; height:1.2rem;
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:0 .3rem;
+    }
+    .status-badge {
+      padding:.25rem .75rem; border-radius:999px; font-size:.7rem; font-weight:700;
+    }
+    .status-0 { background:#064028; color:#6ee7b7; }
+    .status-1 { background:#1c3a5e; color:#93c5fd; }
+    .status-2 { background:#3b1f5e; color:#c4b5fd; }
+    .status-3 { background:#1a3a1a; color:#86efac; }
+    .status-4 { background:#1f2937; color:#9ca3af; }
+    .status-5 { background:#3b0a0a; color:#fca5a5; }
+    #toast {
+      position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999;
+      padding:.85rem 1.5rem; border-radius:16px; font-weight:600; font-size:.9rem;
+      opacity:0; transform:translateY(8px); transition:all .3s; pointer-events:none;
+    }
+    #toast.show { opacity:1; transform:translateY(0); }
+    #toast.success { background:#064028; border:1px solid #10b981; color:#6ee7b7; }
+    #toast.error   { background:#3b0a0a; border:1px solid #ef4444; color:#fca5a5; }
+    #toast.info    { background:#1c3a5e; border:1px solid #3b82f6; color:#93c5fd; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation:fadeIn .4s ease forwards; }
+    .drawer-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.7);
+      z-index:100; display:none;
+    }
+    .drawer {
+      position:fixed; right:0; top:0; bottom:0; width:100%; max-width:420px;
+      background:#020e0a; border-left:1px solid #042f20;
+      z-index:101; transform:translateX(100%); transition:transform .3s ease;
+      display:flex; flex-direction:column;
+    }
+    .drawer.open { transform:translateX(0); }
+    .select-field {
+      background:#010906; border:1.5px solid #042f20; color:#fff;
+      border-radius:.75rem; padding:.65rem 1rem; font-size:.875rem;
+      width:100%; transition:border-color .2s;
+    }
+    .select-field:focus { outline:none; border-color:#10b981; }
   </style>
 </head>
-<body>
+<body class="min-h-screen text-white font-sans">
 
-<nav>
-  <a class="logo" href="/">🍽 Bella Vista</a>
-  <div class="nav-links">
-    <a href="#cardapio">Cardápio</a>
-    <a href="#pedido">Pedido</a>
-    <a href="#reserva">Reserva</a>
-    <a href="#meus-pedidos">Meus Pedidos</a>
-    <a href="/relatorio.html" id="link-relatorio" style="display:none">📊 Relatórios</a>
-  </div>
-  <div style="display:flex;align-items:center;gap:.55rem">
-    <span id="nav-nome"></span>
-    <button onclick="window.location.href='/login.html'" id="btn-login-nav" class="btn-nav">Entrar</button>
-    <button onclick="fazerLogout()" id="btn-logout-nav" class="btn-nav-outline" style="display:none">Sair</button>
-  </div>
-</nav>
-
-<div class="hero">
-  <div id="modo-badge">🍽 Cardápio Bella Vista</div>
-  <h1>Bem-vindo ao Bella Vista</h1>
-  <p>Sabor artesanal — presencial, delivery ou reserva de mesa.</p>
-  <div class="hero-btns">
-    <a href="#cardapio" class="btn btn-primary">Ver Cardápio</a>
-    <a href="#reserva" class="btn btn-secondary">Reservar Mesa</a>
-  </div>
-</div>
-
-<!-- CARDÁPIO -->
-<section id="cardapio">
-  <h2 class="section-titulo">Cardápio do Dia</h2>
-  <p class="section-sub">⭐ Sugestão do Chefe = 20% de desconto automático!</p>
-  <div class="tabs">
-    <button class="tab-btn ativo" onclick="trocarAba('almoco',this)">🌞 Almoço</button>
-    <button class="tab-btn" onclick="trocarAba('jantar',this)">🌙 Jantar</button>
-  </div>
-  <div id="cardapio-grid" class="cardapio-grid"><p style="color:#888">Carregando...</p></div>
-</section>
-
-<!-- PEDIDO -->
-<section id="pedido">
-  <h2 class="section-titulo">Fazer Pedido</h2>
-  <p class="section-sub">Escolha o tipo de atendimento e confirme pelo carrinho.</p>
-  <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start">
-    <div class="form-container" style="flex:1;min-width:265px">
-      <h3 style="margin-bottom:.85rem;color:var(--verde-escuro);font-size:.98rem">Tipo de Atendimento</h3>
-      <div class="form-group">
-        <label>Como deseja receber?</label>
-        <select id="tipo-atendimento" onchange="atualizarCamposAtendimento()">
-          <option value="Presencial">🪑 Presencial (na mesa)</option>
-          <option value="DeliveryProprio">🛵 Delivery Próprio</option>
-          <option value="DeliveryAplicativo">📱 Delivery por Aplicativo</option>
-        </select>
-      </div>
-      <div id="campo-mesa" class="form-group">
-        <label>Número da Mesa</label>
-        <input type="number" id="numero-mesa" placeholder="Ex: 3" min="1" max="20"/>
-      </div>
-      <div id="campo-endereco" class="form-group" style="display:none">
-        <label>Endereço de Entrega</label>
-        <input type="text" id="endereco-entrega" placeholder="Rua, número, bairro..."/>
-      </div>
-      <div id="campo-app" class="form-group" style="display:none">
-        <label>Aplicativo</label>
-        <select id="nome-app">
-          <option value="iFood">iFood</option>
-          <option value="Rappi">Rappi</option>
-          <option value="AppX">AppX</option>
-        </select>
-      </div>
-      <div id="aviso-login-delivery" style="display:none" class="aviso-warn">
-        <p>⚠️ Delivery exige login para rastrear seu pedido.</p>
-        <button class="btn btn-verde btn-sm" onclick="window.location.href='/login.html'">Entrar / Cadastrar</button>
-      </div>
-      <button class="btn btn-verde" style="width:100%;margin-top:.35rem" onclick="abrirCarrinho()">🛒 Ver Carrinho e Confirmar</button>
-    </div>
-    <div style="flex:1;min-width:245px;background:#fff;border-radius:var(--radius);padding:1.3rem;box-shadow:var(--sombra)">
-      <h3 style="margin-bottom:.85rem;color:var(--verde-escuro);font-size:.98rem">Seu Carrinho</h3>
-      <div id="carrinho-lista-inline"><p style="color:#888;font-size:.87rem">Nenhum item adicionado.</p></div>
-      <div id="carrinho-total-inline"></div>
+<!-- HEADER -->
+<header class="glass sticky top-0 z-50 border-b border-bv-border">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="/welcome.html" class="flex items-center gap-3">
+      <img src="/bellavistalogo.png" alt="Bella Vista" class="h-10 w-10 rounded-full object-cover" onerror="this.style.display='none'">
+      <span class="text-xl font-extrabold text-emerald-400">Bella Vista</span>
+    </a>
+    <nav class="flex items-center gap-1 md:gap-2 text-sm">
+      <button onclick="showSection('cardapio')" id="nav-cardapio" class="nav-tab active px-3 py-2 font-bold text-white">Cardápio</button>
+      <button onclick="showSection('reserva')" id="nav-reserva" class="nav-tab px-3 py-2 font-bold text-gray-400">Reserva</button>
+      <button onclick="showSection('meus-pedidos')" id="nav-pedidos" class="nav-tab px-3 py-2 font-bold text-gray-400">Meus Pedidos</button>
+      <span id="nav-admin-sep" class="hidden text-gray-700">|</span>
+      <a id="nav-admin" href="/admin.html" class="hidden text-amber-400 hover:text-amber-300 font-bold px-3 py-2">👑 Admin</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <span id="header-user" class="text-gray-400 text-sm hidden"></span>
+      <button onclick="toggleCart()" class="relative btn-primary text-white font-bold px-4 py-2 rounded-full text-sm flex items-center gap-2">
+        🛒 <span id="cart-count-badge" class="cart-badge hidden">0</span>
+      </button>
+      <a id="header-login" href="/login.html" class="text-emerald-400 hover:text-emerald-300 text-sm font-bold">Entrar</a>
+      <button id="header-logout" onclick="fazerLogout()" class="hidden text-red-400 hover:text-red-300 text-sm">Sair</button>
     </div>
   </div>
-</section>
+</header>
 
-<!-- RESERVA -->
-<section id="reserva">
-  <h2 class="section-titulo">Reservar Mesa</h2>
-  <p class="section-sub">Somente jantar (19h–22h), com 1 dia de antecedência. Exige login.</p>
-  <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start">
-    <div id="form-reserva-container" class="form-container" style="flex:1;min-width:265px;display:none">
-      <div class="form-group"><label>Data da Reserva</label><input type="date" id="data-reserva"/></div>
-      <div class="form-group">
-        <label>Horário</label>
-        <select id="horario-reserva">
-          <option value="19:00">19:00</option><option value="19:30">19:30</option>
-          <option value="20:00">20:00</option><option value="20:30">20:30</option>
-          <option value="21:00">21:00</option><option value="21:30">21:30</option>
-          <option value="22:00">22:00</option>
-        </select>
+<!-- MAIN -->
+<main class="max-w-7xl mx-auto px-4 py-8">
+
+  <!-- ===== CARDÁPIO ===== -->
+  <section id="section-cardapio" class="fade-in">
+    <!-- Periodo selector -->
+    <div class="flex items-center gap-3 mb-6">
+      <button onclick="setPeriodo('almoco')" id="btn-almoco" class="period-btn active font-bold px-6 py-2 rounded-full text-sm">☀️ Almoço</button>
+      <button onclick="setPeriodo('jantar')" id="btn-jantar" class="period-btn font-bold px-6 py-2 rounded-full text-sm">🌙 Jantar</button>
+      <div id="modo-info" class="ml-auto text-xs text-gray-500 hidden"></div>
+    </div>
+
+    <!-- Sugestão do chef -->
+    <div id="sugestao-card" class="hidden mb-6 rounded-2xl border border-amber-700/40 bg-amber-950/20 p-5 flex items-center gap-4">
+      <div class="text-4xl">👨‍🍳</div>
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-amber-400 font-extrabold text-sm">Sugestão do Chef</span>
+          <span id="sugestao-desconto" class="sugestao-badge">-10%</span>
+        </div>
+        <p id="sugestao-nome" class="text-white font-bold text-base"></p>
+        <p id="sugestao-desc" class="text-gray-400 text-xs mt-0.5"></p>
       </div>
-      <div class="form-group"><label>Número de Pessoas</label><input type="number" id="num-pessoas" min="1" max="20" value="2"/></div>
-      <div class="form-group">
-        <label>Mesa Disponível</label>
-        <select id="mesa-select"><option value="">— Consulte primeiro —</option></select>
-      </div>
-      <div style="display:flex;gap:.6rem;flex-wrap:wrap">
-        <button class="btn btn-secondary btn-sm" onclick="consultarMesas()">🔍 Consultar Mesas</button>
-        <button class="btn btn-verde btn-sm" onclick="fazerReserva()">✅ Confirmar Reserva</button>
+      <div class="text-right">
+        <p id="sugestao-preco-orig" class="text-gray-500 line-through text-xs"></p>
+        <p id="sugestao-preco-final" class="text-emerald-400 font-extrabold text-lg"></p>
+        <button id="sugestao-btn" onclick="" class="btn-primary text-white font-bold px-4 py-1.5 rounded-full text-xs mt-1">Adicionar</button>
       </div>
     </div>
-    <div id="reserva-login-aviso" class="aviso-warn" style="flex:1;min-width:265px">
-      <p>🔒 Faça login para consultar mesas e criar reservas.</p>
-      <button class="btn btn-verde btn-sm" onclick="window.location.href='/login.html'">Entrar / Cadastrar</button>
+
+    <!-- Grid de itens -->
+    <div id="cardapio-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="col-span-3 text-center py-12 text-gray-500">Carregando cardápio...</div>
     </div>
-    <div style="flex:1;min-width:245px">
-      <h3 style="margin-bottom:.85rem;color:var(--verde-escuro);font-size:.98rem">Minhas Reservas</h3>
-      <div id="lista-reservas"><p style="color:#888;font-size:.87rem">Faça login para ver suas reservas.</p></div>
+  </section>
+
+  <!-- ===== RESERVA ===== -->
+  <section id="section-reserva" class="hidden fade-in max-w-xl mx-auto">
+    <h2 class="text-2xl font-extrabold text-white mb-2">📅 Reservar Mesa</h2>
+    <div class="inline-flex items-center gap-2 bg-emerald-900/30 border border-emerald-700/30 rounded-full px-3 py-1 mb-6 text-emerald-400 text-xs font-medium">
+      🌙 Reservas disponíveis somente para o Jantar · Mínimo 1 dia de antecedência
     </div>
+
+    <!-- Formulário nova reserva -->
+    <div class="bg-bv-card border border-bv-border rounded-3xl p-6 mb-6">
+      <h3 class="font-bold text-emerald-400 mb-4">Nova Reserva</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Data (a partir de amanhã)</label>
+          <input type="date" id="res-data" class="input-field w-full rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">🌙 Horário do Jantar</label>
+          <select id="res-horario" class="select-field">
+            <option value="19:00">19:00</option>
+            <option value="19:30">19:30</option>
+            <option value="20:00">20:00</option>
+            <option value="20:30">20:30</option>
+            <option value="21:00">21:00</option>
+            <option value="21:30">21:30</option>
+            <option value="22:00">22:00</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Número de Pessoas</label>
+          <input type="number" id="res-pessoas" min="1" max="20" value="2" class="input-field w-full rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Mesa Disponível</label>
+          <select id="res-mesa" class="select-field">
+            <option value="">Selecione data e horário, depois clique em Buscar</option>
+          </select>
+        </div>
+        <button onclick="verificarMesas()" class="w-full bg-bv-border hover:bg-bv-hover text-white font-bold py-2.5 rounded-full text-sm border border-bv-border2 transition-colors">
+          🔍 Buscar Mesas Disponíveis
+        </button>
+        <button onclick="criarReserva()" id="btn-reservar" class="btn-primary w-full text-white font-extrabold py-3 rounded-full text-sm">
+          ✅ Confirmar Reserva
+        </button>
+      </div>
+    </div>
+
+    <!-- Minhas reservas -->
+    <div id="minhas-reservas-box" class="hidden">
+      <h3 class="font-bold text-white mb-3">Minhas Reservas</h3>
+      <div id="minhas-reservas-list" class="space-y-3"></div>
+    </div>
+  </section>
+
+  <!-- ===== MEUS PEDIDOS ===== -->
+  <section id="section-meus-pedidos" class="hidden fade-in">
+    <h2 class="text-2xl font-extrabold text-white mb-6">📦 Meus Pedidos</h2>
+    <div id="pedidos-list" class="space-y-4">
+      <div class="text-center py-12 text-gray-500">Carregando pedidos...</div>
+    </div>
+  </section>
+
+</main>
+
+<!-- CART DRAWER -->
+<div id="cart-overlay" class="drawer-overlay" onclick="toggleCart()"></div>
+<aside id="cart-drawer" class="drawer">
+  <div class="flex items-center justify-between p-5 border-b border-bv-border">
+    <h2 class="text-lg font-extrabold text-white">🛒 Carrinho</h2>
+    <button onclick="toggleCart()" class="text-gray-400 hover:text-white text-2xl leading-none">×</button>
   </div>
-</section>
 
-<!-- MEUS PEDIDOS -->
-<section id="meus-pedidos">
-  <h2 class="section-titulo">Meus Pedidos</h2>
-  <p class="section-sub">Histórico completo dos seus pedidos realizados.</p>
-  <div id="lista-pedidos">
-    <div class="aviso-warn">
-      <p>🔒 Faça login para ver seu histórico de pedidos.</p>
-      <button class="btn btn-verde btn-sm" onclick="window.location.href='/login.html'">Entrar / Cadastrar</button>
-    </div>
+  <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-3">
+    <p class="text-gray-500 text-sm text-center py-8">Seu carrinho está vazio</p>
   </div>
-</section>
 
-<div id="toast" class="toast"></div>
-
-<div class="carrinho-fixo" onclick="abrirCarrinho()">
-  🛒 <div class="badge" id="carrinho-badge">0</div>
-  <span id="carrinho-total-nav">R$ 0,00</span>
-</div>
-
-<div class="modal-overlay" id="modal-carrinho">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 style="font-size:1.08rem">🛒 Finalizar Pedido</h2>
-      <button class="modal-fechar" onclick="fecharCarrinho()">✕</button>
+  <div class="p-5 border-t border-bv-border space-y-4">
+    <div class="flex justify-between items-center">
+      <span class="text-gray-400 text-sm">Subtotal</span>
+      <span id="cart-subtotal" class="text-white font-bold">R$ 0,00</span>
     </div>
-    <div id="carrinho-lista"></div>
-    <div id="carrinho-total"></div>
-    <div id="area-confirmar-pedido" style="margin-top:.85rem"></div>
-  </div>
-</div>
 
-<footer><p>© 2025 <strong>Restaurante Bella Vista</strong> — Todos os direitos reservados.</p></footer>
+    <!-- Tipo de atendimento -->
+    <div>
+      <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Tipo de Atendimento</label>
+      <select id="tipo-atendimento" onchange="onTipoChange()" class="select-field">
+        <option value="Presencial">🪑 Presencial</option>
+        <option value="DeliveryProprio">🛵 Delivery Próprio</option>
+        <option value="DeliveryAplicativo">📱 Delivery por Aplicativo</option>
+      </select>
+    </div>
+
+    <!-- Campos dinâmicos -->
+    <div id="campo-mesa" class="space-y-1">
+      <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Número da Mesa</label>
+      <input type="number" id="numero-mesa" min="1" max="100" placeholder="Ex: 5"
+        class="input-field w-full rounded-xl px-4 py-2.5 text-sm" />
+    </div>
+    <div id="campo-endereco" class="space-y-1 hidden">
+      <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Endereço de Entrega</label>
+      <input type="text" id="endereco-entrega" placeholder="Rua, número, complemento"
+        class="input-field w-full rounded-xl px-4 py-2.5 text-sm" />
+    </div>
+    <div id="campo-app" class="space-y-1 hidden">
+      <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Nome do Aplicativo</label>
+      <input type="text" id="nome-aplicativo" placeholder="Ex: iFood, Rappi..."
+        class="input-field w-full rounded-xl px-4 py-2.5 text-sm" />
+    </div>
+
+    <!-- Período -->
+    <div>
+      <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Período do Pedido</label>
+      <select id="periodo-pedido" class="select-field">
+        <option value="Almoco">☀️ Almoço</option>
+        <option value="Jantar">🌙 Jantar</option>
+      </select>
+    </div>
+
+    <button onclick="finalizarPedido()" class="btn-primary w-full text-white font-extrabold py-3.5 rounded-full text-sm">
+      ✅ Finalizar Pedido
+    </button>
+  </div>
+</aside>
+
+<div id="toast"></div>
 
 <script>
-const api={
-  async get(url){try{const r=await fetch('/api'+url,{credentials:'include',headers:{'Accept':'application/json'}});let d=null;try{d=await r.json();}catch(_){}return{ok:r.ok,status:r.status,data:d};}catch(e){return null;}},
-  async post(url,body){try{const r=await fetch('/api'+url,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(body)});let d=null;try{d=await r.json();}catch(_){}return{ok:r.ok,status:r.status,data:d};}catch(e){return null;}}
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const api = {
+  async get(url) {
+    const r = await fetch('/api' + url, { credentials:'include', headers:{'Accept':'application/json'} });
+    const data = r.status === 204 ? null : await r.json().catch(() => null);
+    return { ok: r.ok, status: r.status, data };
+  },
+  async post(url, body) {
+    const r = await fetch('/api' + url, { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const data = await r.json().catch(() => null);
+    return { ok: r.ok, status: r.status, data };
+  },
+  async del(url) {
+    const r = await fetch('/api' + url, { method:'DELETE', credentials:'include' });
+    const data = await r.json().catch(() => null);
+    return { ok: r.ok, status: r.status, data };
+  }
 };
-function mostrarToast(msg,tipo='sucesso'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(tipo==='erro'?'toast-erro':'toast-sucesso');void t.offsetWidth;t.classList.add('visivel');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('visivel'),3500);}
-function fmt(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);}
-function fmtData(s){if(!s)return'';return new Date(s).toLocaleDateString('pt-BR');}
-function fmtDH(s){if(!s)return'';const d=new Date(s);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
 
-let usuarioLogado=null,abaPeriodo=1,sugestaoIdAtual=null,itensAtual=[],carrinho=[];
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let carrinho = JSON.parse(sessionStorage.getItem('bv_carrinho') || '[]');
+let cardapioItens = [];
+let sugestaoAtual = null;
+let periodoAtual = 'almoco';
+let modoAtual = '';
+let usuarioLogado = null;
+let cartOpen = false;
 
-function salvarCarrinho(){ sessionStorage.setItem('bv_carrinho', JSON.stringify(carrinho)); }
-function adicionarAoCarrinho(item,ehSugestao){
-  const pf=ehSugestao?item.precoBase*.8:item.precoBase;
-  const ex=carrinho.find(c=>c.id===item.id);
-  if(ex){ex.quantidade++;}else{carrinho.push({id:item.id,nome:item.nome,precoBase:item.precoBase,precoFinal:pf,ehSugestao,quantidade:1});}
-  atualizarBadge();mostrarToast(item.nome+' adicionado!');atualizarCarrinhoInline();
+function salvarCarrinho() {
+  sessionStorage.setItem('bv_carrinho', JSON.stringify(carrinho));
+  atualizarCartUI();
 }
-function removerDoCarrinho(id){const i=carrinho.findIndex(c=>c.id===id);if(i===-1)return;if(carrinho[i].quantidade>1)carrinho[i].quantidade--;else carrinho.splice(i,1);atualizarBadge();renderizarCarrinho();atualizarCarrinhoInline();}
-function limparCarrinho(){carrinho=[];sessionStorage.removeItem('bv_carrinho');atualizarBadge();}
-function totalCarrinho(){return carrinho.reduce((s,c)=>s+c.precoFinal*c.quantidade,0);}
-function atualizarBadge(){const n=carrinho.reduce((s,c)=>s+c.quantidade,0);document.getElementById('carrinho-badge').textContent=n;document.getElementById('carrinho-total-nav').textContent=n>0?fmt(totalCarrinho()):'R$ 0,00';}
-function atualizarCarrinhoInline(){
-  const l=document.getElementById('carrinho-lista-inline'),t=document.getElementById('carrinho-total-inline');
-  if(!carrinho.length){l.innerHTML='<p style="color:#888;font-size:.87rem">Nenhum item.</p>';t.innerHTML='';return;}
-  l.innerHTML=carrinho.map(c=>`<div class="carrinho-item"><span>${c.nome} ×${c.quantidade}</span><strong>${fmt(c.precoFinal*c.quantidade)}</strong></div>`).join('');
-  t.innerHTML=`<div class="carrinho-total-row"><span>Total</span><strong>${fmt(totalCarrinho())}</strong></div>`;
+function limparCarrinho() {
+  carrinho = [];
+  sessionStorage.removeItem('bv_carrinho');
+  atualizarCartUI();
 }
-function renderizarCarrinho(){
-  const l=document.getElementById('carrinho-lista'),te=document.getElementById('carrinho-total'),ac=document.getElementById('area-confirmar-pedido');
-  if(!carrinho.length){l.innerHTML='<p style="color:#888;text-align:center;padding:1.1rem">Carrinho vazio!</p>';te.innerHTML='';ac.innerHTML='';return;}
-  l.innerHTML=carrinho.map(c=>`<div class="carrinho-item"><div><span class="carrinho-nome">${c.nome}</span>${c.ehSugestao?'<span class="badge-mini">⭐</span>':''}<div class="carrinho-preco">${fmt(c.precoFinal)} ×${c.quantidade}</div></div><div style="display:flex;align-items:center;gap:.35rem"><span style="font-weight:700;color:var(--verde-escuro)">${fmt(c.precoFinal*c.quantidade)}</span><button class="btn-remover" onclick="removerDoCarrinho(${c.id})">−</button></div></div>`).join('');
-  te.innerHTML=`<div class="carrinho-total-row"><span>Subtotal</span><strong>${fmt(totalCarrinho())}</strong></div><p style="font-size:.75rem;color:#888;margin-top:.28rem">+ taxa de entrega ao confirmar</p>`;
-  const tipo=document.getElementById('tipo-atendimento').value;
-  if(tipo!=='Presencial'&&!usuarioLogado){
-    ac.innerHTML=`<div class="aviso-warn"><p>Delivery exige login.</p><button class="btn btn-verde btn-sm" onclick="window.location.href='/login.html'">Entrar</button></div>`;
-  }else{
-    ac.innerHTML=`<div style="display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.35rem"><button class="btn btn-verde" style="flex:1" onclick="finalizarPedido()">✅ Confirmar Pedido</button><button class="btn btn-sm btn-danger" onclick="limparCarrinho();renderizarCarrinho();atualizarCarrinhoInline()">Limpar</button></div>`;
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + (type || 'success');
+  setTimeout(() => { t.className = ''; }, 3000);
+}
+
+// ─── NAV ─────────────────────────────────────────────────────────────────────
+function showSection(name) {
+  ['cardapio','reserva','meus-pedidos'].forEach(s => {
+    document.getElementById('section-'+s).classList.add('hidden');
+    const btn = document.getElementById('nav-'+s.replace('-pedidos','-pedidos').replace('meus-pedidos','pedidos'));
+    if (btn) { btn.classList.remove('active'); btn.classList.add('text-gray-400'); btn.classList.remove('text-white'); }
+  });
+  document.getElementById('section-'+name).classList.remove('hidden');
+  const activeBtn = document.getElementById('nav-' + (name === 'meus-pedidos' ? 'pedidos' : name));
+  if (activeBtn) { activeBtn.classList.add('active'); activeBtn.classList.remove('text-gray-400'); activeBtn.classList.add('text-white'); }
+
+  if (name === 'meus-pedidos') carregarMeusPedidos();
+  if (name === 'reserva') carregarMinhasReservas();
+}
+
+// ─── PERIODO ─────────────────────────────────────────────────────────────────
+function setPeriodo(p) {
+  periodoAtual = p;
+  document.getElementById('btn-almoco').classList.toggle('active', p==='almoco');
+  document.getElementById('btn-jantar').classList.toggle('active', p==='jantar');
+  document.getElementById('periodo-pedido').value = p === 'almoco' ? 'Almoco' : 'Jantar';
+  carregarCardapio();
+}
+
+// ─── CARDÁPIO ────────────────────────────────────────────────────────────────
+async function carregarCardapio() {
+  const grid = document.getElementById('cardapio-grid');
+  grid.innerHTML = '<div class="col-span-3 text-center py-12 text-gray-500">Carregando...</div>';
+  try {
+    // API retorna { itens: [...], sugestao: { itemCardapioId, percentualDesconto, precoFinal } | null }
+    const endpoint = periodoAtual === 'almoco' ? '/cardapio/almoco' : '/cardapio/jantar';
+    const r = await api.get(endpoint);
+    if (!r.ok) throw new Error('Erro ' + r.status);
+    cardapioItens = r.data?.itens || [];
+    // sugestao: monta objeto com as infos do item correspondente
+    const sug = r.data?.sugestao;
+    if (sug) {
+      const itemSug = cardapioItens.find(i => i.id === sug.itemCardapioId);
+      sugestaoAtual = itemSug ? { ...itemSug, ...sug, itemNome: itemSug.nome } : null;
+    } else {
+      sugestaoAtual = null;
+    }
+    renderSugestao();
+    renderCardapio();
+  } catch (e) {
+    grid.innerHTML = '<div class="col-span-3 text-center py-12 text-red-400">Erro ao carregar cardápio.</div>';
   }
 }
-function abrirCarrinho(){renderizarCarrinho();document.getElementById('modal-carrinho').classList.add('aberto');}
-function fecharCarrinho(){document.getElementById('modal-carrinho').classList.remove('aberto');}
 
-async function verificarLogin(){
-  const r=await api.get('/auth/me');
-  if(r&&r.ok){
-    usuarioLogado=r.data;
-    document.getElementById('nav-nome').textContent='Olá, '+r.data.nome;
-    document.getElementById('btn-login-nav').style.display='none';
-    document.getElementById('btn-logout-nav').style.display='';
-    // Verifica admin via roles retornadas pelo /auth/me
-    if(r.data.roles&&r.data.roles.includes('Admin'))
-      document.getElementById('link-relatorio').style.display='';
-    // Exibe seções restritas (reserva e meus pedidos)
-    document.getElementById('form-reserva-container').style.display='';
-    document.getElementById('reserva-login-aviso').style.display='none';
-    await carregarReservas();
-    await carregarMeusPedidos();
-  }
+function renderSugestao() {
+  const card = document.getElementById('sugestao-card');
+  if (!sugestaoAtual) { card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  const nome = sugestaoAtual.nome || sugestaoAtual.itemNome || '';
+  document.getElementById('sugestao-nome').textContent = nome;
+  document.getElementById('sugestao-desc').textContent = sugestaoAtual.descricao || '';
+  const desc = sugestaoAtual.percentualDesconto || 20;
+  document.getElementById('sugestao-desconto').textContent = '-' + desc + '%';
+  const orig = sugestaoAtual.precoBase || 0;
+  const precoFinal = sugestaoAtual.precoFinal || (orig * (1 - desc/100));
+  document.getElementById('sugestao-preco-orig').textContent = 'R$ ' + orig.toFixed(2).replace('.',',');
+  document.getElementById('sugestao-preco-final').textContent = 'R$ ' + precoFinal.toFixed(2).replace('.',',');
+  document.getElementById('sugestao-btn').onclick = () => adicionarAoCarrinho(sugestaoAtual.itemCardapioId || sugestaoAtual.id, nome, precoFinal);
 }
-async function fazerLogout(){await api.post('/auth/logout',{});window.location.reload();}
 
-async function carregarCardapio(periodo){
-  const g=document.getElementById('cardapio-grid');
-  g.innerHTML='<p style="color:#888">Carregando...</p>';
-  const r=await api.get('/cardapio/'+periodo);
-  if(!r||!r.ok){g.innerHTML='<p style="color:red">Erro.</p>';return;}
-  itensAtual=r.data.itens;sugestaoIdAtual=r.data.sugestaoId;abaPeriodo=periodo==='almoco'?1:2;
-  if(!itensAtual.length){g.innerHTML='<p>Nenhum item.</p>';return;}
-  g.innerHTML=itensAtual.map(item=>{
-    const es=item.id===sugestaoIdAtual,pf=es?item.precoBase*.8:item.precoBase;
-    return `<div class="card-item ${es?'sugestao':''}">${es?'<span class="badge-sugestao">⭐ Sugestão do Chefe — 20% OFF</span>':''}<h3>${item.nome}</h3><p>${item.descricao}</p><div class="card-preco"><div>${es?`<span class="preco-original">${fmt(item.precoBase)}</span>`:''}<span class="preco-final">${fmt(pf)}</span></div><button class="btn btn-verde btn-sm" onclick='adicionarAoCarrinho(${JSON.stringify(item)},${es})'>+ Adicionar</button></div></div>`;
-  }).join('');
-}
-function trocarAba(periodo,btn){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('ativo'));btn.classList.add('ativo');carregarCardapio(periodo);}
-function atualizarCamposAtendimento(){
-  const t=document.getElementById('tipo-atendimento').value;
-  document.getElementById('campo-mesa').style.display=t==='Presencial'?'':'none';
-  document.getElementById('campo-endereco').style.display=t!=='Presencial'?'':'none';
-  document.getElementById('campo-app').style.display=t==='DeliveryAplicativo'?'':'none';
-  document.getElementById('aviso-login-delivery').style.display=(t!=='Presencial'&&!usuarioLogado)?'':'none';
-}
-async function finalizarPedido(){
-  if(!carrinho.length){mostrarToast('Carrinho vazio!','erro');return;}
-  const tipo=document.getElementById('tipo-atendimento').value;
-  if(tipo!=='Presencial'&&!usuarioLogado){mostrarToast('Faça login para delivery!','erro');return;}
-  if(tipo==='Presencial'){
-    const mesa=parseInt(document.getElementById('numero-mesa').value);
-    if(!mesa||mesa<1||mesa>30){mostrarToast('Informe um número de mesa válido (1–30).','erro');return;}
+function renderCardapio() {
+  const grid = document.getElementById('cardapio-grid');
+  if (!cardapioItens.length) {
+    grid.innerHTML = '<div class="col-span-3 text-center py-12 text-gray-500">Nenhum item disponível para este período.</div>';
+    return;
   }
-  if(tipo!=='Presencial'&&!document.getElementById('endereco-entrega').value.trim()){
-    mostrarToast('Informe o endereço de entrega.','erro');return;
-  }
-  const body={periodo:abaPeriodo,tipoAtendimento:tipo,itens:carrinho.map(c=>({itemId:c.id,quantidade:c.quantidade}))};
-  if(tipo==='Presencial')body.numeroMesa=parseInt(document.getElementById('numero-mesa').value)||null;
-  if(tipo!=='Presencial')body.enderecoEntrega=document.getElementById('endereco-entrega').value;
-  if(tipo==='DeliveryAplicativo')body.nomeAplicativo=document.getElementById('nome-app').value;
-  const r=await api.post('/pedido',body);
-  if(!r)return;
-  if(!r.ok){mostrarToast(r.data?.toString()||'Erro.','erro');return;}
-  mostrarToast(`Pedido #${r.data.pedidoId} confirmado! Total: ${fmt(r.data.total)}`);
-  limparCarrinho();fecharCarrinho();atualizarCarrinhoInline();
-  if(usuarioLogado)await carregarMeusPedidos();
-}
-async function consultarMesas(){
-  if(!usuarioLogado){mostrarToast('Faça login para reservar.','erro');return;}
-  const data=document.getElementById('data-reserva').value;
-  const horario=document.getElementById('horario-reserva').value;
-  if(!data){mostrarToast('Informe a data.','erro');return;}
-  const r=await api.get(`/reserva/mesas-disponiveis?data=${data}&horario=${horario}`);
-  const sel=document.getElementById('mesa-select');
-  if(!r||!r.ok||!r.data.length){sel.innerHTML='<option value="">Nenhuma mesa disponível</option>';mostrarToast('Nenhuma mesa disponível.','erro');return;}
-  sel.innerHTML=r.data.map(m=>`<option value="${m.id}">Mesa ${m.numero} (${m.capacidade} pessoas)</option>`).join('');
-  mostrarToast(`${r.data.length} mesa(s) disponível(is)!`);
-}
-async function fazerReserva(){
-  if(!usuarioLogado){mostrarToast('Faça login para reservar.','erro');return;}
-  const mesaId=document.getElementById('mesa-select').value;
-  if(!mesaId){mostrarToast('Consulte as mesas disponíveis primeiro clicando em "🔍 Consultar Mesas".','erro');return;}
-  const data=document.getElementById('data-reserva').value;
-  const horario=document.getElementById('horario-reserva').value;
-  const numPessoas=document.getElementById('num-pessoas').value;
-  const r=await api.post('/reserva',{mesaId:parseInt(mesaId),dataReserva:data,horario,numeroPessoas:parseInt(numPessoas)});
-  if(!r)return;
-  if(!r.ok){mostrarToast(r.data?.toString()||'Erro na reserva.','erro');return;}
-  mostrarToast('✅ '+r.data.mensagem);
-  document.getElementById('mesa-select').innerHTML='<option value="">— Consulte primeiro —</option>';
-  await carregarReservas();
-}
-async function cancelarPedido(id){
-  if(!confirm('Cancelar o pedido #'+id+'?')) return;
-  const r=await api.del('/pedido/'+id);
-  if(!r||!r.ok){mostrarToast(r?.data?.toString()||'Erro ao cancelar.','erro');return;}
-  mostrarToast('Pedido #'+id+' cancelado.');
-  await carregarMeusPedidos();
-}
-async function carregarReservas(){
-  const r=await api.get('/reserva/minhas-reservas');
-  const l=document.getElementById('lista-reservas');
-  if(!r||!r.ok||!r.data.length){l.innerHTML='<p style="color:#888;font-size:.87rem">Nenhuma reserva encontrada.</p>';return;}
-  l.innerHTML=r.data.map(res=>{
-    const podeCancelar=res.status===0; // StatusReserva.Confirmada=0
-    return `<div class="card-reserva" style="${res.status===1?'opacity:.6':''}">
-      <h4>Mesa ${res.mesa?.numero??'?'} — ${fmtData(res.dataReserva)}</h4>
-      <p>${res.horarioInicio?.substring(0,5)} · ${res.numeroPessoas} pessoa(s) · <strong>${res.statusDesc}</strong></p>
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.35rem">
-        <div class="codigo-confirmacao">Código: ${res.codigoConfirmacao}</div>
-        ${podeCancelar?`<button class="btn btn-sm" style="background:#fee2e2;color:#b91c1c;border:none;padding:.25rem .7rem;border-radius:50px;cursor:pointer;font-size:.78rem" onclick="cancelarReserva(${res.id})">✕ Cancelar</button>`:''}
+  grid.innerHTML = cardapioItens.map(item => {
+    const isSug = sugestaoAtual && (sugestaoAtual.itemCardapioId === item.id || sugestaoAtual.id === item.id);
+    const precoFinalSug = sugestaoAtual?.precoFinal || (item.precoBase * (1 - (sugestaoAtual?.percentualDesconto || 20)/100));
+    const preco = isSug ? precoFinalSug : item.precoBase;
+    const noCarrinho = carrinho.find(c => c.id === item.id);
+    return `<div class="card-item p-5 flex flex-col gap-3">
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-1">
+            <h3 class="font-extrabold text-white text-base">${item.nome}</h3>
+            ${isSug ? '<span class="sugestao-badge">Chef ⭐</span>' : ''}
+          </div>
+          <p class="text-gray-500 text-xs leading-relaxed">${item.descricao || ''}</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-between mt-auto pt-2 border-t border-bv-border">
+        <div>
+          ${isSug ? `<p class="text-gray-600 line-through text-xs">R$ ${item.precoBase.toFixed(2).replace('.',',')}</p>` : ''}
+          <p class="text-emerald-400 font-extrabold text-lg">R$ ${preco.toFixed(2).replace('.',',')}</p>
+        </div>
+        ${noCarrinho
+          ? `<div class="flex items-center gap-2">
+              <button onclick="alterarQtd(${item.id},-1)" class="w-8 h-8 rounded-full border border-bv-border2 text-white hover:bg-bv-hover flex items-center justify-center font-bold">−</button>
+              <span class="text-white font-bold w-4 text-center">${noCarrinho.quantidade}</span>
+              <button onclick="alterarQtd(${item.id},1)" class="w-8 h-8 rounded-full bg-emerald-700 hover:bg-emerald-600 text-white flex items-center justify-center font-bold">+</button>
+            </div>`
+          : `<button onclick="adicionarAoCarrinho(${item.id}, '${item.nome.replace(/'/g,"\\'")}', ${preco})" class="btn-primary text-white font-bold px-4 py-2 rounded-full text-sm">+ Adicionar</button>`
+        }
       </div>
     </div>`;
   }).join('');
 }
-async function cancelarReserva(id){
-  if(!confirm('Cancelar esta reserva?')) return;
-  const r=await api.del('/reserva/'+id);
-  if(!r||!r.ok){mostrarToast(r?.data?.toString()||'Erro ao cancelar.','erro');return;}
-  mostrarToast('Reserva cancelada.');
-  await carregarReservas();
-}
-async function carregarMeusPedidos(){
-  if(!usuarioLogado)return;
-  const r=await api.get('/pedido/meus-pedidos');
-  const l=document.getElementById('lista-pedidos');
-  if(!r||!r.ok||!r.data.length){l.innerHTML='<p style="color:#888;font-size:.87rem">Nenhum pedido encontrado.</p>';return;}
-  const tl={Presencial:'🪑 Presencial',DeliveryProprio:'🛵 Delivery Próprio',DeliveryAplicativo:'📱 Aplicativo'};
-  const sc={EmPreparo:'preparando',Cancelado:'cancelado'};
-  l.innerHTML=r.data.map(p=>{
-    const podeCancelar = p.status===0; // StatusPedido.Pendente = 0
-    return `<div class="card-pedido">
-      <div class="pedido-header">
-        <span class="pedido-id">Pedido #${p.pedidoId} — ${tl[p.tipoAtendimento]||p.tipoAtendimento}</span>
-        <span class="pedido-status ${sc[p.status]||''}">${p.statusDesc}</span>
-      </div>
-      <div class="pedido-itens">${p.itens.map(i=>`${i.nome} ×${i.quantidade}${i.sugestao?' ⭐':''}`).join(' · ')}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.35rem">
-        <span style="font-size:.77rem;color:var(--cinza)">${p.fmtDH}</span>
-        <strong style="color:var(--verde-escuro)">${fmt(p.total)}</strong>
-        ${podeCancelar?`<button class="btn btn-sm" style="background:#fee2e2;color:#b91c1c;border:none;padding:.3rem .75rem;border-radius:50px;cursor:pointer;font-size:.78rem" onclick="cancelarPedido(${p.pedidoId})">✕ Cancelar</button>`:''}
-      </div>
-    </div>`;
-  }).join('');
-}
-function aplicarModo(){
-  const p=new URLSearchParams(window.location.search),modo=p.get('modo');
-  const badge=document.getElementById('modo-badge');
-  const secReserva=document.getElementById('reserva');
-  const navReserva=document.querySelector('a[href="#reserva"]');
-  const heroBtnReserva=document.querySelector('a[href="#reserva"].btn');
 
-  if(modo==='presencial'){
-    badge.textContent='🪑 Modo: Estou no Restaurante';
-    document.getElementById('tipo-atendimento').value='Presencial';
-    atualizarCamposAtendimento();
-    // Quem está no restaurante não precisa reservar mesa
-    if(secReserva) secReserva.style.display='none';
-    if(navReserva) navReserva.style.display='none';
-    if(heroBtnReserva) heroBtnReserva.style.display='none';
-    setTimeout(()=>document.getElementById('cardapio').scrollIntoView({behavior:'smooth'}),300);
-  } else if(modo==='delivery'){
-    badge.textContent='🛵 Modo: Delivery';
-    document.getElementById('tipo-atendimento').value='DeliveryProprio';
-    atualizarCamposAtendimento();
-    // Delivery também não precisa de reserva
-    if(secReserva) secReserva.style.display='none';
-    if(navReserva) navReserva.style.display='none';
-    if(heroBtnReserva) heroBtnReserva.style.display='none';
-    setTimeout(()=>document.getElementById('pedido').scrollIntoView({behavior:'smooth'}),300);
-  } else if(modo==='reserva'){
-    badge.textContent='📅 Modo: Reservar Mesa';
-    setTimeout(()=>document.getElementById('reserva').scrollIntoView({behavior:'smooth'}),400);
+// ─── CARRINHO ─────────────────────────────────────────────────────────────────
+function adicionarAoCarrinho(id, nome, preco) {
+  const idx = carrinho.findIndex(c => c.id === id);
+  if (idx >= 0) carrinho[idx].quantidade++;
+  else carrinho.push({ id, nome, preco, quantidade: 1 });
+  salvarCarrinho();
+  showToast('✅ ' + nome + ' adicionado!', 'success');
+  renderCardapio();
+}
+
+function alterarQtd(id, delta) {
+  const idx = carrinho.findIndex(c => c.id === id);
+  if (idx < 0) return;
+  carrinho[idx].quantidade += delta;
+  if (carrinho[idx].quantidade <= 0) carrinho.splice(idx, 1);
+  salvarCarrinho();
+  renderCardapio();
+}
+
+function removerDoCarrinho(id) {
+  carrinho = carrinho.filter(c => c.id !== id);
+  salvarCarrinho();
+  renderCardapio();
+}
+
+function atualizarCartUI() {
+  const total = carrinho.reduce((s, c) => s + c.preco * c.quantidade, 0);
+  const count = carrinho.reduce((s, c) => s + c.quantidade, 0);
+
+  const badge = document.getElementById('cart-count-badge');
+  if (count > 0) { badge.textContent = count; badge.classList.remove('hidden'); }
+  else badge.classList.add('hidden');
+
+  document.getElementById('cart-subtotal').textContent = 'R$ ' + total.toFixed(2).replace('.',',');
+
+  const el = document.getElementById('cart-items');
+  if (!carrinho.length) {
+    el.innerHTML = '<p class="text-gray-500 text-sm text-center py-8">Seu carrinho está vazio</p>';
+    return;
+  }
+  el.innerHTML = carrinho.map(c => `
+    <div class="flex items-center gap-3 bg-bv-hover rounded-2xl p-3">
+      <div class="flex-1">
+        <p class="font-bold text-white text-sm">${c.nome}</p>
+        <p class="text-emerald-400 text-xs font-bold">R$ ${c.preco.toFixed(2).replace('.',',')} × ${c.quantidade}</p>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <button onclick="alterarQtd(${c.id},-1)" class="w-7 h-7 rounded-full border border-bv-border2 text-white hover:bg-bv-border flex items-center justify-center text-sm font-bold">−</button>
+        <span class="text-white font-bold w-5 text-center text-sm">${c.quantidade}</span>
+        <button onclick="alterarQtd(${c.id},1)" class="w-7 h-7 rounded-full bg-emerald-700 hover:bg-emerald-600 text-white flex items-center justify-center text-sm font-bold">+</button>
+        <button onclick="removerDoCarrinho(${c.id})" class="w-7 h-7 rounded-full text-red-400 hover:bg-red-900/30 flex items-center justify-center text-sm ml-1">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function toggleCart() {
+  cartOpen = !cartOpen;
+  document.getElementById('cart-drawer').classList.toggle('open', cartOpen);
+  document.getElementById('cart-overlay').style.display = cartOpen ? 'block' : 'none';
+}
+
+function onTipoChange() {
+  const tipo = document.getElementById('tipo-atendimento').value;
+  document.getElementById('campo-mesa').classList.toggle('hidden', tipo !== 'Presencial');
+  document.getElementById('campo-endereco').classList.toggle('hidden', tipo === 'Presencial' || tipo === 'DeliveryAplicativo');
+  document.getElementById('campo-app').classList.toggle('hidden', tipo !== 'DeliveryAplicativo');
+  // address visible for both delivery types
+  if (tipo !== 'Presencial') {
+    document.getElementById('campo-endereco').classList.remove('hidden');
   }
 }
-document.addEventListener('DOMContentLoaded',async()=>{
-  await verificarLogin();
-  // RF22: seleciona aba automaticamente pelo horário atual
+
+async function finalizarPedido() {
+  if (!carrinho.length) { showToast('❌ Carrinho vazio!', 'error'); return; }
+  const tipo = document.getElementById('tipo-atendimento').value;
+  const periodo = document.getElementById('periodo-pedido').value;
+  const isDelivery = tipo === 'DeliveryProprio' || tipo === 'DeliveryAplicativo';
+
+  if (isDelivery && !usuarioLogado) {
+    showToast('❌ Faça login para delivery!', 'error');
+    setTimeout(() => location.href = '/login.html', 1000);
+    return;
+  }
+
+  if (tipo === 'Presencial') {
+    const mesa = document.getElementById('numero-mesa').value;
+    if (!mesa || parseInt(mesa) < 1) { showToast('❌ Informe o número da mesa!', 'error'); return; }
+  }
+  if (isDelivery) {
+    const end = document.getElementById('endereco-entrega').value.trim();
+    if (!end) { showToast('❌ Informe o endereço de entrega!', 'error'); return; }
+  }
+
+  const body = {
+    tipoAtendimento: tipo,
+    periodo,
+    itens: carrinho.map(c => ({ itemId: c.id, quantidade: c.quantidade })),
+    numeroMesa: tipo === 'Presencial' ? parseInt(document.getElementById('numero-mesa').value) : null,
+    enderecoEntrega: isDelivery ? document.getElementById('endereco-entrega').value.trim() : null,
+    nomeAplicativo: tipo === 'DeliveryAplicativo' ? (document.getElementById('nome-aplicativo').value.trim() || 'Aplicativo') : null
+  };
+
+  const btn = document.querySelector('#cart-drawer button[onclick="finalizarPedido()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+  try {
+    const r = await api.post('/pedido', body);
+    if (r.ok) {
+      showToast('✅ Pedido #' + r.data.pedidoId + ' realizado! ' + r.data.statusDesc, 'success');
+      limparCarrinho();
+      toggleCart();
+      setTimeout(() => showSection('meus-pedidos'), 1200);
+    } else {
+      showToast('❌ ' + (r.data?.message || r.data || 'Erro ao criar pedido'), 'error');
+    }
+  } catch {
+    showToast('❌ Erro de conexão', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Finalizar Pedido'; }
+  }
+}
+
+// ─── MEUS PEDIDOS ────────────────────────────────────────────────────────────
+const statusDesc = ['Pendente','Em Preparo','Saiu p/ Entrega','Pronto p/ Retirada','Finalizado','Cancelado'];
+const statusClass = ['status-0','status-1','status-2','status-3','status-4','status-5'];
+
+async function carregarMeusPedidos() {
+  if (!usuarioLogado) {
+    document.getElementById('pedidos-list').innerHTML = `<div class="text-center py-12 bg-bv-card border border-bv-border rounded-2xl">
+      <p class="text-gray-400 mb-3">Faça login para ver seus pedidos</p>
+      <a href="/login.html" class="btn-primary text-white font-bold px-6 py-2 rounded-full text-sm inline-block">Entrar</a>
+    </div>`;
+    return;
+  }
+  const r = await api.get('/pedido/meus-pedidos');
+  const list = document.getElementById('pedidos-list');
+  if (!r.ok || !r.data?.length) {
+    list.innerHTML = '<div class="text-center py-12 text-gray-500">Nenhum pedido encontrado.</div>';
+    return;
+  }
+  list.innerHTML = r.data.map(p => `
+    <div class="bg-bv-card border border-bv-border rounded-2xl p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <span class="text-white font-extrabold">Pedido #${p.pedidoId}</span>
+          <span class="text-gray-500 text-xs ml-2">${p.fmtDH}</span>
+        </div>
+        <span class="status-badge ${statusClass[p.status] || 'status-4'}">${p.statusDesc || statusDesc[p.status] || ''}</span>
+      </div>
+      <div class="space-y-1 mb-3">
+        ${p.itens.map(i => `<div class="flex justify-between text-sm">
+          <span class="text-gray-300">${i.quantidade}× ${i.nome}${i.sugestao ? ' ⭐' : ''}</span>
+          <span class="text-emerald-400 font-bold">R$ ${(i.preco*i.quantidade).toFixed(2).replace('.',',')}</span>
+        </div>`).join('')}
+      </div>
+      <div class="flex items-center justify-between border-t border-bv-border pt-3">
+        <div>
+          <span class="text-gray-500 text-xs">${p.tipoAtendimento}</span>
+          <span class="text-white font-extrabold ml-4">Total: R$ ${p.total.toFixed(2).replace('.',',')}</span>
+        </div>
+        ${p.status === 0
+          ? `<button onclick="cancelarPedido(${p.pedidoId})" class="btn-danger text-white font-bold px-4 py-1.5 rounded-full text-xs">Cancelar</button>`
+          : ''}
+      </div>
+    </div>`).join('');
+}
+
+async function cancelarPedido(id) {
+  if (!confirm('Cancelar o pedido #' + id + '?')) return;
+  const r = await api.del('/pedido/' + id);
+  if (r.ok) { showToast('✅ Pedido cancelado', 'success'); carregarMeusPedidos(); }
+  else showToast('❌ ' + (r.data?.message || r.data || 'Erro'), 'error');
+}
+
+// ─── RESERVA ─────────────────────────────────────────────────────────────────
+// Reservas somente para jantar, mínimo 1 dia de antecedência
+
+// Define data mínima = amanhã
+function inicializarDataReserva() {
+  const amanha = new Date();
+  amanha.setDate(amanha.getDate() + 1);
+  const minDate = amanha.toISOString().slice(0, 10);
+  const el = document.getElementById('res-data');
+  el.min = minDate;
+  el.value = minDate;
+}
+
+async function verificarMesas() {
+  const data    = document.getElementById('res-data').value;
+  const horario = document.getElementById('res-horario').value;
+  if (!data) { showToast('❌ Selecione uma data', 'error'); return; }
+
+  // Validar antecedência mínima
+  const dataEscolhida = new Date(data + 'T00:00:00');
+  const hoje          = new Date(); hoje.setHours(0,0,0,0);
+  if (dataEscolhida <= hoje) {
+    showToast('❌ Reservas requerem pelo menos 1 dia de antecedência', 'error');
+    return;
+  }
+
+  const r = await api.get('/reserva/mesas-disponiveis?data=' + data + '&horario=' + encodeURIComponent(horario));
+  const select = document.getElementById('res-mesa');
+  if (r.ok && r.data?.length) {
+    select.innerHTML = r.data.map(m =>
+      `<option value="${m.id}">Mesa ${m.numero} (${m.capacidade} lugares)</option>`
+    ).join('');
+    showToast('✅ ' + r.data.length + ' mesas disponíveis!', 'success');
+  } else {
+    select.innerHTML = '<option value="">Nenhuma mesa disponível neste horário</option>';
+    showToast('❌ ' + (r.data?.message || 'Nenhuma mesa disponível'), 'error');
+  }
+}
+
+async function criarReserva() {
+  if (!usuarioLogado) {
+    showToast('❌ Faça login para reservar', 'error');
+    setTimeout(() => location.href = '/login.html', 800);
+    return;
+  }
+  const data    = document.getElementById('res-data').value;
+  const horario = document.getElementById('res-horario').value;
+  const pessoas = parseInt(document.getElementById('res-pessoas').value);
+  const mesaId  = parseInt(document.getElementById('res-mesa').value);
+
+  if (!data) { showToast('❌ Selecione uma data', 'error'); return; }
+  if (!mesaId || isNaN(mesaId)) { showToast('❌ Clique em "Buscar Mesas" e selecione uma mesa', 'error'); return; }
+  if (!pessoas || pessoas < 1) { showToast('❌ Informe o número de pessoas', 'error'); return; }
+
+  const btn = document.getElementById('btn-reservar');
+  btn.disabled = true; btn.textContent = 'Reservando...';
+
+  const r = await api.post('/reserva', {
+    mesaId,
+    dataReserva: data,
+    horario,
+    numeroPessoas: pessoas
+  });
+
+  btn.disabled = false; btn.textContent = '✅ Confirmar Reserva';
+
+  if (r.ok) {
+    showToast('✅ Reserva confirmada! Código: ' + r.data.codigoConfirmacao, 'success');
+    carregarMinhasReservas();
+  } else {
+    showToast('❌ ' + (r.data?.message || r.data || 'Erro ao reservar'), 'error');
+  }
+}
+
+async function carregarMinhasReservas() {
+  if (!usuarioLogado) return;
+  const r   = await api.get('/reserva/minhas-reservas');
+  const box  = document.getElementById('minhas-reservas-box');
+  const list = document.getElementById('minhas-reservas-list');
+  if (!r.ok || !r.data?.length) { box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+
+  list.innerHTML = r.data.map(res => `
+    <div class="bg-bv-card border border-bv-border rounded-2xl p-4">
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <p class="text-white font-bold">🪑 Mesa ${res.numeroMesa || '—'} — ${res.data}</p>
+          <p class="text-gray-400 text-xs mt-0.5">🕐 ${res.horario} · 👥 ${res.numeroPessoas} pessoas</p>
+          <p class="text-gray-600 text-xs mt-0.5">Código: <span class="text-emerald-500 font-bold">${res.codigoConfirmacao}</span></p>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <span class="status-badge ${res.status === 0 ? 'status-0' : res.status === 1 ? 'status-5' : 'status-4'}">${res.statusDesc}</span>
+          ${res.status === 0
+            ? `<button onclick="cancelarReserva(${res.reservaId})" class="btn-danger text-white font-bold px-3 py-1 rounded-full text-xs">Cancelar</button>`
+            : ''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function cancelarReserva(id) {
+  if (!confirm('Cancelar esta reserva?')) return;
+  const r = await api.del('/reserva/' + id);
+  if (r.ok) { showToast('✅ Reserva cancelada', 'success'); carregarMinhasReservas(); }
+  else showToast('❌ ' + (r.data?.message || r.data || 'Erro'), 'error');
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+async function fazerLogout() {
+  await fetch('/api/auth/logout', { method:'POST', credentials:'include' });
+  usuarioLogado = null;
+  document.getElementById('header-login').classList.remove('hidden');
+  document.getElementById('header-logout').classList.add('hidden');
+  document.getElementById('header-user').classList.add('hidden');
+  document.getElementById('nav-admin').classList.add('hidden');
+  document.getElementById('nav-admin-sep').classList.add('hidden');
+  showToast('👋 Você saiu', 'info');
+}
+
+// ─── MODO (presencial / delivery / reserva) ───────────────────────────────────
+function aplicarModo(modo) {
+  modoAtual = modo;
+  document.getElementById('modo-info').classList.add('hidden');
+  const tipo = document.getElementById('tipo-atendimento');
+
+  if (modo === 'presencial') {
+    tipo.value = 'Presencial';
+    onTipoChange();
+    // Ocultar seção e nav de reserva
+    document.getElementById('section-reserva').classList.add('hidden');
+    document.getElementById('nav-reserva').classList.add('hidden');
+    document.getElementById('modo-info').textContent = '🪑 Modo: Presencial no restaurante';
+    document.getElementById('modo-info').classList.remove('hidden');
+  } else if (modo === 'delivery') {
+    tipo.value = 'DeliveryProprio';
+    onTipoChange();
+    document.getElementById('section-reserva').classList.add('hidden');
+    document.getElementById('nav-reserva').classList.add('hidden');
+    document.getElementById('modo-info').textContent = '🛵 Modo: Delivery';
+    document.getElementById('modo-info').classList.remove('hidden');
+  } else if (modo === 'reserva') {
+    showSection('reserva');
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  // Auto-selecionar período por horário
   const hora = new Date().getHours();
   const periodoAuto = (hora >= 18) ? 'jantar' : 'almoco';
-  const btnAuto = periodoAuto === 'jantar'
-    ? document.querySelectorAll('.tab-btn')[1]
-    : document.querySelectorAll('.tab-btn')[0];
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('ativo'));
-  btnAuto.classList.add('ativo');
-  await carregarCardapio(periodoAuto);
-  atualizarBadge();aplicarModo();
-  const di=document.getElementById('data-reserva');
-  const am=new Date();am.setDate(am.getDate()+1);
-  di.min=am.toISOString().split('T')[0];di.value=di.min;
+  setPeriodo(periodoAuto);
+
+  // Sincronizar select de período do carrinho
+  document.getElementById('periodo-pedido').value = periodoAuto === 'almoco' ? 'Almoco' : 'Jantar';
+
+  // Atualizar cart UI inicial
+  atualizarCartUI();
+
+  // Checar auth
+  try {
+    const r = await api.get('/auth/me');
+    if (r.ok && r.data) {
+      usuarioLogado = r.data;
+      document.getElementById('header-login').classList.add('hidden');
+      document.getElementById('header-logout').classList.remove('hidden');
+      document.getElementById('header-user').textContent = '👋 ' + r.data.nome;
+      document.getElementById('header-user').classList.remove('hidden');
+      if (r.data.roles?.includes('Admin')) {
+        document.getElementById('nav-admin').classList.remove('hidden');
+        document.getElementById('nav-admin-sep').classList.remove('hidden');
+      }
+    }
+  } catch (_) {}
+
+  // Inicializar data mínima de reserva
+  inicializarDataReserva();
+
+  // Modo via URL
+  const params = new URLSearchParams(location.search);
+  const modo = params.get('modo');
+  if (modo) aplicarModo(modo);
 });
 </script>
 </body>
