@@ -3,390 +3,431 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bella Vista — Relatórios</title>
+  <title>Relatorios — Bella Vista</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
-            bv: { bg:'#010906', card:'#020e0a', hover:'#031e15', border:'#042f20', border2:'#064028' }
-          }
+          fontFamily: { display: ['Playfair Display','serif'], sans: ['Inter','sans-serif'] },
+          colors: { bv: { bg:'#010906', card:'#020e0a', hover:'#031e15', border:'#042f20', border2:'#064028' } }
         }
       }
     }
   </script>
   <style>
+    * { font-family: 'Inter', sans-serif; }
     body { background-color: #010906; }
-    .glass { background: rgba(2,14,10,0.88); backdrop-filter: blur(16px); }
-    .btn-primary { background: linear-gradient(135deg,#059669,#10b981); transition:all .2s; }
-    .btn-primary:hover { background: linear-gradient(135deg,#047857,#059669); box-shadow:0 0 20px rgba(16,185,129,.3); }
-    .stat-card { background:#020e0a; border:1.5px solid #042f20; border-radius:1.5rem; padding:1.5rem; }
-    .input-field { background:#010906; border:1.5px solid #042f20; color:#fff; border-radius:.75rem; padding:.65rem 1rem; font-size:.875rem; transition:border-color .2s; }
-    .input-field:focus { outline:none; border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.1); }
-    .select-field { background:#010906; border:1.5px solid #042f20; color:#fff; border-radius:.75rem; padding:.65rem 1rem; font-size:.875rem; }
-    .select-field:focus { outline:none; border-color:#10b981; }
-    table { border-collapse: collapse; width: 100%; }
-    th { text-align:left; padding:.65rem 1rem; font-size:.75rem; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid #042f20; }
-    td { padding:.65rem 1rem; font-size:.875rem; color:#d1d5db; border-bottom:1px solid #0a1f15; }
-    tr:hover td { background:#031e15; }
-    .badge { padding:.2rem .65rem; border-radius:999px; font-size:.7rem; font-weight:700; }
-    .tab-btn { padding:.5rem 1.25rem; border-radius:999px; font-weight:700; font-size:.875rem; transition:all .2s; cursor:pointer; }
-    .tab-btn.active { background:#10b981; color:#000; }
-    .tab-btn:not(.active) { background:#020e0a; border:1px solid #042f20; color:#9ca3af; }
-    .tab-btn:not(.active):hover { border-color:#10b981; color:#fff; }
-    #toast {
-      position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999;
-      padding:.85rem 1.5rem; border-radius:16px; font-weight:600; font-size:.9rem;
-      opacity:0; transform:translateY(8px); transition:all .3s; pointer-events:none;
+    .font-display { font-family: 'Playfair Display', serif; }
+    .glass { background: rgba(2,14,10,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .nav-link { color: #9ca3af; font-size:.875rem; font-weight:500; transition:color .2s; text-decoration:none; }
+    .nav-link:hover { color:#fff; }
+
+    .period-preset { padding:.4rem .875rem; border-radius:2rem; font-size:.78rem; font-weight:600; border:1px solid #042f20; cursor:pointer; transition:all .2s; background:transparent; color:#6b7280; }
+    .period-preset.active { background:#042f20; border-color:#10b981; color:#10b981; }
+    .period-preset:hover:not(.active) { border-color:#6b7280; color:#d1d5db; }
+
+    .tab-nav-btn { padding:.625rem 1.25rem; font-size:.85rem; font-weight:600; border-radius:.5rem; border:1px solid transparent; cursor:pointer; transition:all .2s; background:transparent; color:#6b7280; white-space:nowrap; }
+    .tab-nav-btn.active { background:#020e0a; border-color:#042f20; color:#fff; }
+    .tab-nav-btn:hover:not(.active) { color:#d1d5db; }
+
+    .kpi-card { background:#020e0a; border:1px solid #042f20; border-radius:1rem; padding:1rem 1.125rem; }
+
+    /* Mobile responsive */
+    @media(max-width:639px) {
+      .tab-nav-btn { padding:.5rem .75rem; font-size:.78rem; }
+      .data-row { flex-wrap:wrap; gap:.5rem; }
+      .inline-chart { gap:4px; }
+      [style*="padding:1.5rem"] { padding:1rem !important; }
     }
-    #toast.show { opacity:1; transform:translateY(0); }
-    #toast.success { background:#064028; border:1px solid #10b981; color:#6ee7b7; }
-    #toast.error   { background:#3b0a0a; border:1px solid #ef4444; color:#fca5a5; }
-    .bar-fill { height:.5rem; border-radius:999px; transition:width .6s ease; }
+
+    .bar-container { display:flex; align-items:center; gap:.75rem; }
+    .bar-track { flex:1; height:8px; background:#042f20; border-radius:4px; overflow:hidden; }
+    .bar-fill { height:100%; border-radius:4px; transition:width .6s ease; }
+
+    .data-row { display:flex; align-items:center; justify-content:space-between; padding:.75rem 0; border-bottom:1px solid #042f20; }
+    .data-row:last-child { border-bottom:none; }
+
+    .form-input { background:#010906; border:1px solid #042f20; color:#fff; border-radius:.5rem; padding:.5rem .875rem; font-size:.875rem; outline:none; transition:border-color .2s; }
+    .form-input:focus { border-color:#10b981; }
+
+    .btn-primary { background:linear-gradient(135deg,#059669,#10b981); color:#fff; border:none; border-radius:.5rem; padding:.625rem 1.5rem; font-size:.85rem; font-weight:600; cursor:pointer; transition:all .2s; }
+    .btn-primary:hover { background:linear-gradient(135deg,#047857,#059669); box-shadow:0 0 20px rgba(16,185,129,.3); }
+
+    .skeleton { background:linear-gradient(90deg,#042f20 25%,#064028 50%,#042f20 75%); background-size:200% 100%; animation:skeleton-shimmer 1.5s infinite; border-radius:.5rem; }
+    @keyframes skeleton-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation:fadeUp .4s ease forwards; }
+
+    .chart-wrap { position:relative; overflow-x:auto; }
+    .inline-chart { display:flex; align-items:flex-end; gap:6px; height:120px; padding-top:8px; }
+    .chart-col { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; min-width:28px; }
+    .chart-bar { width:100%; border-radius:3px 3px 0 0; background:linear-gradient(180deg,#10b981,#059669); transition:height .5s ease; cursor:default; }
+    .chart-bar:hover { background:linear-gradient(180deg,#34d399,#10b981); }
+    .chart-label { font-size:.65rem; color:#4b5563; text-align:center; white-space:nowrap; }
+    .chart-val { font-size:.65rem; color:#6b7280; }
   </style>
 </head>
-<body class="min-h-screen text-white font-sans">
+<body class="min-h-screen text-white">
 
-<!-- HEADER -->
+<!-- Header -->
 <header class="glass sticky top-0 z-50 border-b border-bv-border">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-    <a href="/welcome.html" class="flex items-center gap-3">
-      <img src="/bellavistalogo.png" alt="Bella Vista" class="h-10 w-10 rounded-full object-cover" onerror="this.style.display='none'">
-      <span class="text-xl font-extrabold text-emerald-400">Bella Vista</span>
-      <span class="bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-bold px-2 py-0.5 rounded-full">Admin</span>
+  <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between gap-4">
+    <a href="/welcome.html" class="flex items-center gap-3" style="text-decoration:none">
+      <img src="/bellavistalogo.png" alt="Bella Vista" class="h-8 w-8 rounded-full object-cover" onerror="this.style.display='none'">
+      <span class="font-display text-lg font-bold text-emerald-400">Bella Vista</span>
     </a>
-    <nav class="flex items-center gap-4 text-sm">
-      <a href="/admin.html" class="text-gray-400 hover:text-white transition-colors">👑 Pedidos</a>
-      <a href="/index.html" class="text-gray-400 hover:text-white transition-colors">📋 Cardápio</a>
-      <button onclick="fazerLogout()" class="text-red-400 hover:text-red-300 transition-colors">Sair</button>
-    </nav>
+    <div class="flex items-center gap-3">
+      <a href="/admin.html" class="nav-link text-xs">Admin</a>
+      <button onclick="fazerLogout()" class="nav-link text-xs" style="color:#f87171">Sair</button>
+    </div>
   </div>
 </header>
 
-<main class="max-w-7xl mx-auto px-4 py-8">
+<div class="max-w-7xl mx-auto px-3 sm:px-5 py-4 sm:py-6">
 
-  <!-- ACESSO NEGADO -->
-  <div id="acesso-negado" class="hidden text-center py-24">
-    <div class="text-6xl mb-4">🔒</div>
-    <h2 class="text-2xl font-extrabold text-white mb-2">Acesso Restrito</h2>
-    <p class="text-gray-400 mb-6">Esta página é exclusiva para administradores.</p>
-    <a href="/login.html" class="btn-primary text-white font-bold px-8 py-3 rounded-full inline-block">Entrar</a>
+  <!-- Page header -->
+  <div class="flex flex-col gap-3 mb-6">
+    <div>
+      <h1 class="font-display text-xl sm:text-2xl font-bold">Relatorios</h1>
+      <p class="text-gray-500 text-sm mt-1">Analise de faturamento, pedidos e clientes</p>
+    </div>
+    <!-- Presets -->
+    <div class="flex gap-1.5 flex-wrap">
+      <button class="period-preset" onclick="aplicarPreset(0)" id="preset-hoje">Hoje</button>
+      <button class="period-preset active" onclick="aplicarPreset(7)" id="preset-7">7 dias</button>
+      <button class="period-preset" onclick="aplicarPreset(30)" id="preset-30">30 dias</button>
+      <button class="period-preset" onclick="aplicarPreset(90)" id="preset-90">90 dias</button>
+    </div>
+    <!-- Custom range -->
+    <div class="flex items-center gap-2 flex-wrap">
+      <input id="data-inicio" type="date" class="form-input text-xs" style="padding:.4rem .75rem;flex:1;min-width:120px">
+      <span class="text-gray-600 text-xs flex-shrink-0">ate</span>
+      <input id="data-fim" type="date" class="form-input text-xs" style="padding:.4rem .75rem;flex:1;min-width:120px">
+      <button onclick="carregarTodos()" class="btn-primary text-xs flex-shrink-0" style="padding:.4rem .875rem">Aplicar</button>
+    </div>
   </div>
 
-  <!-- PAINEL -->
-  <div id="painel-relatorios" class="hidden">
-
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="text-3xl font-extrabold text-white">Relatórios</h1>
-        <p class="text-gray-500 text-sm mt-1">Faturamento por tipo de atendimento e itens mais vendidos</p>
-      </div>
-      <button onclick="gerarRelatorio()" class="btn-primary text-white font-bold px-5 py-2.5 rounded-full text-sm">📊 Gerar</button>
+  <!-- KPI cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="kpi-card">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Faturamento</p>
+      <p id="kpi-fat" class="font-display text-2xl font-bold text-emerald-400">—</p>
+      <p id="kpi-fat-sub" class="text-gray-600 text-xs mt-1">no periodo</p>
     </div>
+    <div class="kpi-card">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Pedidos</p>
+      <p id="kpi-ped" class="font-display text-2xl font-bold text-white">—</p>
+      <p id="kpi-ped-sub" class="text-gray-600 text-xs mt-1">no periodo</p>
+    </div>
+    <div class="kpi-card">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Ticket medio</p>
+      <p id="kpi-ticket" class="font-display text-2xl font-bold text-blue-400">—</p>
+      <p class="text-gray-600 text-xs mt-1">por pedido</p>
+    </div>
+    <div class="kpi-card">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Clientes ativos</p>
+      <p id="kpi-cli" class="font-display text-2xl font-bold text-purple-400">—</p>
+      <p class="text-gray-600 text-xs mt-1">no periodo</p>
+    </div>
+  </div>
 
-    <!-- FILTROS DE DATA -->
-    <div class="bg-bv-card border border-bv-border rounded-2xl p-5 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+  <!-- Tab nav -->
+  <div class="flex gap-2 mb-6 overflow-x-auto pb-1" style="border-bottom:1px solid #042f20;padding-bottom:.75rem">
+    <button class="tab-nav-btn active" onclick="mostrarTab('faturamento')" id="tnav-faturamento">Faturamento</button>
+    <button class="tab-nav-btn" onclick="mostrarTab('itens')" id="tnav-itens">Itens mais vendidos</button>
+    <button class="tab-nav-btn" onclick="mostrarTab('clientes')" id="tnav-clientes">Top clientes</button>
+    <button class="tab-nav-btn" onclick="mostrarTab('horario')" id="tnav-horario">Horario de pico</button>
+  </div>
+
+  <!-- TAB FATURAMENTO -->
+  <div id="tab-faturamento" class="fade-up">
+    <div style="background:#020e0a;border:1px solid #042f20;border-radius:1rem;padding:1.5rem" id="fat-card">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-display text-lg font-semibold">Evolucao do faturamento</h2>
+        <span id="fat-periodo" class="text-gray-500 text-xs"></span>
+      </div>
+      <div id="fat-chart-wrap" class="chart-wrap"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-5" style="border-top:1px solid #042f20">
         <div>
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Data Início</label>
-          <input type="date" id="filtro-inicio" class="input-field w-full" />
+          <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Total faturado</p>
+          <p id="fat-total" class="font-display text-xl font-bold text-emerald-400">—</p>
         </div>
         <div>
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Data Fim</label>
-          <input type="date" id="filtro-fim" class="input-field w-full" />
+          <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Total pedidos</p>
+          <p id="fat-qtd" class="font-display text-xl font-bold text-white">—</p>
         </div>
         <div>
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Exibir top clientes</label>
-          <select id="filtro-top" class="select-field w-full">
-            <option value="5">Top 5</option>
-            <option value="10" selected>Top 10</option>
-            <option value="20">Top 20</option>
+          <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Ticket medio</p>
+          <p id="fat-ticket" class="font-display text-xl font-bold text-blue-400">—</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB ITENS -->
+  <div id="tab-itens" style="display:none" class="fade-up">
+    <div style="background:#020e0a;border:1px solid #042f20;border-radius:1rem;padding:1.5rem">
+      <h2 class="font-display text-lg font-semibold mb-5">Pratos mais pedidos</h2>
+      <div id="itens-lista"></div>
+      <p id="itens-empty" style="display:none" class="text-center text-gray-600 py-8 text-sm">Sem dados no periodo.</p>
+    </div>
+  </div>
+
+  <!-- TAB CLIENTES -->
+  <div id="tab-clientes" style="display:none" class="fade-up">
+    <div style="background:#020e0a;border:1px solid #042f20;border-radius:1rem;padding:1.5rem">
+      <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <h2 class="font-display text-lg font-semibold">Top clientes</h2>
+        <div class="flex items-center gap-2">
+          <label class="text-gray-500 text-xs">Mostrar top</label>
+          <select id="top-n" class="form-input text-xs" style="padding:.35rem .75rem;width:auto" onchange="carregarClientes()">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
           </select>
         </div>
-        <button onclick="gerarRelatorio()" class="btn-primary text-white font-bold py-2.5 rounded-full text-sm">Filtrar</button>
       </div>
+      <div id="clientes-lista"></div>
+      <p id="clientes-empty" style="display:none" class="text-center text-gray-600 py-8 text-sm">Sem dados no periodo.</p>
     </div>
-
-    <!-- CARDS RESUMO -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-      <div class="stat-card">
-        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Faturamento Total</p>
-        <p id="res-fat-total" class="text-3xl font-extrabold text-emerald-400">—</p>
-      </div>
-      <div class="stat-card">
-        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Total Pedidos</p>
-        <p id="res-total-pedidos" class="text-3xl font-extrabold text-white">—</p>
-      </div>
-      <div class="stat-card">
-        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Ticket Médio</p>
-        <p id="res-ticket-medio" class="text-3xl font-extrabold text-blue-400">—</p>
-      </div>
-      <div class="stat-card">
-        <p class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Itens Vendidos</p>
-        <p id="res-itens-total" class="text-3xl font-extrabold text-amber-400">—</p>
-      </div>
-    </div>
-
-    <!-- TABS -->
-    <div class="flex gap-2 mb-6 flex-wrap">
-      <button onclick="showTab('faturamento')" id="tab-faturamento" class="tab-btn active">💰 Faturamento por Tipo</button>
-      <button onclick="showTab('itens')" id="tab-itens" class="tab-btn">🍽️ Itens Mais Vendidos</button>
-      <button onclick="showTab('clientes')" id="tab-clientes" class="tab-btn">👥 Top Clientes</button>
-      <button onclick="showTab('horario')" id="tab-horario" class="tab-btn">⏰ Horário de Pico</button>
-    </div>
-
-    <!-- TAB: FATURAMENTO POR TIPO DE ATENDIMENTO -->
-    <div id="tab-content-faturamento">
-      <div class="bg-bv-card border border-bv-border rounded-2xl overflow-hidden">
-        <div class="p-5 border-b border-bv-border">
-          <h3 class="font-extrabold text-white">Faturamento por Tipo de Atendimento</h3>
-          <p class="text-gray-500 text-xs mt-0.5">Excluindo pedidos cancelados</p>
-        </div>
-        <div id="rel-faturamento-content" class="p-5">
-          <p class="text-gray-500 text-sm text-center py-6">Clique em "Gerar" para carregar os dados</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: ITENS MAIS VENDIDOS -->
-    <div id="tab-content-itens" class="hidden">
-      <div class="bg-bv-card border border-bv-border rounded-2xl overflow-hidden">
-        <div class="p-5 border-b border-bv-border">
-          <h3 class="font-extrabold text-white">Itens Mais Vendidos</h3>
-          <p class="text-gray-500 text-xs mt-0.5">Com e sem Sugestão do Chef</p>
-        </div>
-        <div class="overflow-x-auto">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Item</th>
-                <th>Período</th>
-                <th>Qtd Vendida</th>
-                <th>Receita</th>
-                <th>Vendas como Chef ⭐</th>
-              </tr>
-            </thead>
-            <tbody id="rel-itens-tbody">
-              <tr><td colspan="6" class="text-center text-gray-500 py-8">Aguardando dados...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: TOP CLIENTES -->
-    <div id="tab-content-clientes" class="hidden">
-      <div class="bg-bv-card border border-bv-border rounded-2xl overflow-hidden">
-        <div class="p-5 border-b border-bv-border">
-          <h3 class="font-extrabold text-white">Top Clientes</h3>
-        </div>
-        <div class="overflow-x-auto">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Cliente</th>
-                <th>E-mail</th>
-                <th>Pedidos</th>
-                <th>Total Gasto</th>
-                <th>Ticket Médio</th>
-              </tr>
-            </thead>
-            <tbody id="rel-clientes-tbody">
-              <tr><td colspan="6" class="text-center text-gray-500 py-8">Aguardando dados...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: HORÁRIO DE PICO -->
-    <div id="tab-content-horario" class="hidden">
-      <div class="bg-bv-card border border-bv-border rounded-2xl p-5">
-        <h3 class="font-extrabold text-white mb-4">Horário de Pico</h3>
-        <div id="rel-horario-content">
-          <p class="text-gray-500 text-sm text-center py-6">Aguardando dados...</p>
-        </div>
-      </div>
-    </div>
-
   </div>
-</main>
 
-<div id="toast"></div>
+  <!-- TAB HORARIO PICO -->
+  <div id="tab-horario" style="display:none" class="fade-up">
+    <div style="background:#020e0a;border:1px solid #042f20;border-radius:1rem;padding:1.5rem">
+      <h2 class="font-display text-lg font-semibold mb-5">Horarios de maior movimento</h2>
+      <div id="horario-lista"></div>
+      <p id="horario-empty" style="display:none" class="text-center text-gray-600 py-8 text-sm">Sem dados no periodo.</p>
+    </div>
+  </div>
+
+</div>
 
 <script>
-const api = {
-  async get(url) {
-    const r = await fetch('/api' + url, { credentials:'include', headers:{'Accept':'application/json'} });
-    const data = r.status === 204 ? null : await r.json().catch(() => null);
-    return { ok: r.ok, data };
-  }
-};
+// ─── State ────────────────────────────────────────────────────────────────────
+let dataInicio = '';
+let dataFim = '';
 
-let dadosCarregados = false;
-
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show ' + (type || 'success');
-  setTimeout(() => { t.className = ''; }, 3000);
-}
-
-function showTab(name) {
-  ['faturamento','itens','clientes','horario'].forEach(t => {
-    document.getElementById('tab-content-' + t).classList.add('hidden');
-    document.getElementById('tab-' + t).classList.remove('active');
-  });
-  document.getElementById('tab-content-' + name).classList.remove('hidden');
-  document.getElementById('tab-' + name).classList.add('active');
-}
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  await verificarAdmin();
+  aplicarPreset(7);
+});
 
 async function verificarAdmin() {
-  const r = await api.get('/auth/me');
-  if (!r.ok || !r.data?.roles?.includes('Admin')) {
-    document.getElementById('acesso-negado').classList.remove('hidden');
-    return false;
-  }
-  document.getElementById('painel-relatorios').classList.remove('hidden');
-  return true;
-}
-
-function fmt(val) {
-  return 'R$ ' + (val || 0).toFixed(2).replace('.', ',');
-}
-
-async function gerarRelatorio() {
-  const inicio = document.getElementById('filtro-inicio').value;
-  const fim    = document.getElementById('filtro-fim').value;
-  const top    = document.getElementById('filtro-top').value;
-
-  if (!inicio || !fim) { showToast('❌ Selecione as datas', 'error'); return; }
-
-  const params = `dataInicio=${inicio}&dataFim=${fim}`;
-  const btn    = document.querySelector('button[onclick="gerarRelatorio()"]');
-  btn.textContent = 'Carregando...'; btn.disabled = true;
-
   try {
-    const [rFat, rItens, rClientes, rHorario] = await Promise.all([
-      api.get('/relatorio/faturamento?' + params),
-      api.get('/relatorio/itens-mais-vendidos?' + params),
-      api.get('/relatorio/top-clientes?' + params + '&top=' + top),
-      api.get('/relatorio/horario-pico?' + params)
-    ]);
-
-    // ── Resumo geral ──────────────────────────────────────────────────────
-    const fatTotal     = rFat.ok ? rFat.data.reduce((s, f) => s + f.totalFaturado, 0) : 0;
-    const totalPedidos = rFat.ok ? rFat.data.reduce((s, f) => s + f.totalPedidos, 0) : 0;
-    const ticketMedio  = totalPedidos > 0 ? fatTotal / totalPedidos : 0;
-    const itensTotal   = rItens.ok ? rItens.data.reduce((s, i) => s + i.quantidadeVendida, 0) : 0;
-
-    document.getElementById('res-fat-total').textContent    = fmt(fatTotal);
-    document.getElementById('res-total-pedidos').textContent = totalPedidos;
-    document.getElementById('res-ticket-medio').textContent  = fmt(ticketMedio);
-    document.getElementById('res-itens-total').textContent   = itensTotal;
-
-    // ── Faturamento por tipo ──────────────────────────────────────────────
-    const tipoIcons = { 'Presencial':'🪑', 'DeliveryProprio':'🛵', 'DeliveryAplicativo':'📱' };
-    const cores     = ['#10b981','#3b82f6','#8b5cf6','#f59e0b'];
-
-    if (rFat.ok && rFat.data?.length) {
-      const maxFat = Math.max(...rFat.data.map(f => f.totalFaturado));
-      document.getElementById('rel-faturamento-content').innerHTML = rFat.data.map((f, i) => `
-        <div class="mb-5">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-2">
-              <span class="text-lg">${tipoIcons[f.tipoAtendimento] || '📦'}</span>
-              <span class="text-white font-bold">${f.tipoAtendimento}</span>
-            </div>
-            <div class="text-right">
-              <p class="text-emerald-400 font-extrabold">${fmt(f.totalFaturado)}</p>
-              <p class="text-gray-500 text-xs">${f.totalPedidos} pedidos · Ticket: ${fmt(f.ticketMedio)}</p>
-            </div>
-          </div>
-          <div class="bg-bv-border rounded-full h-2">
-            <div class="bar-fill rounded-full" style="width:${Math.round(f.totalFaturado/maxFat*100)}%;background:${cores[i%cores.length]}"></div>
-          </div>
-        </div>`).join('');
-    } else {
-      document.getElementById('rel-faturamento-content').innerHTML = '<p class="text-gray-500 text-sm text-center py-6">Nenhum dado no período.</p>';
-    }
-
-    // ── Itens mais vendidos ───────────────────────────────────────────────
-    if (rItens.ok && rItens.data?.length) {
-      document.getElementById('rel-itens-tbody').innerHTML = rItens.data.map((item, idx) => `
-        <tr>
-          <td class="text-gray-500 font-bold">${idx + 1}</td>
-          <td class="text-white font-bold">${item.nomeItem}</td>
-          <td><span class="badge" style="background:#064028;color:#6ee7b7">${item.periodo}</span></td>
-          <td><span class="badge" style="background:#1c3a5e;color:#93c5fd">${item.quantidadeVendida}</span></td>
-          <td class="text-emerald-400 font-bold">${fmt(item.receitaTotal)}</td>
-          <td>${item.vendasComoSugestao > 0
-            ? `<span class="badge" style="background:#3b2500;color:#fbbf24">⭐ ${item.vendasComoSugestao}x</span>`
-            : '<span class="text-gray-600">—</span>'}</td>
-        </tr>`).join('');
-    } else {
-      document.getElementById('rel-itens-tbody').innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-8">Nenhum item vendido no período.</td></tr>';
-    }
-
-    // ── Top clientes ──────────────────────────────────────────────────────
-    if (rClientes.ok && rClientes.data?.length) {
-      document.getElementById('rel-clientes-tbody').innerHTML = rClientes.data.map((c, idx) => `
-        <tr>
-          <td class="text-gray-500 font-bold">${idx + 1}</td>
-          <td class="text-white font-bold">${c.nome}</td>
-          <td class="text-gray-400">${c.email}</td>
-          <td><span class="badge" style="background:#1c3a5e;color:#93c5fd">${c.totalPedidos}</span></td>
-          <td class="text-emerald-400 font-bold">${fmt(c.totalGasto)}</td>
-          <td class="text-blue-400 font-bold">${fmt(c.ticketMedio)}</td>
-        </tr>`).join('');
-    } else {
-      document.getElementById('rel-clientes-tbody').innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-8">Nenhum cliente no período.</td></tr>';
-    }
-
-    // ── Horário de pico ───────────────────────────────────────────────────
-    if (rHorario.ok && rHorario.data?.length) {
-      const maxPedidos = Math.max(...rHorario.data.map(h => h.totalPedidos));
-      document.getElementById('rel-horario-content').innerHTML = rHorario.data.map(h => `
-        <div class="flex items-center gap-4 mb-3">
-          <span class="text-gray-400 text-sm font-bold w-16 flex-shrink-0">${h.faixaHorario}</span>
-          <div class="flex-1 bg-bv-border rounded-full h-2">
-            <div class="bar-fill rounded-full bg-emerald-500" style="width:${Math.round(h.totalPedidos/maxPedidos*100)}%"></div>
-          </div>
-          <span class="text-white font-bold text-sm w-8 text-right">${h.totalPedidos}</span>
-          <span class="text-emerald-400 text-xs w-24 text-right">${fmt(h.totalFaturado)}</span>
-        </div>`).join('');
-    } else {
-      document.getElementById('rel-horario-content').innerHTML = '<p class="text-gray-500 text-sm text-center py-6">Nenhum dado no período.</p>';
-    }
-
-    showToast('✅ Relatórios gerados!', 'success');
-    dadosCarregados = true;
-
-  } catch(e) {
-    showToast('❌ Erro ao carregar relatórios', 'error');
-  } finally {
-    btn.textContent = '📊 Gerar'; btn.disabled = false;
-  }
+    const r = await fetch('/api/auth/me', { credentials:'include' });
+    if (!r.ok) { window.location.href = '/login.html'; return; }
+    const d = await r.json();
+    if (!d.roles?.includes('Admin')) window.location.href = '/welcome.html';
+  } catch(_) { window.location.href = '/login.html'; }
 }
 
 async function fazerLogout() {
   await fetch('/api/auth/logout', { method:'POST', credentials:'include' });
-  location.href = '/welcome.html';
+  window.location.href = '/login.html';
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  // Datas padrão: último mês
-  const hoje      = new Date();
-  const mesPassado = new Date(hoje); mesPassado.setMonth(hoje.getMonth() - 1);
-  document.getElementById('filtro-fim').value    = hoje.toISOString().slice(0, 10);
-  document.getElementById('filtro-inicio').value = mesPassado.toISOString().slice(0, 10);
+// ─── Period presets ───────────────────────────────────────────────────────────
+function aplicarPreset(dias) {
+  const fim = new Date();
+  const inicio = new Date();
+  inicio.setDate(inicio.getDate() - dias);
+  dataFim = fim.toISOString().split('T')[0];
+  dataInicio = inicio.toISOString().split('T')[0];
+  document.getElementById('data-inicio').value = dataInicio;
+  document.getElementById('data-fim').value = dataFim;
 
-  const ok = await verificarAdmin();
-  if (ok) gerarRelatorio();
-});
+  document.querySelectorAll('.period-preset').forEach(b => b.classList.remove('active'));
+  const map = {0:'hoje',7:'7',30:'30',90:'90'};
+  const btn = document.getElementById(`preset-${map[dias]}`);
+  if (btn) btn.classList.add('active');
+
+  carregarTodos();
+}
+
+function carregarTodos() {
+  dataInicio = document.getElementById('data-inicio').value;
+  dataFim = document.getElementById('data-fim').value;
+  carregarFaturamento();
+  carregarItens();
+  carregarClientes();
+  carregarHorario();
+}
+
+// ─── Faturamento ──────────────────────────────────────────────────────────────
+async function carregarFaturamento() {
+  try {
+    const r = await fetch(`/api/relatorio/faturamento?dataInicio=${dataInicio}&dataFim=${dataFim}`, { credentials:'include' });
+    if (!r.ok) return;
+    const d = await r.json();
+
+    const fat = d.totalFaturado || 0;
+    const qtd = d.totalPedidos || 0;
+    const ticket = qtd > 0 ? fat / qtd : 0;
+
+    document.getElementById('kpi-fat').textContent = formatarPreco(fat);
+    document.getElementById('kpi-ped').textContent = qtd;
+    document.getElementById('kpi-ticket').textContent = formatarPreco(ticket);
+    document.getElementById('fat-total').textContent = formatarPreco(fat);
+    document.getElementById('fat-qtd').textContent = qtd;
+    document.getElementById('fat-ticket').textContent = formatarPreco(ticket);
+    document.getElementById('fat-periodo').textContent = `${formatarData(dataInicio)} a ${formatarData(dataFim)}`;
+
+    // Chart por dia
+    const porDia = d.porDia || [];
+    renderizarChartDia(porDia);
+  } catch(_) {}
+}
+
+function renderizarChartDia(porDia) {
+  const wrap = document.getElementById('fat-chart-wrap');
+  if (!porDia.length) {
+    wrap.innerHTML = `<p class="text-gray-600 text-sm text-center py-6">Sem dados suficientes para o grafico.</p>`;
+    return;
+  }
+  const maxVal = Math.max(...porDia.map(d => d.total || 0), 1);
+  const cols = porDia.slice(-14).map(d => {
+    const pct = Math.max(4, Math.round(((d.total || 0) / maxVal) * 100));
+    const label = d.data ? d.data.substring(5) : '';
+    return `<div class="chart-col">
+      <span class="chart-val" style="font-size:.6rem">${formatarPreco(d.total||0).replace('R$ ','')}</span>
+      <div class="chart-bar" style="height:${pct}%" title="R$ ${(d.total||0).toFixed(2)}"></div>
+      <span class="chart-label">${label}</span>
+    </div>`;
+  });
+  wrap.innerHTML = `<div class="inline-chart">${cols.join('')}</div>`;
+}
+
+// ─── Itens mais vendidos ──────────────────────────────────────────────────────
+async function carregarItens() {
+  try {
+    const r = await fetch(`/api/relatorio/itens-mais-vendidos?dataInicio=${dataInicio}&dataFim=${dataFim}`, { credentials:'include' });
+    if (!r.ok) return;
+    const itens = await r.json();
+    const lista = document.getElementById('itens-lista');
+    const empty = document.getElementById('itens-empty');
+    if (!itens.length) { lista.innerHTML = ''; empty.style.display = ''; return; }
+    empty.style.display = 'none';
+    const max = Math.max(...itens.map(i => i.totalVendido || i.quantidade || 0), 1);
+    const barColors = ['#10b981','#34d399','#6ee7b7','#059669','#047857'];
+    lista.innerHTML = itens.slice(0,10).map((item, idx) => {
+      const qtd = item.totalVendido || item.quantidade || 0;
+      const pct = Math.round((qtd / max) * 100);
+      const color = barColors[idx % barColors.length];
+      return `
+        <div class="data-row fade-up">
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <span class="font-display text-sm font-bold text-gray-600 w-6 text-right flex-shrink-0">${idx+1}</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-white text-sm font-semibold truncate">${item.nome || item.nomePrato || ''}</p>
+              <div class="bar-container mt-1.5">
+                <div class="bar-track">
+                  <div class="bar-fill" style="width:${pct}%;background:${color}"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="text-right flex-shrink-0 ml-4">
+            <p class="text-white font-bold text-sm">${qtd}</p>
+            <p class="text-gray-600 text-xs">pedidos</p>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(_) {}
+}
+
+// ─── Top clientes ─────────────────────────────────────────────────────────────
+async function carregarClientes() {
+  const top = document.getElementById('top-n').value;
+  try {
+    const r = await fetch(`/api/relatorio/top-clientes?dataInicio=${dataInicio}&dataFim=${dataFim}&top=${top}`, { credentials:'include' });
+    if (!r.ok) return;
+    const clientes = await r.json();
+    const lista = document.getElementById('clientes-lista');
+    const empty = document.getElementById('clientes-empty');
+    document.getElementById('kpi-cli').textContent = clientes.length;
+    if (!clientes.length) { lista.innerHTML = ''; empty.style.display = ''; return; }
+    empty.style.display = 'none';
+    lista.innerHTML = clientes.map((c, idx) => `
+      <div class="data-row fade-up">
+        <div class="flex items-center gap-3">
+          <div style="background:#042f20;border-radius:50%;width:2rem;height:2rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <span class="font-display text-xs font-bold text-emerald-400">${idx+1}</span>
+          </div>
+          <div>
+            <p class="text-white text-sm font-semibold">${c.nome || c.clienteNome || 'Cliente'}</p>
+            <p class="text-gray-600 text-xs">${c.email || ''}</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-emerald-400 font-bold text-sm">${formatarPreco(c.totalGasto || c.valorTotal || 0)}</p>
+          <p class="text-gray-600 text-xs">${c.totalPedidos || c.quantidadePedidos || 0} pedidos</p>
+        </div>
+      </div>`).join('');
+  } catch(_) {}
+}
+
+// ─── Horario de pico ──────────────────────────────────────────────────────────
+async function carregarHorario() {
+  try {
+    const r = await fetch(`/api/relatorio/horario-pico?dataInicio=${dataInicio}&dataFim=${dataFim}`, { credentials:'include' });
+    if (!r.ok) return;
+    const dados = await r.json();
+    const lista = document.getElementById('horario-lista');
+    const empty = document.getElementById('horario-empty');
+    if (!dados.length) { lista.innerHTML = ''; empty.style.display = ''; return; }
+    empty.style.display = 'none';
+    const max = Math.max(...dados.map(d => d.totalPedidos || d.quantidade || 0), 1);
+    const sorted = [...dados].sort((a,b) => (b.totalPedidos||b.quantidade||0) - (a.totalPedidos||a.quantidade||0));
+    lista.innerHTML = sorted.map(d => {
+      const qtd = d.totalPedidos || d.quantidade || 0;
+      const pct = Math.round((qtd / max) * 100);
+      const isTop = qtd === max;
+      return `
+        <div class="data-row fade-up">
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <div style="background:#042f20;border-radius:.35rem;padding:.25rem .625rem;flex-shrink:0">
+              <span class="font-mono text-sm font-bold ${isTop?'text-emerald-400':'text-gray-300'}">${d.hora || d.horario || '?'}h</span>
+            </div>
+            <div class="flex-1">
+              <div class="bar-container">
+                <div class="bar-track">
+                  <div class="bar-fill" style="width:${pct}%;background:${isTop?'#10b981':'#064028'}"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="text-right flex-shrink-0 ml-4">
+            <p class="font-bold text-sm ${isTop?'text-emerald-400':'text-white'}">${qtd}</p>
+            <p class="text-gray-600 text-xs">pedidos</p>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(_) {}
+}
+
+// ─── Tab nav ──────────────────────────────────────────────────────────────────
+function mostrarTab(tab) {
+  ['faturamento','itens','clientes','horario'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === tab ? '' : 'none';
+    document.getElementById(`tnav-${t}`).className = 'tab-nav-btn' + (t === tab ? ' active' : '');
+  });
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function formatarPreco(v) {
+  return 'R$ ' + Number(v).toFixed(2).replace('.',',');
+}
+function formatarData(s) {
+  if (!s) return '';
+  const [y,m,d] = s.split('-');
+  return `${d}/${m}/${y}`;
+}
 </script>
 </body>
 </html>

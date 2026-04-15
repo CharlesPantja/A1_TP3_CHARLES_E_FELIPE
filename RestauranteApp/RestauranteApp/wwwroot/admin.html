@@ -3,363 +3,621 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bella Vista — Admin</title>
+  <title>Painel Admin — Bella Vista</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
-            bv: { bg:'#010906', card:'#020e0a', hover:'#031e15', border:'#042f20', border2:'#064028' }
-          }
+          fontFamily: { display: ['Playfair Display','serif'], sans: ['Inter','sans-serif'] },
+          colors: { bv: { bg:'#010906', card:'#020e0a', hover:'#031e15', border:'#042f20', border2:'#064028' } }
         }
       }
     }
   </script>
   <style>
+    * { font-family: 'Inter', sans-serif; }
     body { background-color: #010906; }
-    .glass { background: rgba(2,14,10,0.88); backdrop-filter: blur(16px); }
-    .btn-primary { background: linear-gradient(135deg,#059669,#10b981); transition:all .2s; }
-    .btn-primary:hover { background: linear-gradient(135deg,#047857,#059669); box-shadow:0 0 20px rgba(16,185,129,.3); }
-    .input-field { background:#010906; border:1.5px solid #042f20; color:#fff; transition:border-color .2s; }
-    .input-field:focus { outline:none; border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.1); }
-    .select-field { background:#010906; border:1.5px solid #042f20; color:#fff; border-radius:.75rem; padding:.65rem 1rem; font-size:.875rem; width:100%; }
-    .select-field:focus { outline:none; border-color:#10b981; }
-    .stat-card { background:#020e0a; border:1.5px solid #042f20; border-radius:1.5rem; padding:1.25rem; }
-    .order-card { background:#020e0a; border:1.5px solid #042f20; border-radius:1.25rem; padding:1.25rem; transition:all .2s; }
-    .order-card:hover { border-color:#10b981; }
-    .status-badge { padding:.25rem .75rem; border-radius:999px; font-size:.7rem; font-weight:700; }
-    .status-0 { background:#064028; color:#6ee7b7; }
-    .status-1 { background:#1c3a5e; color:#93c5fd; }
-    .status-2 { background:#3b1f5e; color:#c4b5fd; }
-    .status-3 { background:#1a3a1a; color:#86efac; }
-    .status-4 { background:#1f2937; color:#9ca3af; }
-    .status-5 { background:#3b0a0a; color:#fca5a5; }
-    .border-status-0 { border-left: 3px solid #10b981; }
-    .border-status-1 { border-left: 3px solid #3b82f6; }
-    .border-status-2 { border-left: 3px solid #8b5cf6; }
-    .border-status-3 { border-left: 3px solid #22c55e; }
-    .border-status-4 { border-left: 3px solid #6b7280; }
-    .border-status-5 { border-left: 3px solid #ef4444; }
-    #toast {
-      position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999;
-      padding:.85rem 1.5rem; border-radius:16px; font-weight:600; font-size:.9rem;
-      opacity:0; transform:translateY(8px); transition:all .3s; pointer-events:none;
+    .font-display { font-family: 'Playfair Display', serif; }
+    .glass { background: rgba(2,14,10,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .nav-link { color: #9ca3af; font-size:.875rem; font-weight:500; transition:color .2s; text-decoration:none; }
+    .nav-link:hover { color:#fff; }
+
+    .tab-nav-btn {
+      padding:.625rem 1.25rem; font-size:.85rem; font-weight:600; border-radius:.5rem;
+      border:1px solid transparent; cursor:pointer; transition:all .2s;
+      background:transparent; color:#6b7280; white-space:nowrap;
     }
-    #toast.show { opacity:1; transform:translateY(0); }
-    #toast.success { background:#064028; border:1px solid #10b981; color:#6ee7b7; }
-    #toast.error   { background:#3b0a0a; border:1px solid #ef4444; color:#fca5a5; }
-    #toast.info    { background:#1c3a5e; border:1px solid #3b82f6; color:#93c5fd; }
+    .tab-nav-btn.active { background:#020e0a; border-color:#042f20; color:#fff; }
+    .tab-nav-btn:hover:not(.active) { color:#d1d5db; }
+
+    .stat-card { background:#020e0a; border:1px solid #042f20; border-radius:1rem; padding:1.25rem 1.5rem; }
+
+    .filter-btn {
+      padding:.3rem .75rem; border-radius:2rem; font-size:.75rem; font-weight:600;
+      border:1px solid #042f20; cursor:pointer; transition:all .2s;
+      background:transparent; color:#6b7280; white-space:nowrap;
+    }
+    .filter-btn.active { background:#042f20; border-color:#10b981; color:#10b981; }
+    .filter-btn:hover:not(.active) { border-color:#6b7280; color:#d1d5db; }
+
+    /* Mobile responsive */
+    @media(max-width:639px) {
+      .stat-card { padding:1rem; }
+      .font-display.text-2xl { font-size:1.25rem; }
+      .pedido-row { padding:.875rem 1rem; }
+      .tab-nav-btn { padding:.5rem .875rem; font-size:.78rem; }
+    }
+
+    .pedido-row { background:#020e0a; border:1px solid #042f20; border-radius:.875rem; padding:1rem 1.25rem; transition:border-color .2s; }
+    .pedido-row:hover { border-color:#064028; }
+
+    .status-pill { display:inline-block; padding:.2rem .7rem; border-radius:2rem; font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+
+    .status-select {
+      background:#010906; border:1px solid #042f20; color:#fff; border-radius:.5rem;
+      padding:.375rem .75rem; font-size:.78rem; outline:none; cursor:pointer;
+    }
+    .status-select:focus { border-color:#10b981; }
+    .status-select option { background:#020e0a; }
+
+    .form-input {
+      background:#010906; border:1px solid #042f20; color:#fff;
+      border-radius:.5rem; padding:.625rem .875rem; font-size:.875rem; outline:none;
+      transition:border-color .2s; width:100%;
+    }
+    .form-input:focus { border-color:#10b981; }
+    .form-input option { background:#020e0a; }
+
+    .btn-primary {
+      background:linear-gradient(135deg,#059669,#10b981); color:#fff;
+      border:none; border-radius:.5rem; padding:.625rem 1.25rem; font-size:.85rem;
+      font-weight:600; cursor:pointer; transition:all .2s;
+    }
+    .btn-primary:hover { background:linear-gradient(135deg,#047857,#059669); box-shadow:0 0 20px rgba(16,185,129,.3); }
+    .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+
+    .btn-outline { background:transparent; color:#10b981; border:1px solid #10b981; border-radius:.5rem; padding:.5rem 1rem; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .2s; }
+    .btn-outline:hover { background:#10b981; color:#fff; }
+    .btn-danger { background:transparent; color:#f87171; border:1px solid #ef4444; border-radius:.5rem; padding:.4rem .875rem; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .2s; }
+    .btn-danger:hover { background:#ef4444; color:#fff; }
+
+    .badge-tipo { font-size:.7rem; font-weight:700; padding:.15rem .55rem; border-radius:2rem; }
+
+    .toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(100px); background:#020e0a; border:1px solid #10b981; color:#fff; padding:.75rem 1.5rem; border-radius:2rem; font-size:.85rem; font-weight:500; z-index:200; transition:transform .3s ease; white-space:nowrap; box-shadow:0 8px 32px rgba(0,0,0,.5); }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    .toast.erro { border-color:#ef4444; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation:fadeUp .35s ease forwards; }
+
+    .page-btn { background:#020e0a; border:1px solid #042f20; color:#9ca3af; padding:.375rem .75rem; border-radius:.5rem; font-size:.8rem; cursor:pointer; transition:all .2s; }
+    .page-btn:hover:not(:disabled) { border-color:#10b981; color:#fff; }
+    .page-btn:disabled { opacity:.3; cursor:not-allowed; }
+    .page-btn.current { background:#042f20; border-color:#10b981; color:#fff; }
   </style>
 </head>
-<body class="min-h-screen text-white font-sans">
+<body class="min-h-screen text-white">
 
-<!-- HEADER -->
+<div id="toast" class="toast"></div>
+
+<!-- Header -->
 <header class="glass sticky top-0 z-50 border-b border-bv-border">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-    <a href="/welcome.html" class="flex items-center gap-3">
-      <img src="/bellavistalogo.png" alt="Bella Vista" class="h-10 w-10 rounded-full object-cover" onerror="this.style.display='none'">
-      <span class="text-xl font-extrabold text-emerald-400">Bella Vista</span>
-      <span class="bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-bold px-2 py-0.5 rounded-full">Admin</span>
+  <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between gap-4">
+    <a href="/welcome.html" class="flex items-center gap-3" style="text-decoration:none">
+      <img src="/bellavistalogo.png" alt="Bella Vista" class="h-8 w-8 rounded-full object-cover" onerror="this.style.display='none'">
+      <span class="font-display text-lg font-bold text-emerald-400">Bella Vista</span>
     </a>
-    <nav class="flex items-center gap-4 text-sm">
-      <a href="/index.html" class="text-gray-400 hover:text-white transition-colors">📋 Cardápio</a>
-      <a href="/relatorio.html" class="text-gray-400 hover:text-white transition-colors">📊 Relatórios</a>
-      <button onclick="fazerLogout()" class="text-red-400 hover:text-red-300 transition-colors">Sair</button>
-    </nav>
+    <div class="flex items-center gap-3">
+      <span class="text-xs px-2.5 py-1 rounded-full font-semibold" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#f59e0b">Painel Admin</span>
+      <span id="admin-nome" class="text-gray-500 text-sm hidden md:block"></span>
+      <button onclick="fazerLogout()" class="nav-link text-xs" style="color:#f87171">Sair</button>
+    </div>
   </div>
 </header>
 
-<main class="max-w-7xl mx-auto px-4 py-8">
+<!-- Main -->
+<div class="max-w-7xl mx-auto px-3 sm:px-5 py-4 sm:py-6">
 
-  <!-- ACESSO NEGADO (oculto por padrão) -->
-  <div id="acesso-negado" class="hidden text-center py-24">
-    <div class="text-6xl mb-4">🔒</div>
-    <h2 class="text-2xl font-extrabold text-white mb-2">Acesso Restrito</h2>
-    <p class="text-gray-400 mb-6">Esta página é exclusiva para administradores.</p>
-    <a href="/welcome.html" class="btn-primary text-white font-bold px-8 py-3 rounded-full inline-block">Voltar</a>
-  </div>
-
-  <!-- PAINEL ADMIN -->
-  <div id="painel-admin" class="hidden">
-
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-3xl font-extrabold text-white">Painel de Controle</h1>
-        <p class="text-gray-500 text-sm mt-1">Gerencie pedidos e sugestões do chef</p>
-      </div>
-      <button onclick="carregarPedidos()" class="btn-primary text-white font-bold px-5 py-2.5 rounded-full text-sm">🔄 Atualizar</button>
+  <!-- Stats -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="stats-grid">
+    <div class="stat-card">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Pedidos hoje</p>
+      <p id="stat-pedidos" class="font-display text-2xl font-bold text-white">—</p>
     </div>
-
-    <!-- STATS -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-      <div class="stat-card text-center">
-        <div class="text-2xl font-extrabold text-emerald-400" id="cnt-0">—</div>
-        <div class="text-xs text-gray-500 mt-1">Pendentes</div>
-      </div>
-      <div class="stat-card text-center">
-        <div class="text-2xl font-extrabold text-blue-400" id="cnt-1">—</div>
-        <div class="text-xs text-gray-500 mt-1">Em Preparo</div>
-      </div>
-      <div class="stat-card text-center">
-        <div class="text-2xl font-extrabold text-purple-400" id="cnt-2">—</div>
-        <div class="text-xs text-gray-500 mt-1">Saiu p/ Entrega</div>
-      </div>
-      <div class="stat-card text-center">
-        <div class="text-2xl font-extrabold text-green-400" id="cnt-3">—</div>
-        <div class="text-xs text-gray-500 mt-1">Pronto p/ Retirada</div>
-      </div>
-      <div class="stat-card text-center">
-        <div class="text-2xl font-extrabold text-gray-400" id="cnt-4">—</div>
-        <div class="text-xs text-gray-500 mt-1">Finalizados</div>
-      </div>
-      <div class="stat-card text-center">
-        <div class="text-2xl font-extrabold text-red-400" id="cnt-5">—</div>
-        <div class="text-xs text-gray-500 mt-1">Cancelados</div>
-      </div>
+    <div class="stat-card">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Pendentes</p>
+      <p id="stat-pendentes" class="font-display text-2xl font-bold text-amber-400">—</p>
     </div>
-
-    <!-- SUGESTÃO DO CHEF -->
-    <div class="bg-bv-card border border-bv-border rounded-2xl p-5 mb-8">
-      <h2 class="text-lg font-extrabold text-white mb-4">👨‍🍳 Sugestão do Chef</h2>
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-        <div>
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Período</label>
-          <select id="sug-periodo" class="select-field" onchange="carregarItensSugestao()">
-            <option value="Almoco">Almoço</option>
-            <option value="Jantar">Jantar</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Item do Cardápio</label>
-          <select id="sug-item-id" class="select-field" onchange="document.getElementById('sug-item-id-num').value=this.value">
-            <option value="">Selecione um item...</option>
-          </select>
-          <input type="hidden" id="sug-item-id-num" />
-        </div>
-        <div>
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">Desconto (%)</label>
-          <input type="number" id="sug-desconto" value="10" min="1" max="100"
-            class="input-field w-full rounded-xl px-4 py-3 text-sm" />
-        </div>
-        <button onclick="salvarSugestao()" class="btn-primary text-white font-bold py-3 rounded-full text-sm">
-          ✅ Salvar Sugestão
-        </button>
-      </div>
-      <div id="sug-atual" class="mt-4 text-sm text-gray-500"></div>
+    <div class="stat-card">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Em preparo</p>
+      <p id="stat-preparo" class="font-display text-2xl font-bold text-blue-400">—</p>
     </div>
-
-    <!-- FILTROS -->
-    <div class="flex flex-wrap gap-3 mb-6 items-center">
-      <span class="text-gray-400 text-sm font-bold">Filtrar:</span>
-      <button onclick="filtrar('')" id="f-todos" class="px-4 py-1.5 rounded-full text-sm font-bold bg-emerald-700 text-white">Todos</button>
-      <button onclick="filtrar('0')" id="f-0" class="px-4 py-1.5 rounded-full text-sm font-bold bg-bv-card border border-bv-border text-gray-400">Pendentes</button>
-      <button onclick="filtrar('1')" id="f-1" class="px-4 py-1.5 rounded-full text-sm font-bold bg-bv-card border border-bv-border text-gray-400">Em Preparo</button>
-      <button onclick="filtrar('2')" id="f-2" class="px-4 py-1.5 rounded-full text-sm font-bold bg-bv-card border border-bv-border text-gray-400">Saiu p/ Entrega</button>
-      <button onclick="filtrar('3')" id="f-3" class="px-4 py-1.5 rounded-full text-sm font-bold bg-bv-card border border-bv-border text-gray-400">Pronto p/ Retirada</button>
-      <button onclick="filtrar('4')" id="f-4" class="px-4 py-1.5 rounded-full text-sm font-bold bg-bv-card border border-bv-border text-gray-400">Finalizados</button>
-      <button onclick="filtrar('5')" id="f-5" class="px-4 py-1.5 rounded-full text-sm font-bold bg-bv-card border border-bv-border text-gray-400">Cancelados</button>
-      <div class="ml-auto flex items-center gap-2">
-        <select id="filtro-tipo" onchange="renderPedidos()" class="select-field" style="width:auto;padding:.4rem .75rem;">
-          <option value="">Todos os tipos</option>
-          <option value="Presencial">Presencial</option>
-          <option value="DeliveryProprio">Delivery Próprio</option>
-          <option value="DeliveryAplicativo">Delivery Aplicativo</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- LISTA DE PEDIDOS -->
-    <div id="pedidos-admin-list" class="space-y-3">
-      <div class="text-center py-12 text-gray-500">Carregando pedidos...</div>
-    </div>
-
-    <!-- PAGINAÇÃO -->
-    <div class="flex items-center justify-between mt-6">
-      <button onclick="mudarPagina(-1)" id="btn-prev" class="bg-bv-card border border-bv-border text-white font-bold px-5 py-2 rounded-full text-sm hover:bg-bv-hover disabled:opacity-30 transition-colors">← Anterior</button>
-      <span id="pagina-info" class="text-gray-500 text-sm">Página 1</span>
-      <button onclick="mudarPagina(1)" id="btn-next" class="bg-bv-card border border-bv-border text-white font-bold px-5 py-2 rounded-full text-sm hover:bg-bv-hover transition-colors">Próxima →</button>
+    <div class="stat-card">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Faturamento hoje</p>
+      <p id="stat-fat" class="font-display text-2xl font-bold text-emerald-400">—</p>
     </div>
   </div>
-</main>
 
-<div id="toast"></div>
+  <!-- Tab navigation -->
+  <div class="flex gap-2 mb-6 overflow-x-auto pb-1" style="border-bottom:1px solid #042f20;padding-bottom:.75rem">
+    <button class="tab-nav-btn active" onclick="mostrarTab('pedidos')" id="tnav-pedidos">Pedidos</button>
+    <button class="tab-nav-btn" onclick="mostrarTab('reservas')" id="tnav-reservas">Reservas</button>
+    <button class="tab-nav-btn" onclick="mostrarTab('sugestao')" id="tnav-sugestao">Sugestao do Chef</button>
+    <a href="/relatorio.html" class="tab-nav-btn" style="text-decoration:none">Relatorios</a>
+  </div>
+
+  <!-- ── TAB PEDIDOS ── -->
+  <div id="tab-pedidos" class="fade-up">
+    <div class="flex flex-col gap-2 mb-4">
+      <!-- Status filters -->
+      <div class="flex gap-1.5 flex-wrap items-center">
+        <button class="filter-btn active" onclick="filtrarPedidos('todos')" id="f-todos">Todos</button>
+        <button class="filter-btn" onclick="filtrarPedidos(0)" id="f-0">Pendente</button>
+        <button class="filter-btn" onclick="filtrarPedidos(1)" id="f-1">Em preparo</button>
+        <button class="filter-btn" onclick="filtrarPedidos(2)" id="f-2">Saiu</button>
+        <button class="filter-btn" onclick="filtrarPedidos(3)" id="f-3">Pronto</button>
+        <button class="filter-btn" onclick="filtrarPedidos(4)" id="f-4">Finalizado</button>
+        <button class="filter-btn" onclick="filtrarPedidos(5)" id="f-5">Cancelado</button>
+      </div>
+      <!-- Tipo + refresh -->
+      <div class="flex gap-1.5 flex-wrap items-center">
+        <button class="filter-btn active" onclick="filtrarTipo('todos')" id="ft-todos">Todos</button>
+        <button class="filter-btn" onclick="filtrarTipo('Presencial')" id="ft-pres">Presencial</button>
+        <button class="filter-btn" onclick="filtrarTipo('Delivery')" id="ft-del">Delivery</button>
+        <button onclick="carregarPedidos()" class="btn-outline text-xs py-1" style="margin-left:auto">Atualizar</button>
+      </div>
+    </div>
+
+    <div id="lista-pedidos" class="space-y-3"></div>
+    <p id="sem-pedidos" style="display:none" class="text-center text-gray-600 py-10 text-sm">Nenhum pedido encontrado.</p>
+
+    <!-- Paginacao -->
+    <div id="paginacao" class="flex items-center justify-center gap-2 mt-6" style="display:none!important"></div>
+  </div>
+
+  <!-- ── TAB RESERVAS ── -->
+  <div id="tab-reservas" style="display:none" class="fade-up">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex gap-2">
+        <button class="filter-btn active" onclick="filtrarReservas('todas')" id="fr-todas">Todas</button>
+        <button class="filter-btn" onclick="filtrarReservas(0)" id="fr-0">Confirmadas</button>
+        <button class="filter-btn" onclick="filtrarReservas(1)" id="fr-1">Canceladas</button>
+        <button class="filter-btn" onclick="filtrarReservas(2)" id="fr-2">Concluidas</button>
+      </div>
+      <button onclick="carregarReservas()" class="btn-outline text-xs py-1.5">Atualizar</button>
+    </div>
+    <div id="lista-reservas" class="space-y-3"></div>
+    <p id="sem-reservas" style="display:none" class="text-center text-gray-600 py-10 text-sm">Nenhuma reserva.</p>
+  </div>
+
+  <!-- ── TAB SUGESTAO ── -->
+  <div id="tab-sugestao" style="display:none" class="fade-up">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Almoco -->
+      <div style="background:#020e0a;border:1px solid #042f20;border-radius:1rem;padding:1.5rem">
+        <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-4">Almoco</p>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Prato destaque</label>
+            <select id="sug-almoco-item" class="form-input" onchange="preencherPreco('almoco')">
+              <option value="">Carregando...</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Desconto (%)</label>
+            <input id="sug-almoco-desc" type="number" min="1" max="80" value="20" class="form-input" />
+          </div>
+          <p id="sug-almoco-preview" class="text-gray-500 text-sm"></p>
+          <button onclick="definirSugestao('Almoco')" class="btn-primary w-full" style="width:100%">Definir para hoje</button>
+          <p id="sug-almoco-msg" class="text-sm text-center" style="display:none"></p>
+        </div>
+      </div>
+      <!-- Jantar -->
+      <div style="background:#020e0a;border:1px solid #042f20;border-radius:1rem;padding:1.5rem">
+        <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-4">Jantar</p>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Prato destaque</label>
+            <select id="sug-jantar-item" class="form-input" onchange="preencherPreco('jantar')">
+              <option value="">Carregando...</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Desconto (%)</label>
+            <input id="sug-jantar-desc" type="number" min="1" max="80" value="20" class="form-input" />
+          </div>
+          <p id="sug-jantar-preview" class="text-gray-500 text-sm"></p>
+          <button onclick="definirSugestao('Jantar')" class="btn-primary w-full" style="width:100%">Definir para hoje</button>
+          <p id="sug-jantar-msg" class="text-sm text-center" style="display:none"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
 
 <script>
-const api = {
-  async get(url) {
-    const r = await fetch('/api' + url, { credentials:'include', headers:{'Accept':'application/json'} });
-    const data = r.status === 204 ? null : await r.json().catch(() => null);
-    return { ok: r.ok, data };
-  },
-  async post(url, body) {
-    const r = await fetch('/api' + url, { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-    const data = await r.json().catch(() => null);
-    return { ok: r.ok, data };
-  },
-  async patch(url, body) {
-    const r = await fetch('/api' + url, { method:'PATCH', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-    const data = await r.json().catch(() => null);
-    return { ok: r.ok, data };
-  }
-};
-
-const statusDesc  = ['Pendente','Em Preparo','Saiu p/ Entrega','Pronto p/ Retirada','Finalizado','Cancelado'];
-const statusClass = ['status-0','status-1','status-2','status-3','status-4','status-5'];
-
+// ─── State ────────────────────────────────────────────────────────────────────
 let todosPedidos = [];
-let filtroStatus = '';
-let pagina = 1;
-const TAMANHO = 20;
+let todasReservas = [];
+let filtroStatusPedido = 'todos';
+let filtroTipoPedido = 'todos';
+let filtroStatusReserva = 'todas';
+let itensPorPagina = 15;
+let paginaAtual = 1;
+let itensAlmoco = [];
+let itensJantar = [];
 
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show ' + (type || 'success');
-  setTimeout(() => { t.className = ''; }, 3000);
-}
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  await verificarAdmin();
+  carregarPedidos();
+  carregarEstatisticas();
+  carregarItensSugestao();
+
+  // auto-refresh
+  setInterval(() => {
+    const tabAtiva = document.getElementById('tab-pedidos').style.display !== 'none';
+    if (tabAtiva) carregarPedidos();
+    carregarEstatisticas();
+  }, 20000);
+});
 
 async function verificarAdmin() {
-  const r = await api.get('/auth/me');
-  if (!r.ok || !r.data?.roles?.includes('Admin')) {
-    document.getElementById('acesso-negado').classList.remove('hidden');
-    return false;
-  }
-  document.getElementById('painel-admin').classList.remove('hidden');
-  return true;
-}
-
-async function carregarPedidos() {
-  const r = await api.get('/pedido/todos?pagina=' + pagina + '&tamanho=' + TAMANHO);
-  if (!r.ok) { showToast('❌ Erro ao carregar pedidos', 'error'); return; }
-  todosPedidos = r.data || [];
-  atualizarContadores();
-  renderPedidos();
-  document.getElementById('pagina-info').textContent = 'Página ' + pagina;
-  document.getElementById('btn-prev').disabled = pagina <= 1;
-}
-
-function atualizarContadores() {
-  for (let i = 0; i <= 5; i++) {
-    document.getElementById('cnt-' + i).textContent = todosPedidos.filter(p => p.status === i).length;
-  }
-}
-
-function filtrar(status) {
-  filtroStatus = status;
-  // Update filter buttons
-  const ids = ['todos','0','1','2','3','4','5'];
-  ids.forEach(id => {
-    const btn = document.getElementById('f-' + id);
-    if (!btn) return;
-    const isActive = id === (status === '' ? 'todos' : status);
-    btn.className = 'px-4 py-1.5 rounded-full text-sm font-bold ' + (isActive ? 'bg-emerald-700 text-white' : 'bg-bv-card border border-bv-border text-gray-400');
-  });
-  renderPedidos();
-}
-
-function renderPedidos() {
-  const tipoFiltro = document.getElementById('filtro-tipo').value;
-  let lista = todosPedidos;
-  if (filtroStatus !== '') lista = lista.filter(p => p.status === parseInt(filtroStatus));
-  if (tipoFiltro) lista = lista.filter(p => p.tipoAtendimento === tipoFiltro);
-
-  const el = document.getElementById('pedidos-admin-list');
-  if (!lista.length) {
-    el.innerHTML = '<div class="text-center py-12 text-gray-500">Nenhum pedido encontrado.</div>';
-    return;
-  }
-  el.innerHTML = lista.map(p => `
-    <div class="order-card border-status-${p.status}">
-      <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
-        <div>
-          <div class="flex items-center gap-2 mb-1">
-            <span class="text-white font-extrabold">Pedido #${p.pedidoId}</span>
-            <span class="status-badge ${statusClass[p.status]}">${p.statusDesc || statusDesc[p.status]}</span>
-          </div>
-          <p class="text-gray-500 text-xs">${p.fmtDH} · ${p.tipoAtendimento}${p.numeroMesa ? ' · Mesa '+p.numeroMesa : ''}</p>
-          <p class="text-gray-400 text-sm mt-0.5">👤 ${p.cliente}</p>
-        </div>
-        <div class="text-right">
-          <p class="text-emerald-400 font-extrabold text-lg">R$ ${p.total.toFixed(2).replace('.',',')}</p>
-        </div>
-      </div>
-      <div class="text-xs text-gray-500 mb-3">
-        ${p.itens.map(i => i.quantidade + '× ' + i.nome).join(' · ')}
-      </div>
-      <div class="flex items-center gap-3 pt-3 border-t border-bv-border">
-        <select id="sel-${p.pedidoId}" class="select-field flex-1" style="padding:.4rem .75rem;">
-          ${[0,1,2,3,4,5].map(s => `<option value="${s}" ${p.status===s?'selected':''}>${statusDesc[s]}</option>`).join('')}
-        </select>
-        <button onclick="salvarStatus(${p.pedidoId})" class="btn-primary text-white font-bold px-5 py-2 rounded-full text-sm whitespace-nowrap">
-          Salvar
-        </button>
-      </div>
-    </div>`).join('');
-}
-
-async function salvarStatus(pedidoId) {
-  const novoStatus = parseInt(document.getElementById('sel-' + pedidoId).value);
-  const r = await api.patch('/pedido/' + pedidoId + '/status', { novoStatus });
-  if (r.ok) {
-    showToast('✅ Status atualizado para: ' + (r.data?.statusDesc || r.data?.mensagem || 'OK'), 'success');
-    // Atualizar localmente sem recarregar tudo
-    const idx = todosPedidos.findIndex(p => p.pedidoId === pedidoId);
-    if (idx >= 0) { todosPedidos[idx].status = novoStatus; todosPedidos[idx].statusDesc = statusDesc[novoStatus]; }
-    atualizarContadores();
-    renderPedidos();
-  } else {
-    showToast('❌ Erro ao atualizar status', 'error');
-  }
-}
-
-async function salvarSugestao() {
-  const periodo = document.getElementById('sug-periodo').value;
-  const itemId = parseInt(document.getElementById('sug-item-id').value || document.getElementById('sug-item-id-num').value);
-  const desconto = parseFloat(document.getElementById('sug-desconto').value);
-  if (!itemId || isNaN(itemId)) { showToast('❌ Informe um ID de item válido', 'error'); return; }
-  if (!desconto || desconto < 1 || desconto > 100) { showToast('❌ Desconto deve ser entre 1 e 100%', 'error'); return; }
-  // API espera: { ItemId, Periodo (string), PercentualDesconto }
-  const r = await api.post('/cardapio/sugestao', { itemId, periodo, percentualDesconto: desconto });
-  if (r.ok) {
-    showToast('✅ Sugestão salva!', 'success');
-    document.getElementById('sug-atual').textContent = '✅ Sugestão ativa: Item #' + itemId + ' com ' + desconto + '% de desconto no ' + periodo;
-  } else {
-    showToast('❌ ' + (r.data?.message || r.data || 'Erro ao salvar sugestão'), 'error');
-  }
-}
-
-function mudarPagina(delta) {
-  if (pagina + delta < 1) return;
-  pagina += delta;
-  carregarPedidos();
+  try {
+    const r = await fetch('/api/auth/me', { credentials:'include' });
+    if (!r.ok) { window.location.href = '/login.html'; return; }
+    const d = await r.json();
+    if (!d.roles?.includes('Admin')) { window.location.href = '/welcome.html'; return; }
+    document.getElementById('admin-nome').textContent = d.nome;
+  } catch(_) { window.location.href = '/login.html'; }
 }
 
 async function fazerLogout() {
   await fetch('/api/auth/logout', { method:'POST', credentials:'include' });
-  location.href = '/welcome.html';
+  window.location.href = '/login.html';
 }
 
-async function carregarItensSugestao() {
-  const periodo = document.getElementById('sug-periodo').value;
-  const endpoint = periodo === 'Jantar' ? '/cardapio/jantar' : '/cardapio/almoco';
-  const r = await api.get(endpoint);
-  const select = document.getElementById('sug-item-id');
-  if (r.ok && r.data?.itens?.length) {
-    select.innerHTML = '<option value="">Selecione um item...</option>' +
-      r.data.itens.map(i => `<option value="${i.id}">#${i.id} — ${i.nome} (R$ ${i.precoBase.toFixed(2).replace('.',',')})</option>`).join('');
+// ─── Stats ────────────────────────────────────────────────────────────────────
+async function carregarEstatisticas() {
+  try {
+    const hoje = new Date().toISOString().split('T')[0];
+    const r = await fetch(`/api/relatorio/faturamento?dataInicio=${hoje}&dataFim=${hoje}`, { credentials:'include' });
+    if (r.ok) {
+      const d = await r.json();
+      document.getElementById('stat-fat').textContent = formatarPreco(d.totalFaturado || 0);
+      document.getElementById('stat-pedidos').textContent = d.totalPedidos ?? '—';
+    }
+  } catch(_) {}
+
+  // contar pendentes e em preparo
+  const pendentes = todosPedidos.filter(p => p.status === 0).length;
+  const preparo = todosPedidos.filter(p => p.status === 1).length;
+  document.getElementById('stat-pendentes').textContent = pendentes;
+  document.getElementById('stat-preparo').textContent = preparo;
+}
+
+// ─── Pedidos ──────────────────────────────────────────────────────────────────
+async function carregarPedidos() {
+  try {
+    const r = await fetch('/api/pedido/todos', { credentials:'include' });
+    if (!r.ok) return;
+    todosPedidos = await r.json();
+    renderizarPedidos();
+    carregarEstatisticas();
+  } catch(_) {}
+}
+
+function filtrarPedidos(s) {
+  filtroStatusPedido = s;
+  paginaAtual = 1;
+  document.querySelectorAll('[id^="f-"]').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById(s === 'todos' ? 'f-todos' : `f-${s}`);
+  if (btn) btn.classList.add('active');
+  renderizarPedidos();
+}
+
+function filtrarTipo(t) {
+  filtroTipoPedido = t;
+  paginaAtual = 1;
+  document.querySelectorAll('[id^="ft-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById(t === 'todos' ? 'ft-todos' : t === 'Presencial' ? 'ft-pres' : 'ft-del').classList.add('active');
+  renderizarPedidos();
+}
+
+function renderizarPedidos() {
+  let lista = [...todosPedidos];
+  if (filtroStatusPedido !== 'todos') lista = lista.filter(p => p.status === filtroStatusPedido);
+  if (filtroTipoPedido !== 'todos') lista = lista.filter(p => p.tipo === filtroTipoPedido);
+  lista.sort((a,b) => (b.pedidoId||b.id) - (a.pedidoId||a.id));
+
+  const total = lista.length;
+  const inicio = (paginaAtual - 1) * itensPorPagina;
+  const pagina = lista.slice(inicio, inicio + itensPorPagina);
+
+  const container = document.getElementById('lista-pedidos');
+  const sem = document.getElementById('sem-pedidos');
+
+  if (!pagina.length) {
+    container.innerHTML = '';
+    sem.style.display = '';
   } else {
-    select.innerHTML = '<option value="">Nenhum item disponível</option>';
+    sem.style.display = 'none';
+    container.innerHTML = pagina.map(p => {
+      const { bg, color, label } = statusInfo(p.status);
+      const itensTxt = (p.itens||[]).map(i => `${i.nomePrato} x${i.quantidade}`).join(', ');
+      const isDelivery = p.tipo === 'Delivery';
+      return `
+        <div class="pedido-row fade-up">
+          <div class="flex items-start gap-3 flex-wrap">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap mb-1">
+                <span class="status-pill" style="background:${bg};color:${color}">${label}</span>
+                <span class="text-gray-500 text-xs">#${p.pedidoId||p.id}</span>
+                <span class="badge-tipo" style="background:${isDelivery?'rgba(139,92,246,.15)':'rgba(16,185,129,.1)'};color:${isDelivery?'#c4b5fd':'#6ee7b7'}">${p.tipo||'Presencial'}</span>
+                ${p.numeroMesa?`<span class="text-gray-600 text-xs">Mesa ${p.numeroMesa}</span>`:''}
+                <span class="text-gray-600 text-xs">${formatarPreco(p.total||0)}</span>
+              </div>
+              <p class="text-gray-300 text-sm truncate">${itensTxt}</p>
+              ${isDelivery && p.enderecoEntrega ? `<p class="text-gray-600 text-xs mt-0.5">Entrega: ${p.enderecoEntrega}</p>` : ''}
+              <p class="text-gray-600 text-xs mt-0.5">${p.clienteNome||''}</p>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap flex-shrink-0">
+              <select class="status-select" style="font-size:.75rem;padding:.3rem .6rem" onchange="atualizarStatus(${p.pedidoId||p.id}, this.value)">
+                <option value="0"${p.status===0?' selected':''}>Pendente</option>
+                <option value="1"${p.status===1?' selected':''}>Em preparo</option>
+                <option value="2"${p.status===2?' selected':''}>Saiu entrega</option>
+                <option value="3"${p.status===3?' selected':''}>Pronto</option>
+                <option value="4"${p.status===4?' selected':''}>Finalizado</option>
+                <option value="5"${p.status===5?' selected':''}>Cancelado</option>
+              </select>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // Paginação
+  const pag = document.getElementById('paginacao');
+  const totalPags = Math.ceil(total / itensPorPagina);
+  if (totalPags > 1) {
+    pag.style.removeProperty('display');
+    let html = `<button class="page-btn" onclick="irPagina(${paginaAtual-1})" ${paginaAtual<=1?'disabled':''}>Anterior</button>`;
+    for (let i = 1; i <= totalPags; i++) {
+      if (i === 1 || i === totalPags || Math.abs(i - paginaAtual) <= 1) {
+        html += `<button class="page-btn${i===paginaAtual?' current':''}" onclick="irPagina(${i})">${i}</button>`;
+      } else if (Math.abs(i - paginaAtual) === 2) {
+        html += `<span class="text-gray-600 text-sm px-1">...</span>`;
+      }
+    }
+    html += `<button class="page-btn" onclick="irPagina(${paginaAtual+1})" ${paginaAtual>=totalPags?'disabled':''}>Proximo</button>`;
+    pag.innerHTML = html;
+  } else {
+    pag.style.display = 'none';
   }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const ok = await verificarAdmin();
-  if (ok) {
-    carregarPedidos();
-    carregarItensSugestao();
+function irPagina(p) {
+  paginaAtual = p;
+  renderizarPedidos();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function atualizarStatus(id, status) {
+  try {
+    const r = await fetch(`/api/pedido/${id}/status`, {
+      method:'PUT', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ status: parseInt(status) })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      mostrarToast(d.statusDesc || d.mensagem || 'Status atualizado');
+      const p = todosPedidos.find(x => (x.pedidoId||x.id) === id);
+      if (p) p.status = parseInt(status);
+      renderizarPedidos();
+      carregarEstatisticas();
+    } else {
+      mostrarToast(extrairErro(d, 'Erro ao atualizar'), true);
+      carregarPedidos();
+    }
+  } catch(_) { mostrarToast('Erro de conexao', true); carregarPedidos(); }
+}
+
+// ─── Reservas ────────────────────────────────────────────────────────────────
+async function carregarReservas() {
+  try {
+    const r = await fetch('/api/reserva/todas', { credentials:'include' });
+    if (!r.ok) return;
+    todasReservas = await r.json();
+    renderizarReservas();
+  } catch(_) {}
+}
+
+function filtrarReservas(s) {
+  filtroStatusReserva = s;
+  document.querySelectorAll('[id^="fr-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById(s === 'todas' ? 'fr-todas' : `fr-${s}`).classList.add('active');
+  renderizarReservas();
+}
+
+function renderizarReservas() {
+  let lista = [...todasReservas];
+  if (filtroStatusReserva !== 'todas') lista = lista.filter(rv => rv.status === filtroStatusReserva);
+  lista.sort((a,b) => (b.reservaId||b.id) - (a.reservaId||a.id));
+
+  const container = document.getElementById('lista-reservas');
+  const sem = document.getElementById('sem-reservas');
+
+  if (!lista.length) {
+    container.innerHTML = ''; sem.style.display = ''; return;
   }
-});
+  sem.style.display = 'none';
+  const statusColors = {
+    0: { bg:'rgba(16,185,129,.15)', color:'#34d399', label:'Confirmada' },
+    1: { bg:'rgba(239,68,68,.15)', color:'#f87171', label:'Cancelada' },
+    2: { bg:'rgba(107,114,128,.15)', color:'#9ca3af', label:'Concluida' },
+  };
+  container.innerHTML = lista.map(rv => {
+    const sc = statusColors[rv.status] || statusColors[0];
+    return `
+      <div class="pedido-row fade-up">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="status-pill" style="background:${sc.bg};color:${sc.color}">${sc.label}</span>
+              <span class="text-gray-500 text-xs">#${rv.reservaId||rv.id}</span>
+            </div>
+            <p class="text-white text-sm font-semibold">Mesa ${rv.numeroMesa} — ${rv.data} as ${rv.horario}</p>
+            <p class="text-gray-500 text-xs mt-0.5">${rv.numeroPessoas} pessoas &bull; ${rv.clienteNome||''} &bull; Cod: <span class="font-mono text-emerald-400">${rv.codigoConfirmacao}</span></p>
+          </div>
+          ${rv.status === 0 ? `
+          <div class="flex gap-2">
+            <button onclick="atualizarReserva(${rv.reservaId||rv.id},2)" class="btn-outline text-xs">Concluir</button>
+            <button onclick="atualizarReserva(${rv.reservaId||rv.id},1)" class="btn-danger">Cancelar</button>
+          </div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function atualizarReserva(id, status) {
+  try {
+    const r = await fetch(`/api/reserva/${id}/status`, {
+      method:'PUT', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ status })
+    });
+    const d = await r.json();
+    if (r.ok) { mostrarToast(d.message || 'Reserva atualizada'); carregarReservas(); }
+    else mostrarToast(extrairErro(d, 'Erro ao atualizar'), true);
+  } catch(_) { mostrarToast('Erro de conexao', true); }
+}
+
+// ─── Sugestão do chef ──────────────────────────────────────────────────────────
+async function carregarItensSugestao() {
+  try {
+    const [rA, rJ] = await Promise.all([
+      fetch('/api/cardapio/almoco', { credentials:'include' }),
+      fetch('/api/cardapio/jantar', { credentials:'include' })
+    ]);
+    if (rA.ok) { const d = await rA.json(); itensAlmoco = d.itens || []; }
+    if (rJ.ok) { const d = await rJ.json(); itensJantar = d.itens || []; }
+
+    preencherSelectSugestao('almoco', itensAlmoco);
+    preencherSelectSugestao('jantar', itensJantar);
+
+    // Carregar sugestoes atuais
+    const [rsA, rsJ] = await Promise.all([
+      fetch('/api/cardapio/sugestao?periodo=Almoco', { credentials:'include' }),
+      fetch('/api/cardapio/sugestao?periodo=Jantar', { credentials:'include' })
+    ]);
+    if (rsA.ok) {
+      const sA = await rsA.json();
+      if (sA && sA.itemCardapioId) {
+        document.getElementById('sug-almoco-item').value = sA.itemCardapioId;
+        preencherPreco('almoco');
+      }
+    }
+    if (rsJ.ok) {
+      const sJ = await rsJ.json();
+      if (sJ && sJ.itemCardapioId) {
+        document.getElementById('sug-jantar-item').value = sJ.itemCardapioId;
+        preencherPreco('jantar');
+      }
+    }
+  } catch(_) {}
+}
+
+function preencherSelectSugestao(periodo, itens) {
+  const sel = document.getElementById(`sug-${periodo}-item`);
+  sel.innerHTML = '<option value="">Selecione o prato</option>' +
+    itens.map(i => `<option value="${i.id}" data-preco="${i.precoBase}">${i.nome} — R$ ${Number(i.precoBase).toFixed(2).replace('.',',')}</option>`).join('');
+}
+
+function preencherPreco(periodo) {
+  const sel = document.getElementById(`sug-${periodo}-item`);
+  const desc = parseFloat(document.getElementById(`sug-${periodo}-desc`).value) || 20;
+  const opt = sel.selectedOptions[0];
+  if (!opt || !opt.dataset.preco) { document.getElementById(`sug-${periodo}-preview`).textContent = ''; return; }
+  const preco = parseFloat(opt.dataset.preco);
+  const final = preco * (1 - desc / 100);
+  document.getElementById(`sug-${periodo}-preview`).textContent =
+    `Preco original: R$ ${preco.toFixed(2).replace('.',',')} → Com desconto: R$ ${final.toFixed(2).replace('.',',')}`;
+}
+
+async function definirSugestao(periodo) {
+  const p = periodo.toLowerCase();
+  const itemId = document.getElementById(`sug-${p}-item`).value;
+  const desc = parseFloat(document.getElementById(`sug-${p}-desc`).value) || 20;
+  const msgEl = document.getElementById(`sug-${p}-msg`);
+
+  if (!itemId) { showSugMsg(msgEl, 'Selecione um prato.', false); return; }
+
+  try {
+    const r = await fetch('/api/cardapio/sugestao', {
+      method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ itemId: parseInt(itemId), periodo, percentualDesconto: desc })
+    });
+    const d = await r.json();
+    if (r.ok) { showSugMsg(msgEl, 'Sugestao definida com sucesso!', true); }
+    else showSugMsg(msgEl, extrairErro(d, 'Erro ao definir'), false);
+  } catch(_) { showSugMsg(msgEl, 'Erro de conexao', false); }
+}
+
+function showSugMsg(el, texto, ok) {
+  el.textContent = texto;
+  el.style.color = ok ? '#34d399' : '#f87171';
+  el.style.display = '';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+// ─── Tab nav ──────────────────────────────────────────────────────────────────
+function mostrarTab(tab) {
+  ['pedidos','reservas','sugestao'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === tab ? '' : 'none';
+    document.getElementById(`tnav-${t}`).className = 'tab-nav-btn' + (t === tab ? ' active' : '');
+  });
+  if (tab === 'reservas') carregarReservas();
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function formatarPreco(v) {
+  return 'R$ ' + Number(v).toFixed(2).replace('.',',');
+}
+
+function extrairErro(data, fallback) {
+  if (!data) return fallback;
+  if (typeof data === 'string') return data;
+  if (data.message) return data.message;
+  if (data.errors) return Object.values(data.errors).flat().join(' ');
+  if (data.title) return data.title;
+  return fallback;
+}
+
+function statusInfo(s) {
+  const map = {
+    0: { bg:'rgba(245,158,11,.15)', color:'#fbbf24', label:'Pendente' },
+    1: { bg:'rgba(59,130,246,.15)', color:'#93c5fd', label:'Em preparo' },
+    2: { bg:'rgba(139,92,246,.15)', color:'#c4b5fd', label:'Saiu' },
+    3: { bg:'rgba(16,185,129,.15)', color:'#34d399', label:'Pronto' },
+    4: { bg:'rgba(107,114,128,.15)', color:'#9ca3af', label:'Finalizado' },
+    5: { bg:'rgba(239,68,68,.15)', color:'#f87171', label:'Cancelado' },
+  };
+  return map[s] || { bg:'rgba(107,114,128,.15)', color:'#9ca3af', label:'?' };
+}
+
+function mostrarToast(texto, erro = false) {
+  const t = document.getElementById('toast');
+  t.textContent = texto;
+  t.className = 'toast' + (erro?' erro':'');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
 </script>
 </body>
 </html>

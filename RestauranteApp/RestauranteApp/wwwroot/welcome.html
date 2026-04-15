@@ -3,173 +3,169 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bella Vista — Bem-vindo</title>
+  <title>Bella Vista</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
-            bv: {
-              bg:      '#010906',
-              card:    '#020e0a',
-              hover:   '#031e15',
-              border:  '#042f20',
-              border2: '#064028',
-            }
-          }
+          fontFamily: { display: ['Playfair Display','serif'], sans: ['Inter','sans-serif'] },
+          colors: { bv: { bg:'#010906', card:'#020e0a', hover:'#031e15', border:'#042f20', border2:'#064028' } }
         }
       }
     }
   </script>
   <style>
+    * { font-family: 'Inter', sans-serif; }
     body { background-color: #010906; }
-    .glass {
-      background: rgba(2,14,10,0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
+    .font-display { font-family: 'Playfair Display', serif; }
+    .glass { background: rgba(2,14,10,0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
     .card-option {
-      transition: all 0.25s ease;
-      border: 1.5px solid #042f20;
-      background: #020e0a;
+      background: #020e0a; border: 1px solid #042f20; border-radius: 1.5rem;
+      transition: all 0.3s ease; cursor: pointer; text-decoration: none; display: block;
     }
     .card-option:hover {
-      background: #031e15;
-      border-color: #10b981;
-      transform: translateY(-4px);
-      box-shadow: 0 0 24px rgba(16,185,129,0.15);
+      background: #031e15; border-color: #10b981;
+      transform: translateY(-5px); box-shadow: 0 20px 40px rgba(16,185,129,0.1);
     }
     .btn-primary {
       background: linear-gradient(135deg, #059669, #10b981);
-      transition: all 0.2s;
+      transition: all 0.2s; display: inline-block;
     }
-    .btn-primary:hover {
-      background: linear-gradient(135deg, #047857, #059669);
-      box-shadow: 0 0 20px rgba(16,185,129,0.3);
-    }
-    .hero-glow {
-      background: radial-gradient(ellipse at 50% 0%, rgba(16,185,129,0.12) 0%, transparent 70%);
-    }
-    @keyframes fadeIn {
-      from { opacity:0; transform:translateY(12px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
-    .fade-in { animation: fadeIn 0.5s ease forwards; }
+    .btn-primary:hover { background: linear-gradient(135deg, #047857, #059669); box-shadow: 0 0 24px rgba(16,185,129,0.35); }
+    .divider-line { width: 48px; height: 2px; background: #10b981; margin: 1rem auto; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation: fadeUp 0.6s ease forwards; }
+    .nav-link { color: #9ca3af; font-size: .875rem; font-weight: 500; transition: color .2s; text-decoration: none; }
+    .nav-link:hover { color: #fff; }
   </style>
 </head>
-<body class="min-h-screen text-white font-sans">
+<body class="min-h-screen text-white">
 
-  <!-- HEADER -->
-  <header class="glass sticky top-0 z-50 border-b border-bv-border">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/welcome.html" class="flex items-center gap-3">
-        <img src="/bellavistalogo.png" alt="Bella Vista" class="h-10 w-10 rounded-full object-cover" onerror="this.style.display='none'">
-        <span class="text-xl font-extrabold text-emerald-400">Bella Vista</span>
+<header class="glass sticky top-0 z-50 border-b border-bv-border">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
+    <a href="/welcome.html" class="flex items-center gap-2 sm:gap-3 flex-shrink-0" style="text-decoration:none">
+      <img src="/bellavistalogo.png" alt="Bella Vista" class="h-8 w-8 rounded-full object-cover" onerror="this.style.display='none'">
+      <span class="font-display text-lg sm:text-xl font-bold text-emerald-400">Bella Vista</span>
+    </a>
+    <nav class="flex items-center gap-3 sm:gap-5">
+      <a href="/index.html" class="nav-link hidden sm:block text-sm">Cardápio</a>
+      <span id="nav-logado" class="hidden items-center gap-3">
+        <span id="nav-nome" class="text-gray-400 text-sm hidden md:block"></span>
+        <a id="nav-admin-link" href="/admin.html" class="hidden nav-link text-xs sm:text-sm" style="color:#f59e0b;font-weight:600">Admin</a>
+        <button onclick="fazerLogout()" class="nav-link text-xs sm:text-sm" style="color:#f87171">Sair</button>
+      </span>
+      <a id="nav-login-btn" href="/login.html" class="btn-primary text-white font-semibold px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-sm" style="text-decoration:none">Entrar</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="relative overflow-hidden" style="background: radial-gradient(ellipse at 50% -10%, rgba(16,185,129,0.08) 0%, transparent 65%);">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-24 text-center fade-up">
+    <div class="flex items-center justify-center gap-2 mb-5">
+      <span class="status-dot"></span>
+      <span class="text-emerald-400 text-xs font-semibold uppercase tracking-widest" id="status-label">Restaurante aberto</span>
+    </div>
+    <h1 class="font-display text-4xl sm:text-6xl md:text-7xl font-bold mb-4 leading-tight">
+      Uma experiência<br><em class="text-emerald-400">gastronômica</em> completa
+    </h1>
+    <div class="divider-line"></div>
+    <p class="text-gray-400 text-base sm:text-lg max-w-lg mx-auto mb-10 sm:mb-12 px-2">
+      Cardápio sazonal, atendimento presencial, delivery e reservas para o jantar — tudo em um só lugar.
+    </p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
+      <a href="/index.html?modo=presencial" class="card-option p-6 sm:p-8">
+        <div class="w-11 h-11 rounded-2xl bg-emerald-900/40 border border-emerald-800/40 flex items-center justify-center mx-auto mb-4 sm:mb-5">
+          <svg width="22" height="22" fill="none" stroke="#10b981" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </div>
+        <h2 class="font-display text-base sm:text-lg font-semibold text-white mb-2">No Restaurante</h2>
+        <p class="text-gray-500 text-sm leading-relaxed">Peça na mesa sem precisar de cadastro</p>
+        <p class="text-emerald-500 text-xs font-semibold mt-4 uppercase tracking-wider">Ver cardápio</p>
       </a>
-      <nav class="flex items-center gap-4 text-sm">
-        <a href="/index.html" class="text-emerald-300 hover:text-white transition-colors">📋 Cardápio</a>
-        <span id="nav-logged-in" class="hidden items-center gap-4">
-          <span id="nav-user-name" class="text-gray-400"></span>
-          <a id="nav-admin-link" href="/admin.html" class="hidden text-amber-400 hover:text-amber-300 font-bold transition-colors">👑 Admin</a>
-          <button onclick="fazerLogout()" class="text-red-400 hover:text-red-300 transition-colors">Sair</button>
-        </span>
-        <a id="nav-login-link" href="/login.html" class="btn-primary text-white font-bold px-4 py-2 rounded-full text-sm">Entrar</a>
-      </nav>
+
+      <a href="/index.html?modo=delivery" class="card-option p-6 sm:p-8">
+        <div class="w-11 h-11 rounded-2xl bg-emerald-900/40 border border-emerald-800/40 flex items-center justify-center mx-auto mb-4 sm:mb-5">
+          <svg width="22" height="22" fill="none" stroke="#10b981" stroke-width="1.8" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        <h2 class="font-display text-base sm:text-lg font-semibold text-white mb-2">Delivery</h2>
+        <p class="text-gray-500 text-sm leading-relaxed">Receba nossos pratos no conforto de casa</p>
+        <p class="text-emerald-500 text-xs font-semibold mt-4 uppercase tracking-wider">Pedir agora</p>
+      </a>
+
+      <a href="/index.html?modo=reserva" class="card-option p-6 sm:p-8">
+        <div class="w-11 h-11 rounded-2xl bg-emerald-900/40 border border-emerald-800/40 flex items-center justify-center mx-auto mb-4 sm:mb-5">
+          <svg width="22" height="22" fill="none" stroke="#10b981" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </div>
+        <h2 class="font-display text-base sm:text-lg font-semibold text-white mb-2">Reservar Mesa</h2>
+        <p class="text-gray-500 text-sm leading-relaxed">Agende para o jantar com antecedência</p>
+        <p class="text-emerald-500 text-xs font-semibold mt-4 uppercase tracking-wider">Reservar</p>
+      </a>
     </div>
-  </header>
+  </div>
+</section>
 
-  <!-- HERO -->
-  <section class="hero-glow relative overflow-hidden">
-    <div class="max-w-6xl mx-auto px-4 py-20 text-center fade-in">
-      <div class="inline-flex items-center gap-2 bg-emerald-900/30 border border-emerald-700/40 rounded-full px-4 py-1.5 mb-6 text-emerald-400 text-sm font-medium">
-        <span>✨</span> Bem-vindo ao Bella Vista
-      </div>
-      <h1 class="text-5xl md:text-6xl font-extrabold mb-4 leading-tight">
-        Sabor artesanal,<br>
-        <span class="text-emerald-400">atendimento de excelência</span>
-      </h1>
-      <p class="text-gray-400 text-lg max-w-xl mx-auto mb-10">
-        Escolha como deseja aproveitar nossa experiência gastronômica única.
-      </p>
-
-      <!-- CARDS DE OPÇÃO -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-4xl mx-auto mt-8">
-
-        <a href="/index.html?modo=presencial" class="card-option rounded-3xl p-8 flex flex-col items-center text-center no-underline group cursor-pointer">
-          <div class="text-5xl mb-4">🪑</div>
-          <h2 class="text-xl font-extrabold text-white mb-2">Estou no Restaurante</h2>
-          <p class="text-gray-400 text-sm leading-relaxed">Faça seu pedido na mesa sem precisar de login</p>
-          <span class="mt-4 text-emerald-400 text-sm font-bold group-hover:text-emerald-300">Ver cardápio →</span>
-        </a>
-
-        <a href="/index.html?modo=delivery" class="card-option rounded-3xl p-8 flex flex-col items-center text-center no-underline group cursor-pointer">
-          <div class="text-5xl mb-4">🛵</div>
-          <h2 class="text-xl font-extrabold text-white mb-2">Quero Delivery</h2>
-          <p class="text-gray-400 text-sm leading-relaxed">Peça para entrega em casa (login necessário)</p>
-          <span class="mt-4 text-emerald-400 text-sm font-bold group-hover:text-emerald-300">Pedir agora →</span>
-        </a>
-
-        <a href="/index.html?modo=reserva" class="card-option rounded-3xl p-8 flex flex-col items-center text-center no-underline group cursor-pointer">
-          <div class="text-5xl mb-4">📅</div>
-          <h2 class="text-xl font-extrabold text-white mb-2">Reservar Mesa</h2>
-          <p class="text-gray-400 text-sm leading-relaxed">Agende sua mesa para jantar com antecedência</p>
-          <span class="mt-4 text-emerald-400 text-sm font-bold group-hover:text-emerald-300">Reservar →</span>
-        </a>
-
-      </div>
+<!-- DESTAQUES -->
+<section class="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-16 border-t border-bv-border">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+    <div style="background:#020e0a;border:1px solid #042f20;border-radius:1.25rem;padding:1.75rem">
+      <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-3">Cardápio</p>
+      <h3 class="font-display text-xl font-semibold text-white mb-2">40 pratos autorais</h3>
+      <p class="text-gray-500 text-sm">Vinte opções para o almoço e vinte para o jantar, todos preparados com ingredientes frescos e sazonais.</p>
     </div>
-  </section>
-
-  <!-- FEATURES -->
-  <section class="max-w-6xl mx-auto px-4 py-16">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="rounded-2xl p-6 border border-bv-border bg-bv-card">
-        <div class="text-3xl mb-3">🍽️</div>
-        <h3 class="font-extrabold text-white mb-1">Cardápio Completo</h3>
-        <p class="text-gray-500 text-sm">Pratos cuidadosamente elaborados para almoço e jantar com ingredientes frescos.</p>
-      </div>
-      <div class="rounded-2xl p-6 border border-bv-border bg-bv-card">
-        <div class="text-3xl mb-3">👨‍🍳</div>
-        <h3 class="font-extrabold text-white mb-1">Sugestão do Chef</h3>
-        <p class="text-gray-500 text-sm">Descubra a recomendação especial do dia com desconto exclusivo.</p>
-      </div>
-      <div class="rounded-2xl p-6 border border-bv-border bg-bv-card">
-        <div class="text-3xl mb-3">📦</div>
-        <h3 class="font-extrabold text-white mb-1">Delivery Rápido</h3>
-        <p class="text-gray-500 text-sm">Receba nossos pratos no conforto da sua casa com entrega própria ou por aplicativo.</p>
-      </div>
+    <div style="background:#020e0a;border:1px solid #042f20;border-radius:1.25rem;padding:1.75rem">
+      <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-3">Sugestão do Chef</p>
+      <h3 class="font-display text-xl font-semibold text-white mb-2">Desconto diário</h3>
+      <p class="text-gray-500 text-sm">Todo dia nosso chef seleciona um prato especial com 20% de desconto — exclusivo para os clientes mais atentos.</p>
     </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="border-t border-bv-border mt-4 py-8">
-    <div class="max-w-6xl mx-auto px-4 text-center text-gray-600 text-sm">
-      <p>© 2025 Bella Vista — Todos os direitos reservados</p>
+    <div style="background:#020e0a;border:1px solid #042f20;border-radius:1.25rem;padding:1.75rem">
+      <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-3">Reservas</p>
+      <h3 class="font-display text-xl font-semibold text-white mb-2">Jantar exclusivo</h3>
+      <p class="text-gray-500 text-sm">Reserve sua mesa para o jantar com horários das 19h às 22h. Código de confirmação gerado automaticamente.</p>
     </div>
-  </footer>
+  </div>
+</section>
+
+<footer class="border-t border-bv-border py-6 sm:py-8">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between flex-wrap gap-2">
+    <span class="font-display text-emerald-400 font-semibold">Bella Vista</span>
+    <span class="text-gray-600 text-xs">© 2025 Bella Vista. Todos os direitos reservados.</span>
+  </div>
+</footer>
 
 <script>
 async function fazerLogout() {
-  await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+  await fetch('/api/auth/logout', { method:'POST', credentials:'include' });
   location.reload();
 }
-
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const r = await fetch('/api/auth/me', { credentials: 'include', headers: { 'Accept': 'application/json' } });
+    const r = await fetch('/api/auth/me', { credentials:'include', headers:{'Accept':'application/json'} });
     if (r.ok) {
       const d = await r.json();
-      document.getElementById('nav-login-link').classList.add('hidden');
-      const loggedIn = document.getElementById('nav-logged-in');
-      loggedIn.classList.remove('hidden');
-      loggedIn.classList.add('flex');
-      document.getElementById('nav-user-name').textContent = '👋 ' + d.nome;
-      if (d.roles?.includes('Admin')) {
-        document.getElementById('nav-admin-link').classList.remove('hidden');
-      }
+      document.getElementById('nav-login-btn').classList.add('hidden');
+      const el = document.getElementById('nav-logado');
+      el.classList.remove('hidden'); el.classList.add('flex');
+      document.getElementById('nav-nome').textContent = d.nome;
+      if (d.roles?.includes('Admin')) document.getElementById('nav-admin-link').classList.remove('hidden');
     }
-  } catch (_) {}
+  } catch(_) {}
+
+  // Indicador aberto/fechado
+  const h = new Date().getHours();
+  const aberto = (h >= 11 && h < 15) || (h >= 18 && h < 23);
+  const dot = document.querySelector('.status-dot');
+  const label = document.getElementById('status-label');
+  if (!aberto && dot && label) {
+    dot.style.background = '#ef4444'; dot.style.animation = 'none';
+    label.textContent = 'Restaurante fechado no momento';
+    label.style.color = '#f87171';
+  }
 });
 </script>
 </body>
