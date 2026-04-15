@@ -356,7 +356,7 @@ C:\Users\Charles\A1_TP3_CHARLES_E_FELIPE\RestauranteApp\RestauranteApp\obj\Debug
 C:\Users\Charles\A1_TP3_CHARLES_E_FELIPE\RestauranteApp\RestauranteApp\obj\Debug\net10.0\RestauranteApp.genruntimeconfig.cache
 C:\Users\Charles\A1_TP3_CHARLES_E_FELIPE\RestauranteApp\RestauranteApp\obj\Debug\net10.0\ref\RestauranteApp.dll
 C:\Users\Charles\A1_TP3_CHARLES_E_FELIPE\RestauranteApp\RestauranteApp\obj\Debug\net10.0\compressed\xygoujpgq8-{0}-32aov5sf1c-32aov5sf1c.gz
-C:\Users\Charles\A1_TP3_CHARLES_E_FELIPE\RestauranteApp\RestauranteApp\obj\Debug\net10.0\compressed\5e1ygl8sq7-{0}-jtgipw4lzi-jtgipw4lzi.gz
-C:\Users\Charles\A1_TP3_CHARLES_E_FELIPE\RestauranteApp\RestauranteApp\obj\Debug\net10.0\compressed\6o6l1zqi4n-{0}-b4blziol44-b4blziol44.gz
 C:\Users\Charles\A1_TP3_CHARLES_E_FELIPE\RestauranteApp\RestauranteApp\obj\Debug\net10.0\compressed\jp4ptakjan-{0}-yhh43sy7v4-yhh43sy7v4.gz
 C:\Users\Charles\A1_TP3_CHARLES_E_FELIPE\RestauranteApp\RestauranteApp\obj\Debug\net10.0\compressed\fo5m2k3z11-{0}-3hcq26rpsa-3hcq26rpsa.gz
+C:\Users\Charles\A1_TP3_CHARLES_E_FELIPE\RestauranteApp\RestauranteApp\obj\Debug\net10.0\compressed\5e1ygl8sq7-{0}-nclpsrpena-nclpsrpena.gz
+C:\Users\Charles\A1_TP3_CHARLES_E_FELIPE\RestauranteApp\RestauranteApp\obj\Debug\net10.0\compressed\6o6l1zqi4n-{0}-1pnca2xuc3-1pnca2xuc3.gz

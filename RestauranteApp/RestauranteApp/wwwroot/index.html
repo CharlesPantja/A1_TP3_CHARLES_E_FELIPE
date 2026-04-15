@@ -211,6 +211,7 @@
     <nav class="flex items-center gap-3 flex-shrink-0">
       <span id="nav-logado" class="hidden items-center gap-3">
         <span id="nav-nome" class="text-gray-500 text-xs hidden lg:block"></span>
+        <a href="/meus-pedidos.html" class="nav-link text-xs" style="color:#34d399;font-weight:600">Pedidos</a>
         <a id="nav-admin-link" href="/admin.html" class="hidden nav-link" style="color:#f59e0b;font-weight:600;font-size:.78rem">Admin</a>
         <button onclick="fazerLogout()" class="nav-link text-xs" style="color:#f87171">Sair</button>
       </span>
@@ -661,8 +662,8 @@ async function finalizarPedido() {
       salvarCarrinho();
       atualizarCarrinhoUI();
       fecharCarrinho();
-      mostrarToast('Pedido realizado com sucesso!');
-      carregarPedidos();
+      mostrarToast('Pedido realizado! Redirecionando...');
+      setTimeout(() => { window.location.href = '/meus-pedidos.html'; }, 1200);
     } else {
       mostrarToast(extrairErro(d, 'Erro ao finalizar pedido'), true);
     }

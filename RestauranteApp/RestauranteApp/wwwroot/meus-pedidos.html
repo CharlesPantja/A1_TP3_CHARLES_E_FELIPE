@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meus Pedidos — Bella Vista</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { display: ['Playfair Display','serif'], sans: ['Inter','sans-serif'] },
+          colors: { bv: { bg:'#010906', card:'#020e0a', hover:'#031e15', border:'#042f20', border2:'#064028' } }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    body { background-color: #010906; }
+    .font-display { font-family: 'Playfair Display', serif; }
+    .glass { background: rgba(2,14,10,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .nav-link { color:#9ca3af; font-size:.875rem; font-weight:500; transition:color .2s; text-decoration:none; }
+    .nav-link:hover { color:#fff; }
+
+    /* Status tracker */
+    .tracker-wrap { display:flex; align-items:flex-start; gap:0; width:100%; }
+    .tracker-step { flex:1; display:flex; flex-direction:column; align-items:center; position:relative; }
+    .tracker-step:not(:last-child)::after {
+      content:''; position:absolute; top:14px; left:50%; width:100%; height:2px;
+      background:#042f20; z-index:0; transition:background .4s;
+    }
+    .tracker-step.done:not(:last-child)::after { background:#10b981; }
+    .tracker-dot {
+      width:28px; height:28px; border-radius:50%; border:2px solid #042f20;
+      background:#010906; display:flex; align-items:center; justify-content:center;
+      z-index:1; position:relative; transition:all .3s; flex-shrink:0;
+    }
+    .tracker-step.done .tracker-dot { border-color:#10b981; background:#10b981; }
+    .tracker-step.active .tracker-dot { border-color:#10b981; background:#010906; box-shadow:0 0 0 4px rgba(16,185,129,.18); animation:pulse-ring 2s infinite; }
+    .tracker-step.cancelled .tracker-dot { border-color:#ef4444; background:#ef4444; }
+    .tracker-label { font-size:.62rem; font-weight:600; color:#4b5563; margin-top:.4rem; text-align:center; line-height:1.2; transition:color .3s; }
+    .tracker-step.done .tracker-label { color:#10b981; }
+    .tracker-step.active .tracker-label { color:#fff; }
+    .tracker-step.cancelled .tracker-label { color:#f87171; }
+
+    @keyframes pulse-ring { 0%,100%{box-shadow:0 0 0 4px rgba(16,185,129,.18)} 50%{box-shadow:0 0 0 8px rgba(16,185,129,.08)} }
+
+    /* Pedido card */
+    .pedido-card {
+      background:#020e0a; border:1px solid #042f20; border-radius:1rem;
+      overflow:hidden; transition:border-color .3s;
+    }
+    .pedido-card.ativo { border-color:#064028; }
+    .pedido-card.cancelado { border-color:rgba(239,68,68,.3); }
+    .pedido-card.finalizado { opacity:.75; }
+
+    .status-badge {
+      display:inline-flex; align-items:center; gap:.35rem; padding:.25rem .75rem;
+      border-radius:2rem; font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+    }
+
+    .btn-cancel {
+      background:transparent; color:#f87171; border:1px solid rgba(239,68,68,.4);
+      border-radius:.5rem; padding:.375rem .875rem; font-size:.78rem; font-weight:600;
+      cursor:pointer; transition:all .2s;
+    }
+    .btn-cancel:hover { background:#ef4444; color:#fff; border-color:#ef4444; }
+    .btn-add {
+      background:linear-gradient(135deg,#059669,#10b981); color:#fff;
+      border:none; border-radius:.5rem; padding:.375rem .875rem; font-size:.78rem;
+      font-weight:600; cursor:pointer; transition:all .2s;
+    }
+    .btn-add:hover { background:linear-gradient(135deg,#047857,#059669); box-shadow:0 0 16px rgba(16,185,129,.3); }
+
+    .toast {
+      position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(100px);
+      background:#020e0a; border:1px solid #10b981; color:#fff; padding:.75rem 1.5rem;
+      border-radius:2rem; font-size:.85rem; font-weight:500; z-index:200;
+      transition:transform .3s ease; white-space:nowrap; box-shadow:0 8px 32px rgba(0,0,0,.5);
+    }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    .toast.erro { border-color:#ef4444; }
+
+    .skeleton { background:linear-gradient(90deg,#042f20 25%,#064028 50%,#042f20 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:.75rem; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation:fadeUp .35s ease forwards; }
+
+    .refresh-dot { width:6px; height:6px; border-radius:50%; background:#10b981; display:inline-block; animation:blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    /* Tab filters */
+    .tab-btn {
+      padding:.4rem 1rem; border-radius:2rem; font-size:.8rem; font-weight:600;
+      border:1px solid #042f20; cursor:pointer; transition:all .2s;
+      background:transparent; color:#6b7280; white-space:nowrap;
+    }
+    .tab-btn.active { background:#042f20; border-color:#10b981; color:#10b981; }
+    .tab-btn:hover:not(.active) { border-color:#6b7280; color:#d1d5db; }
+  </style>
+</head>
+<body class="min-h-screen text-white">
+
+<div id="toast" class="toast"></div>
+
+<!-- Header -->
+<header class="glass sticky top-0 z-50 border-b border-bv-border">
+  <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+    <a href="/welcome.html" class="flex items-center gap-2 flex-shrink-0" style="text-decoration:none">
+      <img src="/bellavistalogo.png" alt="Bella Vista" class="h-7 w-7 rounded-full object-cover" onerror="this.style.display='none'">
+      <span class="font-display text-base font-bold text-emerald-400">Bella Vista</span>
+    </a>
+    <div class="flex items-center gap-3">
+      <span id="nav-nome" class="text-gray-500 text-xs hidden sm:block"></span>
+      <a href="/index.html" class="nav-link text-xs">Cardápio</a>
+      <button onclick="fazerLogout()" class="nav-link text-xs" style="color:#f87171">Sair</button>
+    </div>
+  </div>
+</header>
+
+<div class="max-w-3xl mx-auto px-4 py-6">
+
+  <!-- Page title + live indicator -->
+  <div class="flex items-start justify-between gap-3 mb-5 flex-wrap">
+    <div>
+      <h1 class="font-display text-2xl font-bold">Meus Pedidos</h1>
+      <p class="text-gray-500 text-sm mt-1">Acompanhe o status em tempo real</p>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0" id="refresh-info">
+      <span class="refresh-dot"></span>
+      <span class="text-gray-600 text-xs">Atualizando automaticamente</span>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="flex gap-2 flex-wrap mb-5">
+    <button class="tab-btn active" onclick="setFiltro('ativos')" id="f-ativos">Em andamento</button>
+    <button class="tab-btn" onclick="setFiltro('todos')" id="f-todos">Todos</button>
+    <button class="tab-btn" onclick="setFiltro('finalizados')" id="f-finalizados">Finalizados</button>
+    <button class="tab-btn" onclick="setFiltro('cancelados')" id="f-cancelados">Cancelados</button>
+  </div>
+
+  <!-- Lista -->
+  <div id="lista-pedidos" class="space-y-4"></div>
+  <div id="skeleton-wrap" class="space-y-4">
+    <div class="skeleton h-48"></div>
+    <div class="skeleton h-48"></div>
+  </div>
+  <div id="estado-vazio" style="display:none" class="text-center py-16">
+    <svg width="40" height="40" fill="none" stroke="#374151" stroke-width="1.5" viewBox="0 0 24 24" class="mx-auto mb-4"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+    <p class="text-gray-500 text-sm mb-4" id="vazio-msg">Nenhum pedido encontrado.</p>
+    <a href="/index.html" class="btn-add inline-block px-5 py-2 rounded-full text-sm" style="text-decoration:none;display:inline-block">Ver cardápio</a>
+  </div>
+
+</div>
+
+<footer class="border-t border-bv-border py-5 mt-8">
+  <div class="max-w-3xl mx-auto px-4 flex items-center justify-between flex-wrap gap-2">
+    <span class="font-display text-emerald-400 text-sm font-semibold">Bella Vista</span>
+    <a href="/index.html" class="nav-link text-xs">Fazer novo pedido</a>
+  </div>
+</footer>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+let todosPedidos = [];
+let filtroAtual = 'ativos';
+let statusAnteriores = {};
+let refreshTimer = null;
+let carregouUmaVez = false;
+
+// ─── Etapas do tracker ────────────────────────────────────────────────────────
+const ETAPAS_PRESENCIAL = [
+  { status: 0, label: 'Recebido' },
+  { status: 1, label: 'Preparando' },
+  { status: 3, label: 'Pronto' },
+  { status: 4, label: 'Entregue' },
+];
+const ETAPAS_DELIVERY = [
+  { status: 0, label: 'Recebido' },
+  { status: 1, label: 'Preparando' },
+  { status: 2, label: 'Saiu' },
+  { status: 4, label: 'Entregue' },
+];
+
+const STATUS_INFO = {
+  0: { label:'Aguardando preparo', bg:'rgba(245,158,11,.15)', color:'#fbbf24', dot:'#f59e0b' },
+  1: { label:'Em preparo',         bg:'rgba(59,130,246,.15)',  color:'#93c5fd', dot:'#3b82f6' },
+  2: { label:'Saiu para entrega',  bg:'rgba(139,92,246,.15)', color:'#c4b5fd', dot:'#8b5cf6' },
+  3: { label:'Pronto para retirar',bg:'rgba(16,185,129,.15)', color:'#34d399', dot:'#10b981' },
+  4: { label:'Finalizado',         bg:'rgba(107,114,128,.15)',color:'#9ca3af', dot:'#6b7280' },
+  5: { label:'Cancelado',          bg:'rgba(239,68,68,.15)',  color:'#f87171', dot:'#ef4444' },
+};
+
+const TEMPO_ESTIMADO = {
+  0: 'Seu pedido foi recebido. Aguardando inicio do preparo...',
+  1: 'Nosso chef esta preparando agora! Aprox. 20 minutos.',
+  2: 'Pedido a caminho da sua mesa ou endereco!',
+  3: 'Seu pedido esta pronto. Pode retirar!',
+  4: '',
+  5: '',
+};
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  await verificarLogin();
+  await carregarPedidos();
+  // Auto-refresh a cada 15 segundos para pedidos ativos
+  refreshTimer = setInterval(async () => {
+    await carregarPedidos(true); // silencioso
+  }, 15000);
+});
+
+async function verificarLogin() {
+  try {
+    const r = await fetch('/api/auth/me', { credentials:'include' });
+    if (!r.ok) { window.location.href = '/login.html?redirected=1'; return; }
+    const d = await r.json();
+    document.getElementById('nav-nome').textContent = d.nome;
+  } catch(_) { window.location.href = '/login.html?redirected=1'; }
+}
+
+async function fazerLogout() {
+  await fetch('/api/auth/logout', { method:'POST', credentials:'include' });
+  window.location.href = '/login.html';
+}
+
+// ─── Carregar pedidos ─────────────────────────────────────────────────────────
+async function carregarPedidos(silencioso = false) {
+  if (!silencioso) {
+    document.getElementById('skeleton-wrap').style.display = '';
+    document.getElementById('lista-pedidos').innerHTML = '';
+    document.getElementById('estado-vazio').style.display = 'none';
+  }
+  try {
+    const r = await fetch('/api/pedido/meus-pedidos', { credentials:'include' });
+    if (!r.ok) throw new Error();
+    const pedidos = await r.json();
+
+    // Detectar mudanças de status e notificar
+    if (carregouUmaVez) {
+      for (const p of pedidos) {
+        const idStr = String(p.pedidoId || p.id);
+        const statusAnterior = statusAnteriores[idStr];
+        if (statusAnterior !== undefined && statusAnterior !== p.status) {
+          const info = STATUS_INFO[p.status] || {};
+          mostrarToast(`Pedido #${idStr}: ${info.label || 'Status atualizado'}`);
+        }
+      }
+    }
+
+    // Salvar status atual para comparar no proximo refresh
+    for (const p of pedidos) {
+      statusAnteriores[String(p.pedidoId || p.id)] = p.status;
+    }
+    carregouUmaVez = true;
+    todosPedidos = pedidos;
+
+  } catch(_) {
+    if (!silencioso) mostrarToast('Erro ao carregar pedidos', true);
+  } finally {
+    document.getElementById('skeleton-wrap').style.display = 'none';
+    renderizarPedidos();
+  }
+}
+
+// ─── Renderizar ───────────────────────────────────────────────────────────────
+function setFiltro(f) {
+  filtroAtual = f;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`f-${f}`).classList.add('active');
+  renderizarPedidos();
+}
+
+function renderizarPedidos() {
+  let lista = [...todosPedidos];
+
+  if (filtroAtual === 'ativos') {
+    lista = lista.filter(p => p.status >= 0 && p.status <= 3);
+  } else if (filtroAtual === 'finalizados') {
+    lista = lista.filter(p => p.status === 4);
+  } else if (filtroAtual === 'cancelados') {
+    lista = lista.filter(p => p.status === 5);
+  }
+
+  // Mais recentes primeiro
+  lista.sort((a, b) => (b.pedidoId||b.id) - (a.pedidoId||a.id));
+
+  const container = document.getElementById('lista-pedidos');
+  const vazio = document.getElementById('estado-vazio');
+
+  if (!lista.length) {
+    container.innerHTML = '';
+    vazio.style.display = '';
+    const msgs = {
+      ativos: 'Nenhum pedido em andamento.',
+      finalizados: 'Nenhum pedido finalizado ainda.',
+      cancelados: 'Nenhum pedido cancelado.',
+      todos: 'Voce ainda nao fez nenhum pedido.',
+    };
+    document.getElementById('vazio-msg').textContent = msgs[filtroAtual] || 'Nenhum pedido.';
+    return;
+  }
+  vazio.style.display = 'none';
+  container.innerHTML = lista.map(p => renderPedidoCard(p)).join('');
+}
+
+function renderPedidoCard(p) {
+  const id = p.pedidoId || p.id;
+  const isCancelado = p.status === 5;
+  const isFinalizado = p.status === 4;
+  const isDelivery = (p.tipoAtendimento||'').includes('Delivery');
+  const info = STATUS_INFO[p.status] || STATUS_INFO[0];
+  const itensTxt = (p.itens||[]).map(i => `${i.nome||''} x${i.quantidade}`).join(' &bull; ');
+  const podeCancelar = p.status === 0;
+
+  const cardClass = isCancelado ? 'cancelado' : isFinalizado ? 'finalizado' : 'ativo';
+
+  // Tracker
+  const etapas = isDelivery ? ETAPAS_DELIVERY : ETAPAS_PRESENCIAL;
+  const trackerHtml = isCancelado ? renderTrackerCancelado() : renderTracker(p.status, etapas);
+
+  // Tempo estimado
+  const tempoTxt = TEMPO_ESTIMADO[p.status] || '';
+
+  // Data/hora formatada
+  const dataHora = p.fmtDH || '';
+
+  return `
+    <div class="pedido-card ${cardClass} fade-up">
+      <!-- Header do card -->
+      <div class="flex items-start justify-between gap-3 p-4 sm:p-5" style="border-bottom:1px solid #042f20">
+        <div class="flex items-start gap-3 flex-1 min-w-0">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap mb-1">
+              <span class="status-badge" style="background:${info.bg};color:${info.color}">
+                <span style="width:6px;height:6px;border-radius:50%;background:${info.dot};display:inline-block;${!isCancelado && !isFinalizado ? 'animation:blink 1.5s infinite' : ''}"></span>
+                ${info.label}
+              </span>
+              <span class="text-gray-600 text-xs">#${id}</span>
+              ${isDelivery ? `<span class="text-xs px-1.5 py-0.5 rounded" style="background:#064028;color:#10b981">Delivery</span>` : ''}
+            </div>
+            <p class="text-gray-500 text-xs">${dataHora}</p>
+          </div>
+        </div>
+        <div class="flex gap-2 flex-shrink-0">
+          ${podeCancelar ? `<button onclick="cancelarPedido(${id})" class="btn-cancel">Cancelar</button>` : ''}
+        </div>
+      </div>
+
+      <!-- Itens -->
+      <div class="px-4 sm:px-5 py-3" style="border-bottom:1px solid #042f20">
+        <p class="text-white text-sm font-medium leading-relaxed">${itensTxt}</p>
+        <div class="flex items-center justify-between mt-1.5">
+          <p class="text-gray-600 text-xs">Total: <span class="text-gray-300 font-semibold">${formatarPreco(p.total||0)}</span></p>
+          ${p.numeroMesa ? `<p class="text-gray-600 text-xs">Mesa <span class="text-gray-400">${p.numeroMesa}</span></p>` : ''}
+        </div>
+      </div>
+
+      ${!isCancelado ? `
+      <!-- Tracker de status -->
+      <div class="px-4 sm:px-5 pt-4 pb-3">
+        ${trackerHtml}
+        ${tempoTxt ? `<p class="text-gray-500 text-xs mt-3 text-center">${tempoTxt}</p>` : ''}
+      </div>` : `
+      <!-- Cancelado -->
+      <div class="px-5 py-3">
+        <p class="text-red-400 text-xs text-center">Este pedido foi cancelado.</p>
+      </div>`}
+    </div>`;
+}
+
+function renderTracker(statusAtual, etapas) {
+  return `
+    <div class="tracker-wrap">
+      ${etapas.map((etapa, idx) => {
+        const isDone = statusAtual > etapa.status || statusAtual === etapa.status;
+        const isActive = statusAtual === etapa.status;
+        const isCompleted = statusAtual > etapa.status;
+        const cls = isCompleted ? 'done' : isActive ? 'active' : '';
+        const checkSvg = `<svg width="12" height="12" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+        return `
+          <div class="tracker-step ${cls}">
+            <div class="tracker-dot">
+              ${isCompleted ? checkSvg : isActive ? `<span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block"></span>` : ''}
+            </div>
+            <span class="tracker-label">${etapa.label}</span>
+          </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderTrackerCancelado() {
+  return `
+    <div class="tracker-wrap">
+      <div class="tracker-step cancelled">
+        <div class="tracker-dot">
+          <svg width="12" height="12" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </div>
+        <span class="tracker-label">Cancelado</span>
+      </div>
+    </div>`;
+}
+
+// ─── Cancelar ─────────────────────────────────────────────────────────────────
+async function cancelarPedido(id) {
+  try {
+    const r = await fetch(`/api/pedido/${id}`, { method:'DELETE', credentials:'include' });
+    const d = await r.json();
+    if (r.ok) {
+      mostrarToast('Pedido cancelado com sucesso');
+      await carregarPedidos();
+    } else {
+      mostrarToast(extrairErro(d, 'Nao foi possivel cancelar'), true);
+    }
+  } catch(_) { mostrarToast('Erro de conexao', true); }
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function formatarPreco(v) {
+  return 'R$ ' + Number(v).toFixed(2).replace('.', ',');
+}
+function extrairErro(data, fallback) {
+  if (!data) return fallback;
+  if (typeof data === 'string') return data;
+  if (data.message) return data.message;
+  if (data.errors) return Object.values(data.errors).flat().join(' ');
+  if (data.title) return data.title;
+  return fallback;
+}
+function mostrarToast(texto, erro = false) {
+  const t = document.getElementById('toast');
+  t.textContent = texto;
+  t.className = 'toast' + (erro ? ' erro' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
