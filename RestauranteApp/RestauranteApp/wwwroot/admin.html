@@ -348,8 +348,8 @@ function renderizarPedidos() {
     sem.style.display = 'none';
     container.innerHTML = pagina.map(p => {
       const { bg, color, label } = statusInfo(p.status);
-      const itensTxt = (p.itens||[]).map(i => `${i.nomePrato} x${i.quantidade}`).join(', ');
-      const isDelivery = p.tipo === 'Delivery';
+      const itensTxt = (p.itens||[]).map(i => `${i.nome||i.nomePrato||''} x${i.quantidade}`).join(', ');
+      const isDelivery = (p.tipoAtendimento||p.tipo||'').includes('Delivery');
       return `
         <div class="pedido-row fade-up">
           <div class="flex items-start gap-3 flex-wrap">
@@ -357,13 +357,13 @@ function renderizarPedidos() {
               <div class="flex items-center gap-2 flex-wrap mb-1">
                 <span class="status-pill" style="background:${bg};color:${color}">${label}</span>
                 <span class="text-gray-500 text-xs">#${p.pedidoId||p.id}</span>
-                <span class="badge-tipo" style="background:${isDelivery?'rgba(139,92,246,.15)':'rgba(16,185,129,.1)'};color:${isDelivery?'#c4b5fd':'#6ee7b7'}">${p.tipo||'Presencial'}</span>
+                <span class="badge-tipo" style="background:${isDelivery?'rgba(139,92,246,.15)':'rgba(16,185,129,.1)'};color:${isDelivery?'#c4b5fd':'#6ee7b7'}">${p.tipoAtendimento||p.tipo||'Presencial'}</span>
                 ${p.numeroMesa?`<span class="text-gray-600 text-xs">Mesa ${p.numeroMesa}</span>`:''}
                 <span class="text-gray-600 text-xs">${formatarPreco(p.total||0)}</span>
               </div>
               <p class="text-gray-300 text-sm truncate">${itensTxt}</p>
               ${isDelivery && p.enderecoEntrega ? `<p class="text-gray-600 text-xs mt-0.5">Entrega: ${p.enderecoEntrega}</p>` : ''}
-              <p class="text-gray-600 text-xs mt-0.5">${p.clienteNome||''}</p>
+              <p class="text-gray-600 text-xs mt-0.5">${p.cliente||p.clienteNome||''}</p>
             </div>
             <div class="flex items-center gap-2 flex-wrap flex-shrink-0">
               <select class="status-select" style="font-size:.75rem;padding:.3rem .6rem" onchange="atualizarStatus(${p.pedidoId||p.id}, this.value)">
@@ -408,10 +408,11 @@ function irPagina(p) {
 
 async function atualizarStatus(id, status) {
   try {
+    // Controller: [HttpPatch("{id}/status")] com AtualizarStatusRequest.NovoStatus
     const r = await fetch(`/api/pedido/${id}/status`, {
-      method:'PUT', credentials:'include',
+      method:'PATCH', credentials:'include',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ status: parseInt(status) })
+      body: JSON.stringify({ novoStatus: parseInt(status) })
     });
     const d = await r.json();
     if (r.ok) {

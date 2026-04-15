@@ -632,13 +632,16 @@ async function finalizarPedido() {
   if (carrinho.length === 0) { mostrarToast('Carrinho vazio', true); return; }
 
   const body = {
-    itens: carrinho.map(i => ({ itemCardapioId: i.id, quantidade: i.qtd })),
-    tipo: modoAtual === 'delivery' ? 'Delivery' : 'Presencial'
+    // Backend espera "itemId" (ItemPedidoDto.ItemId) e "quantidade"
+    itens: carrinho.map(i => ({ itemId: i.id, quantidade: i.qtd })),
+    // Backend espera "tipoAtendimento" com valores "Presencial" | "DeliveryProprio"
+    tipoAtendimento: modoAtual === 'delivery' ? 'DeliveryProprio' : 'Presencial',
+    // Backend espera "periodo" como enum string
+    periodo: periodoAtual === 'almoco' ? 'Almoco' : 'Jantar'
   };
 
   if (modoAtual === 'delivery') {
     body.enderecoEntrega = document.getElementById('delivery-endereco').value.trim();
-    body.formaPagamento = document.getElementById('delivery-pagamento').value;
     if (!body.enderecoEntrega) { mostrarToast('Informe o endereco', true); return; }
   } else {
     const mesa = parseInt(document.getElementById('numero-mesa').value);
@@ -685,7 +688,7 @@ async function carregarPedidos() {
     semPedidos.style.display = 'none';
     lista.innerHTML = pedidos.map(p => {
       const { bg, color, label } = statusInfo(p.status);
-      const itensTxt = (p.itens||[]).map(i => `${i.nomePrato} x${i.quantidade}`).join(', ');
+      const itensTxt = (p.itens||[]).map(i => `${i.nome||i.nomePrato||''} x${i.quantidade}`).join(', ');
       const progresso = Math.round((p.status / 4) * 100);
       const podeCancelar = p.status === 0;
       return `
@@ -695,7 +698,7 @@ async function carregarPedidos() {
               <div class="flex items-center gap-2 mb-1">
                 <span class="status-pill" style="background:${bg};color:${color}">${label}</span>
                 <span class="text-gray-600 text-xs">#${p.pedidoId || p.id}</span>
-                ${p.tipo==='Delivery'?`<span class="text-xs px-2 py-0.5 rounded-full" style="background:#064028;color:#10b981">Delivery</span>`:''}
+                ${(p.tipoAtendimento||'').includes('Delivery')?`<span class="text-xs px-2 py-0.5 rounded-full" style="background:#064028;color:#10b981">Delivery</span>`:''}
               </div>
               <p class="text-white text-sm font-medium leading-snug">${itensTxt}</p>
               <p class="text-gray-600 text-xs mt-1">Total: <span class="text-gray-400">${formatarPreco(p.total||0)}</span></p>
@@ -719,7 +722,8 @@ async function carregarPedidos() {
 
 async function cancelarPedido(id) {
   try {
-    const r = await fetch(`/api/pedido/${id}/cancelar`, { method:'PUT', credentials:'include' });
+    // Controller: [HttpDelete("{id}")] — usa DELETE, não PUT /cancelar
+    const r = await fetch(`/api/pedido/${id}`, { method:'DELETE', credentials:'include' });
     const d = await r.json();
     if (r.ok) { mostrarToast('Pedido cancelado'); carregarPedidos(); }
     else mostrarToast(extrairErro(d,'Erro ao cancelar'), true);
@@ -730,7 +734,7 @@ async function repetirPedido(itens) {
   if (!itens || !itens.length) return;
   // Tenta encontrar os itens no cardápio atual
   for (const item of itens) {
-    const found = todosItens.find(i => i.nome === item.nomePrato);
+    const found = todosItens.find(i => i.nome === (item.nome || item.nomePrato));
     if (found) {
       for (let q = 0; q < (item.quantidade || 1); q++) {
         adicionarAoCarrinho(found.id, found.nome, found.precoBase);
