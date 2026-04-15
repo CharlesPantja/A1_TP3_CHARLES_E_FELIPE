@@ -269,6 +269,9 @@
       </select>
     </div>
 
+    <div id="aviso-periodo" class="hidden text-xs text-amber-400 bg-amber-900/20 border border-amber-700/30 rounded-xl px-3 py-2">
+      ⚠️ Atenção: os itens no carrinho são de um período diferente do selecionado. Esvazie o carrinho antes de trocar de período.
+    </div>
     <button onclick="finalizarPedido()" class="btn-primary w-full text-white font-extrabold py-3.5 rounded-full text-sm">
       ✅ Finalizar Pedido
     </button>
@@ -321,7 +324,21 @@ function showToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'show ' + (type || 'success');
-  setTimeout(() => { t.className = ''; }, 3000);
+  setTimeout(() => { t.className = ''; }, 3500);
+}
+
+// Extrai mensagem de erro de qualquer formato de resposta da API
+function extrairErro(data, fallback) {
+  if (!data) return fallback || 'Erro desconhecido';
+  if (typeof data === 'string') return data;
+  if (data.message) return data.message;
+  if (data.title && data.errors) {
+    const erros = Object.values(data.errors).flat().join(' | ');
+    return erros || data.title;
+  }
+  if (data.title) return data.title;
+  if (data.errors) return Object.values(data.errors).flat().join(' | ');
+  return fallback || 'Erro ao processar requisição';
 }
 
 // ─── NAV ─────────────────────────────────────────────────────────────────────
@@ -345,7 +362,22 @@ function setPeriodo(p) {
   document.getElementById('btn-almoco').classList.toggle('active', p==='almoco');
   document.getElementById('btn-jantar').classList.toggle('active', p==='jantar');
   document.getElementById('periodo-pedido').value = p === 'almoco' ? 'Almoco' : 'Jantar';
+  // Avisar se há itens do período diferente no carrinho
+  verificarPeriodoCarrinho();
   carregarCardapio();
+}
+
+function verificarPeriodoCarrinho() {
+  // Se carrinho não vazio, verifica se os itens pertencem ao período atual
+  // Os itens do carrinho não têm o campo periodo, mas se o usuário troca de tab
+  // após adicionar itens, mostramos um aviso
+  const aviso = document.getElementById('aviso-periodo');
+  if (!aviso) return;
+  if (carrinho.length > 0) {
+    aviso.classList.remove('hidden');
+  } else {
+    aviso.classList.add('hidden');
+  }
 }
 
 // ─── CARDÁPIO ────────────────────────────────────────────────────────────────
@@ -431,9 +463,13 @@ function renderCardapio() {
 // ─── CARRINHO ─────────────────────────────────────────────────────────────────
 function adicionarAoCarrinho(id, nome, preco) {
   const idx = carrinho.findIndex(c => c.id === id);
-  if (idx >= 0) carrinho[idx].quantidade++;
-  else carrinho.push({ id, nome, preco, quantidade: 1 });
+  if (idx >= 0) {
+    carrinho[idx].quantidade++;
+  } else {
+    carrinho.push({ id, nome, preco, quantidade: 1, periodo: periodoAtual });
+  }
   salvarCarrinho();
+  document.getElementById('aviso-periodo')?.classList.add('hidden');
   showToast('✅ ' + nome + ' adicionado!', 'success');
   renderCardapio();
 }
@@ -466,6 +502,7 @@ function atualizarCartUI() {
   const el = document.getElementById('cart-items');
   if (!carrinho.length) {
     el.innerHTML = '<p class="text-gray-500 text-sm text-center py-8">Seu carrinho está vazio</p>';
+    document.getElementById('aviso-periodo')?.classList.add('hidden');
     return;
   }
   el.innerHTML = carrinho.map(c => `
@@ -502,20 +539,25 @@ function onTipoChange() {
 
 async function finalizarPedido() {
   if (!carrinho.length) { showToast('❌ Carrinho vazio!', 'error'); return; }
-  const tipo = document.getElementById('tipo-atendimento').value;
-  const periodo = document.getElementById('periodo-pedido').value;
+
+  const tipo    = document.getElementById('tipo-atendimento').value;
+  const periodo = document.getElementById('periodo-pedido').value; // "Almoco" ou "Jantar"
   const isDelivery = tipo === 'DeliveryProprio' || tipo === 'DeliveryAplicativo';
 
+  // Delivery exige login
   if (isDelivery && !usuarioLogado) {
-    showToast('❌ Faça login para delivery!', 'error');
+    showToast('❌ Faça login para realizar delivery!', 'error');
     setTimeout(() => location.href = '/login.html', 1000);
     return;
   }
 
+  // Validar mesa (presencial)
   if (tipo === 'Presencial') {
-    const mesa = document.getElementById('numero-mesa').value;
-    if (!mesa || parseInt(mesa) < 1) { showToast('❌ Informe o número da mesa!', 'error'); return; }
+    const mesa = parseInt(document.getElementById('numero-mesa').value);
+    if (!mesa || mesa < 1) { showToast('❌ Informe o número da mesa!', 'error'); return; }
   }
+
+  // Validar endereço (delivery)
   if (isDelivery) {
     const end = document.getElementById('endereco-entrega').value.trim();
     if (!end) { showToast('❌ Informe o endereço de entrega!', 'error'); return; }
@@ -523,11 +565,11 @@ async function finalizarPedido() {
 
   const body = {
     tipoAtendimento: tipo,
-    periodo,
+    periodo,                   // string "Almoco" ou "Jantar" — API agora aceita via JsonStringEnumConverter
     itens: carrinho.map(c => ({ itemId: c.id, quantidade: c.quantidade })),
-    numeroMesa: tipo === 'Presencial' ? parseInt(document.getElementById('numero-mesa').value) : null,
-    enderecoEntrega: isDelivery ? document.getElementById('endereco-entrega').value.trim() : null,
-    nomeAplicativo: tipo === 'DeliveryAplicativo' ? (document.getElementById('nome-aplicativo').value.trim() || 'Aplicativo') : null
+    numeroMesa:      tipo === 'Presencial'          ? parseInt(document.getElementById('numero-mesa').value)            : null,
+    enderecoEntrega: isDelivery                     ? document.getElementById('endereco-entrega').value.trim()          : null,
+    nomeAplicativo:  tipo === 'DeliveryAplicativo'  ? (document.getElementById('nome-aplicativo').value.trim() || 'Aplicativo') : null
   };
 
   const btn = document.querySelector('#cart-drawer button[onclick="finalizarPedido()"]');
@@ -536,15 +578,16 @@ async function finalizarPedido() {
   try {
     const r = await api.post('/pedido', body);
     if (r.ok) {
-      showToast('✅ Pedido #' + r.data.pedidoId + ' realizado! ' + r.data.statusDesc, 'success');
+      const total = r.data.total ? ' — Total: R$ ' + r.data.total.toFixed(2).replace('.',',') : '';
+      showToast('✅ Pedido #' + r.data.pedidoId + ' criado!' + total, 'success');
       limparCarrinho();
       toggleCart();
       setTimeout(() => showSection('meus-pedidos'), 1200);
     } else {
-      showToast('❌ ' + (r.data?.message || r.data || 'Erro ao criar pedido'), 'error');
+      showToast('❌ ' + extrairErro(r.data, 'Erro ao criar pedido'), 'error');
     }
   } catch {
-    showToast('❌ Erro de conexão', 'error');
+    showToast('❌ Erro de conexão. Verifique sua rede.', 'error');
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '✅ Finalizar Pedido'; }
   }
@@ -598,8 +641,8 @@ async function carregarMeusPedidos() {
 async function cancelarPedido(id) {
   if (!confirm('Cancelar o pedido #' + id + '?')) return;
   const r = await api.del('/pedido/' + id);
-  if (r.ok) { showToast('✅ Pedido cancelado', 'success'); carregarMeusPedidos(); }
-  else showToast('❌ ' + (r.data?.message || r.data || 'Erro'), 'error');
+  if (r.ok) { showToast('✅ Pedido cancelado com sucesso', 'success'); carregarMeusPedidos(); }
+  else showToast('❌ ' + extrairErro(r.data, 'Erro ao cancelar pedido'), 'error');
 }
 
 // ─── RESERVA ─────────────────────────────────────────────────────────────────
@@ -634,10 +677,10 @@ async function verificarMesas() {
     select.innerHTML = r.data.map(m =>
       `<option value="${m.id}">Mesa ${m.numero} (${m.capacidade} lugares)</option>`
     ).join('');
-    showToast('✅ ' + r.data.length + ' mesas disponíveis!', 'success');
+    showToast('✅ ' + r.data.length + ' mesa(s) disponível(is)!', 'success');
   } else {
     select.innerHTML = '<option value="">Nenhuma mesa disponível neste horário</option>';
-    showToast('❌ ' + (r.data?.message || 'Nenhuma mesa disponível'), 'error');
+    showToast('❌ ' + extrairErro(r.data, 'Nenhuma mesa disponível neste horário'), 'error');
   }
 }
 
@@ -672,7 +715,7 @@ async function criarReserva() {
     showToast('✅ Reserva confirmada! Código: ' + r.data.codigoConfirmacao, 'success');
     carregarMinhasReservas();
   } else {
-    showToast('❌ ' + (r.data?.message || r.data || 'Erro ao reservar'), 'error');
+    showToast('❌ ' + extrairErro(r.data, 'Erro ao criar reserva'), 'error');
   }
 }
 
@@ -705,8 +748,8 @@ async function carregarMinhasReservas() {
 async function cancelarReserva(id) {
   if (!confirm('Cancelar esta reserva?')) return;
   const r = await api.del('/reserva/' + id);
-  if (r.ok) { showToast('✅ Reserva cancelada', 'success'); carregarMinhasReservas(); }
-  else showToast('❌ ' + (r.data?.message || r.data || 'Erro'), 'error');
+  if (r.ok) { showToast('✅ Reserva cancelada com sucesso', 'success'); carregarMinhasReservas(); }
+  else showToast('❌ ' + extrairErro(r.data, 'Erro ao cancelar reserva'), 'error');
 }
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────

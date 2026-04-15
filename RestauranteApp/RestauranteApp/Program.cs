@@ -52,7 +52,11 @@ builder.Services.AddScoped<PedidoService>();
 builder.Services.AddScoped<ReservaService>();
 builder.Services.AddScoped<RelatorioService>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+        opts.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter()));
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>

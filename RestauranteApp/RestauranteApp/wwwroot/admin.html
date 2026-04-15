@@ -302,7 +302,7 @@ async function salvarStatus(pedidoId) {
   const novoStatus = parseInt(document.getElementById('sel-' + pedidoId).value);
   const r = await api.patch('/pedido/' + pedidoId + '/status', { novoStatus });
   if (r.ok) {
-    showToast('✅ Status atualizado: ' + r.data?.statusDesc, 'success');
+    showToast('✅ Status atualizado para: ' + (r.data?.statusDesc || r.data?.mensagem || 'OK'), 'success');
     // Atualizar localmente sem recarregar tudo
     const idx = todosPedidos.findIndex(p => p.pedidoId === pedidoId);
     if (idx >= 0) { todosPedidos[idx].status = novoStatus; todosPedidos[idx].statusDesc = statusDesc[novoStatus]; }
