@@ -304,7 +304,6 @@ namespace RestauranteApp.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Ativo")
-                        .HasDefaultValue(true)
                         .HasColumnType("bit");
 
                     b.Property<string>("Descricao")
@@ -312,7 +311,6 @@ namespace RestauranteApp.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FotoUrl")
-                        .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Nome")
@@ -333,6 +331,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 1,
+                            Ativo = true,
                             Descricao = "Frango grelhado com salada",
                             Nome = "Frango Grelhado",
                             Periodo = 1,
@@ -341,6 +340,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 2,
+                            Ativo = true,
                             Descricao = "Arroz, feijão, carne e salada",
                             Nome = "PF Completo",
                             Periodo = 1,
@@ -349,6 +349,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 3,
+                            Ativo = true,
                             Descricao = "Macarrão com molho de tomate",
                             Nome = "Macarrão ao Sugo",
                             Periodo = 1,
@@ -357,6 +358,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 4,
+                            Ativo = true,
                             Descricao = "Filé de peixe assado com legumes",
                             Nome = "Peixe Assado",
                             Periodo = 1,
@@ -365,6 +367,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 5,
+                            Ativo = true,
                             Descricao = "Salada com croutons e molho caesar",
                             Nome = "Salada Caesar",
                             Periodo = 1,
@@ -373,6 +376,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 6,
+                            Ativo = true,
                             Descricao = "Bife com cebola caramelizada",
                             Nome = "Bife Acebolado",
                             Periodo = 1,
@@ -381,6 +385,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 7,
+                            Ativo = true,
                             Descricao = "Risoto cremoso de frango",
                             Nome = "Risoto de Frango",
                             Periodo = 1,
@@ -389,6 +394,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 8,
+                            Ativo = true,
                             Descricao = "Feijoada completa",
                             Nome = "Feijoada",
                             Periodo = 1,
@@ -397,6 +403,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 9,
+                            Ativo = true,
                             Descricao = "Moqueca com leite de coco",
                             Nome = "Moqueca de Tilápia",
                             Periodo = 1,
@@ -405,6 +412,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 10,
+                            Ativo = true,
                             Descricao = "Wrap com frango e legumes",
                             Nome = "Wrap de Frango",
                             Periodo = 1,
@@ -413,6 +421,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 11,
+                            Ativo = true,
                             Descricao = "Espaguete com molho cremoso",
                             Nome = "Espaguete Carbonara",
                             Periodo = 1,
@@ -421,6 +430,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 12,
+                            Ativo = true,
                             Descricao = "Frango empanado com molho",
                             Nome = "Frango à Parmegiana",
                             Periodo = 1,
@@ -429,6 +439,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 13,
+                            Ativo = true,
                             Descricao = "Strogonoff com arroz e batata",
                             Nome = "Strogonoff de Carne",
                             Periodo = 1,
@@ -437,6 +448,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 14,
+                            Ativo = true,
                             Descricao = "Hambúrguer com queijo e bacon",
                             Nome = "Hambúrguer Artesanal",
                             Periodo = 1,
@@ -445,6 +457,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 15,
+                            Ativo = true,
                             Descricao = "Omelete recheado com legumes",
                             Nome = "Omelete de Legumes",
                             Periodo = 1,
@@ -453,6 +466,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 16,
+                            Ativo = true,
                             Descricao = "Caldo grosso com torresmo",
                             Nome = "Caldo de Feijão",
                             Periodo = 1,
@@ -461,6 +475,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 17,
+                            Ativo = true,
                             Descricao = "Carne assada com mandioca",
                             Nome = "Carne Assada",
                             Periodo = 1,
@@ -469,6 +484,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 18,
+                            Ativo = true,
                             Descricao = "Panqueca recheada com molho",
                             Nome = "Panqueca de Carne",
                             Periodo = 1,
@@ -477,6 +493,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 19,
+                            Ativo = true,
                             Descricao = "Filé com purê de batatas",
                             Nome = "Filé de Frango",
                             Periodo = 1,
@@ -485,6 +502,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 20,
+                            Ativo = true,
                             Descricao = "Opção vegetariana variada",
                             Nome = "Vegetariano do Dia",
                             Periodo = 1,
@@ -493,6 +511,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 21,
+                            Ativo = true,
                             Descricao = "Picanha ao ponto com vinagrete",
                             Nome = "Picanha Grelhada",
                             Periodo = 2,
@@ -501,6 +520,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 22,
+                            Ativo = true,
                             Descricao = "Salmão com molho de ervas",
                             Nome = "Salmão ao Molho",
                             Periodo = 2,
@@ -509,6 +529,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 23,
+                            Ativo = true,
                             Descricao = "Fraldinha marinada em vinho tinto",
                             Nome = "Fraldinha ao Vinho",
                             Periodo = 2,
@@ -517,6 +538,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 24,
+                            Ativo = true,
                             Descricao = "Camarão grelhado na manteiga",
                             Nome = "Camarão na Manteiga",
                             Periodo = 2,
@@ -525,6 +547,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 25,
+                            Ativo = true,
                             Descricao = "Risoto cremoso de camarão",
                             Nome = "Risoto de Camarão",
                             Periodo = 2,
@@ -533,6 +556,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 26,
+                            Ativo = true,
                             Descricao = "Carré de cordeiro com legumes",
                             Nome = "Cordeiro Assado",
                             Periodo = 2,
@@ -541,6 +565,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 27,
+                            Ativo = true,
                             Descricao = "Nhoque artesanal ao sugo",
                             Nome = "Nhoque de Batata",
                             Periodo = 2,
@@ -549,6 +574,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 28,
+                            Ativo = true,
                             Descricao = "Filé mignon ao molho madeira",
                             Nome = "Filé Mignon",
                             Periodo = 2,
@@ -557,6 +583,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 29,
+                            Ativo = true,
                             Descricao = "Bacalhau com batatas e azeitonas",
                             Nome = "Bacalhau Gratinado",
                             Periodo = 2,
@@ -565,6 +592,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 30,
+                            Ativo = true,
                             Descricao = "Frango recheado com farofa",
                             Nome = "Frango Recheado",
                             Periodo = 2,
@@ -573,6 +601,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 31,
+                            Ativo = true,
                             Descricao = "Polvo com azeite e batata",
                             Nome = "Polvo Grelhado",
                             Periodo = 2,
@@ -581,6 +610,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 32,
+                            Ativo = true,
                             Descricao = "Pato com geleia de laranja",
                             Nome = "Magret de Pato",
                             Periodo = 2,
@@ -589,6 +619,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 33,
+                            Ativo = true,
                             Descricao = "Atum selado com gergelim",
                             Nome = "Steak de Atum",
                             Periodo = 2,
@@ -597,6 +628,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 34,
+                            Ativo = true,
                             Descricao = "Costela bovina assada lentamente",
                             Nome = "Costela ao Forno",
                             Periodo = 2,
@@ -605,6 +637,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 35,
+                            Ativo = true,
                             Descricao = "Ravioli recheado com funghi",
                             Nome = "Ravioli de Funghi",
                             Periodo = 2,
@@ -613,6 +646,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 36,
+                            Ativo = true,
                             Descricao = "Peixe branco com molho de creme",
                             Nome = "Peixe ao Creme",
                             Periodo = 2,
@@ -621,6 +655,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 37,
+                            Ativo = true,
                             Descricao = "Lula recheada ao forno",
                             Nome = "Lula Recheada",
                             Periodo = 2,
@@ -629,6 +664,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 38,
+                            Ativo = true,
                             Descricao = "Carré com crosta de ervas",
                             Nome = "Carré de Porco",
                             Periodo = 2,
@@ -637,6 +673,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 39,
+                            Ativo = true,
                             Descricao = "Combinação de carne e frango",
                             Nome = "Duo de Proteínas",
                             Periodo = 2,
@@ -645,6 +682,7 @@ namespace RestauranteApp.Migrations
                         new
                         {
                             Id = 40,
+                            Ativo = true,
                             Descricao = "Prato vegetariano elaborado",
                             Nome = "Jantar Vegetariano",
                             Periodo = 2,
@@ -849,7 +887,7 @@ namespace RestauranteApp.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("PercentualDesconto")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<int>("Periodo")
                         .HasColumnType("int");

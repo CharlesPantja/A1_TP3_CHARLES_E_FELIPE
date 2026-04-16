@@ -62,6 +62,16 @@ namespace RestauranteApp.Data
                 .Property(x => x.TaxaFixa)
                 .HasColumnType("decimal(10,2)");
 
+            // Precisão decimal para SugestaoChefe
+            builder.Entity<SugestaoChefe>()
+                .Property(x => x.PercentualDesconto)
+                .HasColumnType("decimal(5,2)");
+
+            // Tipo explícito para FotoUrl (evita inconsistência com o snapshot)
+            builder.Entity<ItemCardapio>()
+                .Property(x => x.FotoUrl)
+                .HasColumnType("nvarchar(500)");
+
             // Sugestão do chefe: regra de só 1 por período por dia
             // enforced via index único
             builder.Entity<SugestaoChefe>()
