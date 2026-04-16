@@ -699,12 +699,20 @@ let pratoEditandoId = null;
 let fotoArquivoSelecionado = null;
 
 async function carregarCardapioAdmin() {
+  const cont = document.getElementById('lista-cardapio');
+  cont.innerHTML = '<p class="text-gray-600 text-sm text-center py-6 col-span-3">Carregando...</p>';
   try {
     const r = await fetch('/api/cardapio/todos', { credentials:'include' });
-    if (!r.ok) return;
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      cont.innerHTML = `<p class="text-red-400 text-sm text-center py-6 col-span-3">Erro ${r.status}: ${d.message || 'Falha ao carregar'}</p>`;
+      return;
+    }
     todosItensCardapio = await r.json();
     renderizarCardapioAdmin();
-  } catch(_) { mostrarToast('Erro ao carregar cardapio', true); }
+  } catch(e) {
+    cont.innerHTML = `<p class="text-red-400 text-sm text-center py-6 col-span-3">Erro de conexao: ${e.message}</p>`;
+  }
 }
 
 function filtrarCardapio(tipo) {
@@ -879,12 +887,22 @@ let todosUsuarios = [];
 let filtroUsuarios = 'todos';
 
 async function carregarUsuarios() {
+  const cont = document.getElementById('lista-usuarios');
+  const sem  = document.getElementById('sem-usuarios');
+  cont.innerHTML = '<p class="text-gray-600 text-sm text-center py-6">Carregando...</p>';
+  sem.style.display = 'none';
   try {
     const r = await fetch('/api/admin/usuarios', { credentials:'include' });
-    if (!r.ok) return;
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      cont.innerHTML = `<p class="text-red-400 text-sm text-center py-6">Erro ${r.status}: ${d.message || 'Falha ao carregar usuarios'}</p>`;
+      return;
+    }
     todosUsuarios = await r.json();
     renderizarUsuarios();
-  } catch(_) { mostrarToast('Erro ao carregar usuarios', true); }
+  } catch(e) {
+    cont.innerHTML = `<p class="text-red-400 text-sm text-center py-6">Erro de conexao: ${e.message}</p>`;
+  }
 }
 
 function filtrarUsuarios(tipo) {

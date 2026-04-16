@@ -23,7 +23,7 @@ namespace RestauranteApp.Controllers
         public async Task<IActionResult> ListarUsuarios()
         {
             var usuarios = await _userManager.Users
-                .OrderBy(u => u.NomeCompleto)
+                .OrderBy(u => u.Email)
                 .ToListAsync();
 
             var resultado = new List<object>();
