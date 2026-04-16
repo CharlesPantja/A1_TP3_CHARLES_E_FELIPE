@@ -63,6 +63,20 @@
     .status-select:focus { border-color:#10b981; }
     .status-select option { background:#020e0a; }
 
+    .prato-card {
+      background:#020e0a; border:1px solid #042f20; border-radius:1rem; overflow:hidden;
+      transition:border-color .2s, transform .2s;
+    }
+    .prato-card:hover { border-color:#064028; transform:translateY(-2px); }
+    .prato-card.inativo { opacity:.55; }
+    .prato-card img { width:100%; height:140px; object-fit:cover; }
+    .prato-card .no-foto {
+      width:100%; height:140px; display:flex; align-items:center; justify-content:center;
+      background:#010906; color:#1f2937;
+    }
+
+    .usuario-row { background:#020e0a; border:1px solid #042f20; border-radius:.875rem; padding:1rem 1.25rem; }
+
     .form-input {
       background:#010906; border:1px solid #042f20; color:#fff;
       border-radius:.5rem; padding:.625rem .875rem; font-size:.875rem; outline:none;
@@ -145,6 +159,8 @@
   <div class="flex gap-2 mb-6 overflow-x-auto pb-1" style="border-bottom:1px solid #042f20;padding-bottom:.75rem">
     <button class="tab-nav-btn active" onclick="mostrarTab('pedidos')" id="tnav-pedidos">Pedidos</button>
     <button class="tab-nav-btn" onclick="mostrarTab('reservas')" id="tnav-reservas">Reservas</button>
+    <button class="tab-nav-btn" onclick="mostrarTab('cardapio')" id="tnav-cardapio">Cardapio</button>
+    <button class="tab-nav-btn" onclick="mostrarTab('usuarios')" id="tnav-usuarios">Usuarios</button>
     <button class="tab-nav-btn" onclick="mostrarTab('sugestao')" id="tnav-sugestao">Sugestao do Chef</button>
     <a href="/relatorio.html" class="tab-nav-btn" style="text-decoration:none">Relatorios</a>
   </div>
@@ -191,6 +207,93 @@
     </div>
     <div id="lista-reservas" class="space-y-3"></div>
     <p id="sem-reservas" style="display:none" class="text-center text-gray-600 py-10 text-sm">Nenhuma reserva.</p>
+  </div>
+
+  <!-- ── TAB CARDAPIO ── -->
+  <div id="tab-cardapio" style="display:none" class="fade-up">
+    <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+      <div class="flex gap-2">
+        <button class="filter-btn active" onclick="filtrarCardapio('todos')" id="fc-todos">Todos</button>
+        <button class="filter-btn" onclick="filtrarCardapio('Almoco')" id="fc-almoco">Almoco</button>
+        <button class="filter-btn" onclick="filtrarCardapio('Jantar')" id="fc-jantar">Jantar</button>
+        <button class="filter-btn" onclick="filtrarCardapio('inativos')" id="fc-inativos">Inativos</button>
+      </div>
+      <button onclick="abrirModalPrato(null)" class="btn-primary text-sm px-4 py-2">+ Novo prato</button>
+    </div>
+    <div id="lista-cardapio" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    <p id="sem-cardapio" style="display:none" class="text-center text-gray-600 py-10 text-sm">Nenhum item encontrado.</p>
+  </div>
+
+  <!-- Modal: criar/editar prato -->
+  <div id="modal-prato" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.7);padding:1rem" class="flex items-center justify-center">
+    <div style="background:#020e0a;border:1px solid #042f20;border-radius:1.5rem;padding:1.75rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto">
+      <div class="flex items-center justify-between mb-5">
+        <h2 id="modal-prato-titulo" class="font-display text-lg font-semibold text-white">Novo prato</h2>
+        <button onclick="fecharModalPrato()" style="background:none;border:none;cursor:pointer;color:#6b7280;padding:.25rem">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <!-- Preview da foto -->
+      <div id="foto-preview-wrap" class="mb-4 relative" style="display:none">
+        <img id="foto-preview-img" src="" alt="" class="w-full rounded-xl object-cover" style="height:160px;border:1px solid #042f20">
+        <button onclick="removerFotoPreview()" style="position:absolute;top:.5rem;right:.5rem;background:rgba(0,0,0,.7);border:none;cursor:pointer;color:#f87171;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <!-- Upload foto -->
+      <div class="mb-4">
+        <label class="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Foto do prato</label>
+        <label style="display:block;border:1px dashed #042f20;border-radius:.75rem;padding:.875rem;text-align:center;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='#10b981'" onmouseout="this.style.borderColor='#042f20'">
+          <input type="file" id="foto-input" accept="image/*" style="display:none" onchange="previewFoto(this)">
+          <svg width="24" height="24" fill="none" stroke="#6b7280" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto .5rem"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p class="text-gray-500 text-xs">Clique para selecionar JPG, PNG ou WebP (max 5 MB)</p>
+        </label>
+      </div>
+      <div class="space-y-3">
+        <input type="hidden" id="prato-id">
+        <div>
+          <label class="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Nome</label>
+          <input id="prato-nome" type="text" class="form-input" placeholder="Nome do prato">
+        </div>
+        <div>
+          <label class="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Descricao</label>
+          <textarea id="prato-descricao" class="form-input" rows="2" placeholder="Descricao do prato" style="resize:none"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Preco (R$)</label>
+            <input id="prato-preco" type="number" step="0.01" min="0" class="form-input" placeholder="0,00">
+          </div>
+          <div>
+            <label class="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Periodo</label>
+            <select id="prato-periodo" class="form-input">
+              <option value="Almoco">Almoco</option>
+              <option value="Jantar">Jantar</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 pt-1">
+          <input type="checkbox" id="prato-ativo" checked style="accent-color:#10b981;width:16px;height:16px">
+          <label for="prato-ativo" class="text-gray-400 text-sm cursor-pointer">Prato ativo (visivel no cardapio)</label>
+        </div>
+        <div id="msg-modal-prato" class="msg" style="display:none"></div>
+        <button onclick="salvarPrato()" id="btn-salvar-prato" class="btn-primary w-full py-3 mt-2">Salvar prato</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB USUARIOS ── -->
+  <div id="tab-usuarios" style="display:none" class="fade-up">
+    <div class="flex items-center justify-between mb-5">
+      <div class="flex gap-2">
+        <button class="filter-btn active" onclick="filtrarUsuarios('todos')" id="fu-todos">Todos</button>
+        <button class="filter-btn" onclick="filtrarUsuarios('admins')" id="fu-admins">Admins</button>
+        <button class="filter-btn" onclick="filtrarUsuarios('clientes')" id="fu-clientes">Clientes</button>
+      </div>
+      <button onclick="carregarUsuarios()" class="btn-outline text-xs py-1.5">Atualizar</button>
+    </div>
+    <div id="lista-usuarios" class="space-y-3"></div>
+    <p id="sem-usuarios" style="display:none" class="text-center text-gray-600 py-10 text-sm">Nenhum usuario encontrado.</p>
   </div>
 
   <!-- ── TAB SUGESTAO ── -->
@@ -473,7 +576,8 @@ function renderizarReservas() {
               <span class="text-gray-500 text-xs">#${rv.reservaId||rv.id}</span>
             </div>
             <p class="text-white text-sm font-semibold">Mesa ${rv.numeroMesa} — ${rv.data} as ${rv.horario}</p>
-            <p class="text-gray-500 text-xs mt-0.5">${rv.numeroPessoas} pessoas &bull; ${rv.clienteNome||''} &bull; Cod: <span class="font-mono text-emerald-400">${rv.codigoConfirmacao}</span></p>
+            <p class="text-gray-500 text-xs mt-0.5">${rv.numeroPessoas} pessoas &bull; ${rv.cliente||rv.clienteNome||''} &bull; Cod: <span class="font-mono text-emerald-400">${rv.codigoConfirmacao}</span></p>
+            <p class="text-gray-600 text-xs">${rv.clienteEmail||''}</p>
           </div>
           ${rv.status === 0 ? `
           <div class="flex gap-2">
@@ -488,9 +592,9 @@ function renderizarReservas() {
 async function atualizarReserva(id, status) {
   try {
     const r = await fetch(`/api/reserva/${id}/status`, {
-      method:'PUT', credentials:'include',
+      method:'PATCH', credentials:'include',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ status })
+      body: JSON.stringify({ novoStatus: status })
     });
     const d = await r.json();
     if (r.ok) { mostrarToast(d.message || 'Reserva atualizada'); carregarReservas(); }
@@ -579,11 +683,269 @@ function showSugMsg(el, texto, ok) {
 
 // ─── Tab nav ──────────────────────────────────────────────────────────────────
 function mostrarTab(tab) {
-  ['pedidos','reservas','sugestao'].forEach(t => {
+  ['pedidos','reservas','cardapio','usuarios','sugestao'].forEach(t => {
     document.getElementById(`tab-${t}`).style.display = t === tab ? '' : 'none';
     document.getElementById(`tnav-${t}`).className = 'tab-nav-btn' + (t === tab ? ' active' : '');
   });
   if (tab === 'reservas') carregarReservas();
+  if (tab === 'cardapio') carregarCardapioAdmin();
+  if (tab === 'usuarios') carregarUsuarios();
+}
+
+// ─── Cardápio Admin ───────────────────────────────────────────────────────────
+let todosItensCardapio = [];
+let filtroCardapio = 'todos';
+let pratoEditandoId = null;
+let fotoArquivoSelecionado = null;
+
+async function carregarCardapioAdmin() {
+  try {
+    const r = await fetch('/api/cardapio/todos', { credentials:'include' });
+    if (!r.ok) return;
+    todosItensCardapio = await r.json();
+    renderizarCardapioAdmin();
+  } catch(_) { mostrarToast('Erro ao carregar cardapio', true); }
+}
+
+function filtrarCardapio(tipo) {
+  filtroCardapio = tipo;
+  document.querySelectorAll('[id^="fc-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById(`fc-${tipo === 'todos' ? 'todos' : tipo === 'inativos' ? 'inativos' : tipo === 'Almoco' ? 'almoco' : 'jantar'}`).classList.add('active');
+  renderizarCardapioAdmin();
+}
+
+function renderizarCardapioAdmin() {
+  let lista = [...todosItensCardapio];
+  if (filtroCardapio === 'inativos') lista = lista.filter(i => !i.ativo);
+  else if (filtroCardapio === 'Almoco') lista = lista.filter(i => i.periodo === 'Almoco' && i.ativo);
+  else if (filtroCardapio === 'Jantar') lista = lista.filter(i => i.periodo === 'Jantar' && i.ativo);
+  else lista = lista.filter(i => i.ativo);
+
+  const cont = document.getElementById('lista-cardapio');
+  const sem  = document.getElementById('sem-cardapio');
+  if (!lista.length) { cont.innerHTML = ''; sem.style.display = ''; return; }
+  sem.style.display = 'none';
+  cont.innerHTML = lista.map(item => `
+    <div class="prato-card${item.ativo ? '' : ' inativo'}">
+      ${item.fotoUrl
+        ? `<img src="${item.fotoUrl}?v=${Date.now()}" alt="${item.nome}" loading="lazy">`
+        : `<div class="no-foto"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
+      <div style="padding:1rem">
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <p class="text-white text-sm font-semibold leading-snug">${item.nome}</p>
+          <span style="background:${item.periodo==='Almoco'?'rgba(16,185,129,.15)':'rgba(139,92,246,.15)'};color:${item.periodo==='Almoco'?'#34d399':'#a78bfa'};font-size:.7rem;font-weight:700;padding:.15rem .55rem;border-radius:2rem;white-space:nowrap">${item.periodo}</span>
+        </div>
+        <p class="text-gray-500 text-xs mb-2 leading-relaxed" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${item.descricao}</p>
+        <p class="text-emerald-400 font-semibold text-sm mb-3">${formatarPreco(item.precoBase)}</p>
+        ${!item.ativo ? '<p class="text-red-400 text-xs font-semibold mb-2">INATIVO</p>' : ''}
+        <div class="flex gap-2">
+          <button onclick="abrirModalPrato(${item.id})" class="btn-outline text-xs flex-1 py-1.5">Editar</button>
+          <button onclick="excluirPrato(${item.id})" class="btn-danger text-xs py-1.5 px-3">Excluir</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function abrirModalPrato(id) {
+  pratoEditandoId = id;
+  fotoArquivoSelecionado = null;
+  document.getElementById('foto-input').value = '';
+  document.getElementById('foto-preview-wrap').style.display = 'none';
+  document.getElementById('msg-modal-prato').style.display = 'none';
+
+  if (id === null) {
+    document.getElementById('modal-prato-titulo').textContent = 'Novo prato';
+    document.getElementById('prato-id').value = '';
+    document.getElementById('prato-nome').value = '';
+    document.getElementById('prato-descricao').value = '';
+    document.getElementById('prato-preco').value = '';
+    document.getElementById('prato-periodo').value = 'Almoco';
+    document.getElementById('prato-ativo').checked = true;
+  } else {
+    const item = todosItensCardapio.find(i => i.id === id);
+    if (!item) return;
+    document.getElementById('modal-prato-titulo').textContent = 'Editar prato';
+    document.getElementById('prato-id').value = id;
+    document.getElementById('prato-nome').value = item.nome;
+    document.getElementById('prato-descricao').value = item.descricao;
+    document.getElementById('prato-preco').value = item.precoBase;
+    document.getElementById('prato-periodo').value = item.periodo;
+    document.getElementById('prato-ativo').checked = item.ativo;
+    if (item.fotoUrl) {
+      document.getElementById('foto-preview-img').src = item.fotoUrl;
+      document.getElementById('foto-preview-wrap').style.display = '';
+    }
+  }
+  document.getElementById('modal-prato').style.display = 'flex';
+}
+
+function fecharModalPrato() {
+  document.getElementById('modal-prato').style.display = 'none';
+  fotoArquivoSelecionado = null;
+}
+
+function previewFoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  fotoArquivoSelecionado = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('foto-preview-img').src = e.target.result;
+    document.getElementById('foto-preview-wrap').style.display = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removerFotoPreview() {
+  fotoArquivoSelecionado = null;
+  document.getElementById('foto-input').value = '';
+  document.getElementById('foto-preview-wrap').style.display = 'none';
+  document.getElementById('foto-preview-img').src = '';
+}
+
+function showMsgModal(texto, ok) {
+  const el = document.getElementById('msg-modal-prato');
+  el.textContent = texto;
+  el.className = 'msg ' + (ok ? 'ok' : 'erro');
+  el.style.display = 'block';
+  if (ok) setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+async function salvarPrato() {
+  const nome     = document.getElementById('prato-nome').value.trim();
+  const descricao = document.getElementById('prato-descricao').value.trim();
+  const preco    = parseFloat(document.getElementById('prato-preco').value);
+  const periodo  = document.getElementById('prato-periodo').value;
+  const ativo    = document.getElementById('prato-ativo').checked;
+
+  if (!nome) { showMsgModal('Informe o nome do prato.', false); return; }
+  if (!descricao) { showMsgModal('Informe a descricao.', false); return; }
+  if (!preco || preco <= 0) { showMsgModal('Informe um preco valido.', false); return; }
+
+  const btn = document.getElementById('btn-salvar-prato');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+
+  try {
+    const isNovo = !pratoEditandoId;
+    const url    = isNovo ? '/api/cardapio' : `/api/cardapio/${pratoEditandoId}`;
+    const method = isNovo ? 'POST' : 'PUT';
+    const r = await fetch(url, {
+      method, credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ nome, descricao, precoBase: preco, periodo, ativo })
+    });
+    const d = await r.json();
+    if (!r.ok) { showMsgModal(extrairErro(d,'Erro ao salvar.'), false); return; }
+
+    const itemId = isNovo ? d.id : pratoEditandoId;
+
+    // Upload de foto se houver
+    if (fotoArquivoSelecionado && itemId) {
+      const formData = new FormData();
+      formData.append('foto', fotoArquivoSelecionado);
+      const rf = await fetch(`/api/cardapio/${itemId}/foto`, {
+        method:'POST', credentials:'include', body: formData
+      });
+      if (!rf.ok) {
+        showMsgModal('Prato salvo mas erro no upload da foto.', false);
+        await carregarCardapioAdmin();
+        return;
+      }
+    }
+
+    mostrarToast(isNovo ? 'Prato criado!' : 'Prato atualizado!');
+    fecharModalPrato();
+    await carregarCardapioAdmin();
+  } catch(_) {
+    showMsgModal('Erro de conexao.', false);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar prato';
+  }
+}
+
+async function excluirPrato(id) {
+  const item = todosItensCardapio.find(i => i.id === id);
+  if (!confirm(`Excluir "${item?.nome}"? Se tiver pedidos vinculados, sera apenas desativado.`)) return;
+  try {
+    const r = await fetch(`/api/cardapio/${id}`, { method:'DELETE', credentials:'include' });
+    const d = await r.json();
+    if (r.ok) { mostrarToast(d.message || 'Prato removido'); await carregarCardapioAdmin(); }
+    else mostrarToast(extrairErro(d,'Erro ao excluir'), true);
+  } catch(_) { mostrarToast('Erro de conexao', true); }
+}
+
+// ─── Usuários Admin ───────────────────────────────────────────────────────────
+let todosUsuarios = [];
+let filtroUsuarios = 'todos';
+
+async function carregarUsuarios() {
+  try {
+    const r = await fetch('/api/admin/usuarios', { credentials:'include' });
+    if (!r.ok) return;
+    todosUsuarios = await r.json();
+    renderizarUsuarios();
+  } catch(_) { mostrarToast('Erro ao carregar usuarios', true); }
+}
+
+function filtrarUsuarios(tipo) {
+  filtroUsuarios = tipo;
+  document.querySelectorAll('[id^="fu-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById(`fu-${tipo}`).classList.add('active');
+  renderizarUsuarios();
+}
+
+function renderizarUsuarios() {
+  let lista = [...todosUsuarios];
+  if (filtroUsuarios === 'admins') lista = lista.filter(u => u.isAdmin);
+  else if (filtroUsuarios === 'clientes') lista = lista.filter(u => !u.isAdmin);
+
+  const cont = document.getElementById('lista-usuarios');
+  const sem  = document.getElementById('sem-usuarios');
+  if (!lista.length) { cont.innerHTML = ''; sem.style.display = ''; return; }
+  sem.style.display = 'none';
+
+  cont.innerHTML = lista.map(u => `
+    <div class="usuario-row fade-up">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-0.5">
+            <p class="text-white text-sm font-semibold">${u.nome || '(sem nome)'}</p>
+            ${u.isAdmin ? '<span style="background:rgba(245,158,11,.15);color:#f59e0b;font-size:.7rem;font-weight:700;padding:.15rem .55rem;border-radius:2rem">Admin</span>' : ''}
+          </div>
+          <p class="text-gray-500 text-xs">${u.email}</p>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button onclick="alterarPapel('${u.id}', ${!u.isAdmin})" class="btn-outline text-xs py-1.5 px-3" ${u.isAdmin ? 'style="color:#f59e0b;border-color:rgba(245,158,11,.3)"' : ''}>
+            ${u.isAdmin ? 'Remover Admin' : 'Tornar Admin'}
+          </button>
+          <button onclick="excluirUsuario('${u.id}', '${(u.nome||'').replace(/'/g,"\\'")}', ${u.isAdmin})" class="btn-danger text-xs py-1.5 px-3">Excluir</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function alterarPapel(id, isAdmin) {
+  try {
+    const r = await fetch(`/api/admin/usuarios/${id}/papel`, {
+      method:'PATCH', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ isAdmin })
+    });
+    const d = await r.json();
+    if (r.ok) { mostrarToast(d.message || 'Papel atualizado'); await carregarUsuarios(); }
+    else mostrarToast(extrairErro(d,'Erro'), true);
+  } catch(_) { mostrarToast('Erro de conexao', true); }
+}
+
+async function excluirUsuario(id, nome, isAdmin) {
+  if (isAdmin) { mostrarToast('Nao e possivel excluir outro Admin.', true); return; }
+  if (!confirm(`Excluir o usuario "${nome}"? Esta acao nao pode ser desfeita.`)) return;
+  try {
+    const r = await fetch(`/api/admin/usuarios/${id}`, { method:'DELETE', credentials:'include' });
+    const d = await r.json();
+    if (r.ok) { mostrarToast(d.message || 'Usuario excluido'); await carregarUsuarios(); }
+    else mostrarToast(extrairErro(d,'Erro ao excluir'), true);
+  } catch(_) { mostrarToast('Erro de conexao', true); }
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

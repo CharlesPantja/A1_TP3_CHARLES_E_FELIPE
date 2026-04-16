@@ -79,6 +79,26 @@ namespace RestauranteApp.Services
                 .ToListAsync();
         }
 
+        public async Task<List<Reserva>> GetTodasReservasAsync(int pagina = 1, int tamanho = 50)
+        {
+            return await _context.Reservas
+                .Include(r => r.Mesa)
+                .Include(r => r.Usuario)
+                .OrderByDescending(r => r.DataReserva)
+                .Skip((pagina - 1) * tamanho)
+                .Take(tamanho)
+                .ToListAsync();
+        }
+
+        public async Task<(bool sucesso, string mensagem)> AtualizarStatusReservaAsync(int reservaId, StatusReserva novoStatus)
+        {
+            var reserva = await _context.Reservas.FindAsync(reservaId);
+            if (reserva == null) return (false, "Reserva não encontrada.");
+            reserva.Status = novoStatus;
+            await _context.SaveChangesAsync();
+            return (true, "Status atualizado.");
+        }
+
         public async Task<(bool sucesso, string mensagem)> CancelarReservaAsync(int reservaId, string usuarioId)
         {
             var reserva = await _context.Reservas

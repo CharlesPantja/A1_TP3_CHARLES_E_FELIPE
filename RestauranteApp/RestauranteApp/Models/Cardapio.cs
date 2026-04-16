@@ -20,6 +20,8 @@ namespace RestauranteApp.Models
         public string Descricao { get; set; } = string.Empty;
         public decimal PrecoBase { get; set; }
         public Periodo Periodo { get; set; }
+        public string? FotoUrl { get; set; }
+        public bool Ativo { get; set; } = true;
 
         public ICollection<ItemCardapioIngrediente> ItemCardapioIngredientes { get; set; } = new List<ItemCardapioIngrediente>();
         public ICollection<PedidoItem> PedidoItens { get; set; } = new List<PedidoItem>();

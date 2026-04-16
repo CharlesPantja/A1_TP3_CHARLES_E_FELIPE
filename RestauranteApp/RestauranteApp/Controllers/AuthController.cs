@@ -69,6 +69,32 @@ namespace RestauranteApp.Controllers
             return Ok(new { nome = usuario.NomeCompleto, email = usuario.Email, roles });
         }
 
+        [HttpPatch("atualizar-perfil")]
+        [Authorize]
+        public async Task<IActionResult> AtualizarPerfil([FromBody] AtualizarPerfilRequest req)
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null) return Unauthorized();
+            if (!string.IsNullOrWhiteSpace(req.NomeCompleto))
+                usuario.NomeCompleto = req.NomeCompleto;
+            var result = await _userManager.UpdateAsync(usuario);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors.Select(e => e.Description));
+            return Ok(new { mensagem = "Perfil atualizado!", nome = usuario.NomeCompleto });
+        }
+
+        [HttpPost("alterar-senha")]
+        [Authorize]
+        public async Task<IActionResult> AlterarSenha([FromBody] AlterarSenhaRequest req)
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null) return Unauthorized();
+            var result = await _userManager.ChangePasswordAsync(usuario, req.SenhaAtual, req.NovaSenha);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors.Select(e => e.Description));
+            return Ok(new { mensagem = "Senha alterada com sucesso!" });
+        }
+
         public class CadastroRequest
         {
             public string NomeCompleto { get; set; } = string.Empty;
@@ -81,6 +107,17 @@ namespace RestauranteApp.Controllers
             public string Email { get; set; } = string.Empty;
             public string Senha { get; set; } = string.Empty;
             public bool LembrarMe { get; set; } = false;
+        }
+
+        public class AtualizarPerfilRequest
+        {
+            public string? NomeCompleto { get; set; }
+        }
+
+        public class AlterarSenhaRequest
+        {
+            public string SenhaAtual { get; set; } = string.Empty;
+            public string NovaSenha { get; set; } = string.Empty;
         }
     }
 }

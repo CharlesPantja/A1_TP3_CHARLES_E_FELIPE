@@ -108,12 +108,55 @@ namespace RestauranteApp.Controllers
             return Ok(new { message = mensagem });
         }
 
+        // GET /api/reserva/todas — admin vê todas as reservas
+        [HttpGet("todas")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> TodasReservas([FromQuery] int pagina = 1, [FromQuery] int tamanho = 50)
+        {
+            var reservas = await _reservaService.GetTodasReservasAsync(pagina, tamanho);
+            return Ok(reservas.Select(r => new
+            {
+                reservaId         = r.Id,
+                data              = r.DataReserva.ToString("dd/MM/yyyy"),
+                horario           = r.HorarioInicio,
+                numeroPessoas     = r.NumeroPessoas,
+                codigoConfirmacao = r.CodigoConfirmacao,
+                status            = (int)r.Status,
+                statusDesc        = r.Status switch
+                {
+                    Models.StatusReserva.Confirmada => "Confirmada",
+                    Models.StatusReserva.Cancelada  => "Cancelada",
+                    Models.StatusReserva.Concluida  => "Concluida",
+                    _ => "Desconhecido"
+                },
+                numeroMesa        = r.Mesa?.Numero,
+                capacidadeMesa    = r.Mesa?.Capacidade,
+                cliente           = r.Usuario?.NomeCompleto ?? "—",
+                clienteEmail      = r.Usuario?.Email ?? "—"
+            }));
+        }
+
+        // PATCH /api/reserva/{id}/status — admin atualiza status da reserva
+        [HttpPatch("{id}/status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AtualizarStatusReserva(int id, [FromBody] AtualizarStatusReservaRequest req)
+        {
+            var (sucesso, mensagem) = await _reservaService.AtualizarStatusReservaAsync(id, req.NovoStatus);
+            if (!sucesso) return BadRequest(new { message = mensagem });
+            return Ok(new { message = mensagem });
+        }
+
         public class ReservaRequest
         {
             public int MesaId { get; set; }
             public DateTime DataReserva { get; set; }
             public string Horario { get; set; } = string.Empty;
             public int NumeroPessoas { get; set; } = 2;
+        }
+
+        public class AtualizarStatusReservaRequest
+        {
+            public Models.StatusReserva NovoStatus { get; set; }
         }
     }
 }

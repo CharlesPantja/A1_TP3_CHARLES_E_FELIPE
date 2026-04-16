@@ -57,6 +57,7 @@
     .item-card {
       background:#020e0a; border:1px solid #042f20; border-radius:1rem;
       transition:all .25s ease; position:relative; overflow:hidden;
+      display:flex; flex-direction:column;
     }
     .item-card:hover { border-color:#10b981; background:#031e15; transform:translateY(-2px); box-shadow:0 12px 32px rgba(16,185,129,.08); }
     .item-card.destaque { border-color:#d97706; background: linear-gradient(135deg,#020e0a,#0d0900); }
@@ -175,12 +176,51 @@
 
     <!-- Delivery fields (shown only in delivery mode) -->
     <div id="delivery-fields" style="display:none" class="space-y-3">
-      <div style="width:1px;height:1px;background:#042f20"></div>
-      <input id="delivery-endereco" type="text" class="form-input" placeholder="Endereco de entrega" />
-      <select id="delivery-pagamento" class="form-input">
-        <option value="Dinheiro">Dinheiro</option>
-        <option value="Cartao">Cartao de credito/debito</option>
-        <option value="Pix">Pix</option>
+      <div style="height:1px;background:#042f20"></div>
+      <!-- Tipo de entrega -->
+      <div>
+        <p class="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Tipo de entrega</p>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" id="btn-tipo-proprio" onclick="selecionarTipoDelivery('DeliveryProprio')"
+            class="delivery-tipo-btn active-tipo py-2.5 px-3 rounded-xl border text-xs font-semibold text-left transition-all"
+            style="background:#031e15;border-color:#10b981;color:#10b981">
+            <div class="font-bold mb-0.5">Entrega Propria</div>
+            <div style="color:#6b7280;font-weight:400">Taxa fixa R$ 5,00</div>
+          </button>
+          <button type="button" id="btn-tipo-app" onclick="selecionarTipoDelivery('DeliveryAplicativo')"
+            class="delivery-tipo-btn py-2.5 px-3 rounded-xl border text-xs font-semibold text-left transition-all"
+            style="background:#020e0a;border-color:#042f20;color:#6b7280">
+            <div class="font-bold mb-0.5">Via Aplicativo</div>
+            <div id="taxa-app-label" style="font-weight:400">4% (almoco) / 6% (jantar)</div>
+          </button>
+        </div>
+      </div>
+      <!-- Taxa preview -->
+      <div id="taxa-preview" style="background:rgba(16,185,129,.06);border:1px solid #042f20;border-radius:.625rem;padding:.625rem .875rem;font-size:.8rem" class="flex justify-between items-center">
+        <span class="text-gray-500">Taxa de entrega</span>
+        <span id="taxa-valor" class="text-emerald-400 font-semibold">R$ 5,00</span>
+      </div>
+      <!-- Enderecos salvos -->
+      <div id="enderecos-salvos-section">
+        <p class="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Endereco de entrega</p>
+        <!-- Lista de enderecos salvos (preenchida pelo JS) -->
+        <div id="lista-end-carrinho" class="space-y-2"></div>
+        <!-- Input para novo endereco (mostrado quando nao ha salvos ou usuario clica em "outro") -->
+        <div id="novo-end-section">
+          <input id="delivery-endereco" type="text" class="form-input" placeholder="Digitar endereco de entrega" />
+          <div id="link-salvar-end-wrap" style="display:none;margin-top:.5rem">
+            <button type="button" onclick="salvarEnderecoRapido()" class="text-emerald-500 text-xs font-semibold hover:text-emerald-400 transition-colors" style="background:none;border:none;cursor:pointer;padding:0">
+              + Salvar este endereco no meu perfil
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Nome do app (so para DeliveryAplicativo) -->
+      <select id="delivery-app-nome" class="form-input" style="display:none">
+        <option value="iFood">iFood</option>
+        <option value="Rappi">Rappi</option>
+        <option value="99Food">99Food</option>
+        <option value="Outro">Outro</option>
       </select>
     </div>
 
@@ -212,6 +252,7 @@
       <span id="nav-logado" class="hidden items-center gap-3">
         <span id="nav-nome" class="text-gray-500 text-xs hidden lg:block"></span>
         <a href="/meus-pedidos.html" class="nav-link text-xs" style="color:#34d399;font-weight:600">Pedidos</a>
+        <a href="/perfil.html" class="nav-link text-xs hidden sm:block">Perfil</a>
         <a id="nav-admin-link" href="/admin.html" class="hidden nav-link" style="color:#f59e0b;font-weight:600;font-size:.78rem">Admin</a>
         <button onclick="fazerLogout()" class="nav-link text-xs" style="color:#f87171">Sair</button>
       </span>
@@ -360,6 +401,7 @@
 // ─── State ─────────────────────────────────────────────────────────────────
 let periodoAtual = 'almoco';
 let modoAtual = 'presencial'; // presencial | delivery | reserva
+let tipoDeliveryAtual = 'DeliveryProprio'; // DeliveryProprio | DeliveryAplicativo
 let usuarioLogado = null;
 let carrinho = JSON.parse(sessionStorage.getItem('bv_carrinho') || '[]');
 let sugestaoAtual = null;
@@ -418,6 +460,164 @@ async function fazerLogout() {
   location.reload();
 }
 
+// ─── Enderecos no carrinho ───────────────────────────────────────────────────
+let enderecosUsuario = [];
+let enderecoSelecionadoId = null; // null = digitado, numero = id do salvo
+
+async function carregarEnderecosSalvos() {
+  const listaCont = document.getElementById('lista-end-carrinho');
+  const novoSec   = document.getElementById('novo-end-section');
+  const salvarWrap = document.getElementById('link-salvar-end-wrap');
+
+  if (!usuarioLogado) {
+    // Nao logado: so campo de texto livre
+    listaCont.innerHTML = '';
+    novoSec.style.display = '';
+    salvarWrap.style.display = 'none';
+    return;
+  }
+
+  try {
+    const r = await fetch('/api/endereco', { credentials:'include' });
+    if (!r.ok) { novoSec.style.display = ''; return; }
+    enderecosUsuario = await r.json();
+  } catch(_) { novoSec.style.display = ''; return; }
+
+  if (!enderecosUsuario.length) {
+    // Logado mas sem enderecos: campo livre + botao de salvar
+    listaCont.innerHTML = `
+      <div style="background:rgba(16,185,129,.06);border:1px dashed #064028;border-radius:.75rem;padding:.75rem 1rem;margin-bottom:.5rem">
+        <p class="text-gray-500 text-xs">Voce nao tem enderecos salvos.</p>
+        <a href="/perfil.html" target="_blank" class="text-emerald-500 text-xs font-semibold" style="text-decoration:none">Gerenciar enderecos no perfil →</a>
+      </div>`;
+    novoSec.style.display = '';
+    salvarWrap.style.display = '';
+    enderecoSelecionadoId = null;
+    return;
+  }
+
+  // Tem enderecos: renderiza cards clicaveis
+  renderizarEnderecosSalvos();
+  novoSec.style.display = 'none'; // começa escondido; usuario pode abrir
+  salvarWrap.style.display = 'none';
+}
+
+function renderizarEnderecosSalvos() {
+  const listaCont = document.getElementById('lista-end-carrinho');
+  const novoSec   = document.getElementById('novo-end-section');
+
+  // Se nenhum selecionado ainda, seleciona o primeiro automaticamente
+  if (enderecoSelecionadoId === null && enderecosUsuario.length) {
+    enderecoSelecionadoId = enderecosUsuario[0].id;
+  }
+
+  listaCont.innerHTML = enderecosUsuario.map(e => {
+    const sel = e.id === enderecoSelecionadoId;
+    return `
+      <div onclick="selecionarEnderecoSalvo(${e.id})" style="
+        background:${sel ? '#031e15' : '#010906'};
+        border:1px solid ${sel ? '#10b981' : '#042f20'};
+        border-radius:.75rem; padding:.75rem 1rem; cursor:pointer; transition:all .2s;
+      ">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex-1 min-w-0">
+            <p style="color:${sel ? '#fff' : '#9ca3af'};font-size:.85rem;font-weight:600">${e.logradouro}, ${e.numero}${e.complemento ? ' — ' + e.complemento : ''}</p>
+            <p style="color:#6b7280;font-size:.75rem">${e.bairro} · ${e.cidade} - ${e.estado}</p>
+          </div>
+          <div style="width:16px;height:16px;border-radius:50%;border:2px solid ${sel ? '#10b981' : '#042f20'};background:${sel ? '#10b981' : 'transparent'};flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center">
+            ${sel ? '<svg width="9" height="9" fill="none" stroke="#010906" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>' : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('') + `
+    <button type="button" onclick="mostrarNovoEnderecoCarrinho()" style="
+      width:100%;background:transparent;border:1px dashed #042f20;border-radius:.75rem;
+      padding:.625rem;color:#6b7280;font-size:.78rem;font-weight:600;cursor:pointer;
+      transition:all .2s;margin-top:.25rem;
+    " onmouseover="this.style.borderColor='#10b981';this.style.color='#10b981'"
+       onmouseout="this.style.borderColor='#042f20';this.style.color='#6b7280'">
+      + Usar outro endereco
+    </button>`;
+}
+
+function selecionarEnderecoSalvo(id) {
+  enderecoSelecionadoId = id;
+  document.getElementById('novo-end-section').style.display = 'none';
+  renderizarEnderecosSalvos();
+}
+
+function mostrarNovoEnderecoCarrinho() {
+  enderecoSelecionadoId = null;
+  document.getElementById('novo-end-section').style.display = '';
+  document.getElementById('link-salvar-end-wrap').style.display = '';
+  document.getElementById('delivery-endereco').value = '';
+  document.getElementById('delivery-endereco').focus();
+  renderizarEnderecosSalvos();
+}
+
+async function salvarEnderecoRapido() {
+  const texto = document.getElementById('delivery-endereco').value.trim();
+  if (!texto) return;
+  // Salva como logradouro simples sem decomposicao
+  try {
+    const r = await fetch('/api/endereco', {
+      method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ logradouro: texto, numero: 's/n', bairro: '—', cidade: '—', estado: 'SP', cep: '' })
+    });
+    if (r.ok) {
+      const novo = await r.json();
+      enderecosUsuario.push(novo);
+      enderecoSelecionadoId = novo.id;
+      document.getElementById('novo-end-section').style.display = 'none';
+      renderizarEnderecosSalvos();
+      mostrarToast('Endereco salvo no perfil!');
+    }
+  } catch(_) {}
+}
+
+function obterEnderecoEntrega() {
+  if (enderecoSelecionadoId !== null) {
+    const e = enderecosUsuario.find(x => x.id === enderecoSelecionadoId);
+    if (e) return `${e.logradouro}, ${e.numero}${e.complemento ? ', ' + e.complemento : ''} — ${e.bairro}, ${e.cidade} - ${e.estado}`;
+  }
+  return document.getElementById('delivery-endereco').value.trim();
+}
+
+// ─── Delivery tipo ───────────────────────────────────────────────────────────
+function selecionarTipoDelivery(tipo) {
+  tipoDeliveryAtual = tipo;
+  const btnProprio = document.getElementById('btn-tipo-proprio');
+  const btnApp = document.getElementById('btn-tipo-app');
+  const appNome = document.getElementById('delivery-app-nome');
+  if (tipo === 'DeliveryProprio') {
+    btnProprio.style.background = '#031e15'; btnProprio.style.borderColor = '#10b981'; btnProprio.style.color = '#10b981';
+    btnApp.style.background = '#020e0a'; btnApp.style.borderColor = '#042f20'; btnApp.style.color = '#6b7280';
+    appNome.style.display = 'none';
+  } else {
+    btnApp.style.background = '#031e15'; btnApp.style.borderColor = '#10b981'; btnApp.style.color = '#10b981';
+    btnProprio.style.background = '#020e0a'; btnProprio.style.borderColor = '#042f20'; btnProprio.style.color = '#6b7280';
+    appNome.style.display = '';
+  }
+  atualizarTaxaPreview();
+}
+
+function atualizarTaxaPreview() {
+  const subtotal = carrinho.reduce((s, i) => s + i.preco * i.qtd, 0);
+  let taxa = 0;
+  if (tipoDeliveryAtual === 'DeliveryProprio') {
+    taxa = 5;
+  } else {
+    const pct = periodoAtual === 'jantar' ? 0.06 : 0.04;
+    taxa = subtotal * pct;
+  }
+  const el = document.getElementById('taxa-valor');
+  if (el) el.textContent = 'R$ ' + taxa.toFixed(2).replace('.',',');
+  // Atualiza label do botao app
+  const labelApp = document.getElementById('taxa-app-label');
+  if (labelApp) labelApp.textContent = periodoAtual === 'jantar' ? '6% sobre o subtotal' : '4% sobre o subtotal';
+}
+
 // ─── Modo ────────────────────────────────────────────────────────────────────
 function aplicarModo() {
   const badge = document.getElementById('modo-badge');
@@ -428,6 +628,9 @@ function aplicarModo() {
     badge.style.borderColor = '#059669'; badge.style.color = '#10b981';
     deliveryFields.style.display = '';
     mesaFields.style.display = 'none';
+    enderecoSelecionadoId = null;
+    enderecosUsuario = [];
+    carregarEnderecosSalvos();
   } else if (modoAtual === 'reserva') {
     badge.textContent = 'Reserva de mesa';
     badge.style.borderColor = '#7c3aed'; badge.style.color = '#a78bfa';
@@ -458,6 +661,7 @@ function setPeriodo(p) {
     ? 'Segunda a sexta, das 11h30 as 15h'
     : 'Todos os dias, das 19h as 22h';
   carregarCardapio();
+  if (modoAtual === 'delivery') atualizarTaxaPreview();
 }
 
 function verificarPeriodoCarrinho(novoPeriodo) {
@@ -530,16 +734,21 @@ function filtrarItens() {
     const isDestaque = sugestaoAtual && sugestaoAtual.itemCardapioId === item.id;
     const preco = isDestaque ? sugestaoAtual.precoFinal : item.precoBase;
     return `
-      <div class="item-card p-5 fade-up${isDestaque?' destaque':''}">
+      <div class="item-card fade-up${isDestaque?' destaque':''}">
         ${isDestaque?`<div class="badge-destaque">Chef</div>`:''}
-        <h3 class="font-display text-base font-semibold text-white mb-1 pr-16">${item.nome}</h3>
-        <p class="text-gray-500 text-xs leading-relaxed mb-4">${item.descricao||''}</p>
-        <div class="flex items-center justify-between mt-auto">
-          <div>
-            ${isDestaque?`<p class="text-gray-600 text-xs line-through">${formatarPreco(item.precoBase)}</p>`:''}
-            <p class="${isDestaque?'text-emerald-400':'text-white'} font-bold text-base">${formatarPreco(preco)}</p>
+        ${item.fotoUrl
+          ? `<img src="${item.fotoUrl}" alt="${item.nome}" loading="lazy" style="width:100%;height:160px;object-fit:cover;border-bottom:1px solid #042f20">`
+          : ''}
+        <div class="p-5">
+          <h3 class="font-display text-base font-semibold text-white mb-1 pr-16">${item.nome}</h3>
+          <p class="text-gray-500 text-xs leading-relaxed mb-4">${item.descricao||''}</p>
+          <div class="flex items-center justify-between mt-auto">
+            <div>
+              ${isDestaque?`<p class="text-gray-600 text-xs line-through">${formatarPreco(item.precoBase)}</p>`:''}
+              <p class="${isDestaque?'text-emerald-400':'text-white'} font-bold text-base">${formatarPreco(preco)}</p>
+            </div>
+            <button onclick="adicionarAoCarrinho(${item.id},'${item.nome.replace(/'/g,"\\'")}',${preco})" class="btn-add">Adicionar</button>
           </div>
-          <button onclick="adicionarAoCarrinho(${item.id},'${item.nome.replace(/'/g,"\\'")}',${preco})" class="btn-add">Adicionar</button>
         </div>
       </div>`;
   }).join('');
@@ -593,6 +802,7 @@ function atualizarCarrinhoUI() {
 
   const subtotal = carrinho.reduce((s,i) => s + i.preco * i.qtd, 0);
   document.getElementById('cart-subtotal').textContent = formatarPreco(subtotal);
+  if (modoAtual === 'delivery') atualizarTaxaPreview();
 
   const container = document.getElementById('cart-items');
   if (carrinho.length === 0) {
@@ -635,15 +845,18 @@ async function finalizarPedido() {
   const body = {
     // Backend espera "itemId" (ItemPedidoDto.ItemId) e "quantidade"
     itens: carrinho.map(i => ({ itemId: i.id, quantidade: i.qtd })),
-    // Backend espera "tipoAtendimento" com valores "Presencial" | "DeliveryProprio"
-    tipoAtendimento: modoAtual === 'delivery' ? 'DeliveryProprio' : 'Presencial',
+    // Backend espera "tipoAtendimento" com valores "Presencial" | "DeliveryProprio" | "DeliveryAplicativo"
+    tipoAtendimento: modoAtual === 'delivery' ? tipoDeliveryAtual : 'Presencial',
     // Backend espera "periodo" como enum string
     periodo: periodoAtual === 'almoco' ? 'Almoco' : 'Jantar'
   };
 
   if (modoAtual === 'delivery') {
-    body.enderecoEntrega = document.getElementById('delivery-endereco').value.trim();
-    if (!body.enderecoEntrega) { mostrarToast('Informe o endereco', true); return; }
+    body.enderecoEntrega = obterEnderecoEntrega();
+    if (!body.enderecoEntrega) { mostrarToast('Selecione ou informe o endereco de entrega', true); return; }
+    if (tipoDeliveryAtual === 'DeliveryAplicativo') {
+      body.nomeAplicativo = document.getElementById('delivery-app-nome').value;
+    }
   } else {
     const mesa = parseInt(document.getElementById('numero-mesa').value);
     if (!mesa) { mostrarToast('Informe o numero da mesa', true); return; }
